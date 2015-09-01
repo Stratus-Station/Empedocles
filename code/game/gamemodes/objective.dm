@@ -7,7 +7,8 @@ var/list/potential_theft_objectives=list(
 	"salvage" = typesof(/datum/theft_objective/number/salvage) - /datum/theft_objective/number/salvage
 )
 
-datum/objective
+/datum/objective
+	var/antag_role/role
 	var/datum/mind/owner = null			//Who owns the objective.
 	var/explanation_text = "Nothing"	//What that person is supposed to do.
 	var/datum/mind/target = null		//If they are focused on a particular person.
@@ -15,16 +16,26 @@ datum/objective
 	var/completed = 0					//currently only used for custom objectives.
 	var/blocked = 0                     // Universe fucked, you lost.
 
-	New(var/text)
+	New(var/antag_role/parent, var/text)
+		if(!istype(parent.antag))
+			WARNING("parent.antag is not /datum/mind!")
+		role = parent
+		owner = parent.antag
 		if(text)
 			explanation_text = text
 
 	proc/check_completion()
-		//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\proc/check_completion() called tick#: [world.time]")
 		return completed
 
+	/**
+	*  /antag_role/AppendObjective calls this.
+	*
+	* Should perform a basic check and return 1 on success, 0 on failure.
+	*/
+	proc/PostAppend()
+		return 1
+
 	proc/find_target()
-		//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\proc/find_target() called tick#: [world.time]")
 		var/list/possible_targets = list()
 		for(var/datum/mind/possible_target in ticker.minds)
 			if(possible_target != owner && ishuman(possible_target.current) && (possible_target.current.stat != 2))
@@ -34,7 +45,6 @@ datum/objective
 
 
 	proc/find_target_by_role(role, role_type=0)//Option sets either to check assigned role or special role. Default to assigned.
-		//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\proc/find_target_by_role() called tick#: [world.time]")
 		for(var/datum/mind/possible_target in ticker.minds)
 			if((possible_target != owner) && ishuman(possible_target.current) && ((role_type ? possible_target.special_role : possible_target.assigned_role) == role) )
 				target = possible_target
@@ -42,7 +52,7 @@ datum/objective
 
 
 
-datum/objective/assassinate
+/datum/objective/assassinate
 	find_target()
 		..()
 		if(target && target.current)
@@ -70,7 +80,7 @@ datum/objective/assassinate
 
 
 
-datum/objective/mutiny
+/datum/objective/mutiny
 	find_target()
 		..()
 		if(target && target.current)
@@ -98,7 +108,7 @@ datum/objective/mutiny
 			return 0
 		return 1
 
-datum/objective/mutiny/rp
+/datum/objective/mutiny/rp
 	find_target()
 		..()
 		if(target && target.current)
@@ -133,7 +143,7 @@ datum/objective/mutiny/rp
 			return 0
 		return rval
 
-datum/objective/anti_revolution/execute
+/datum/objective/anti_revolution/execute
 	find_target()
 		..()
 		if(target && target.current)
@@ -192,7 +202,7 @@ datum/objective/anti_revolution/brig
 			return 0
 		return 0
 
-datum/objective/anti_revolution/demote
+/datum/objective/anti_revolution/demote
 	find_target()
 		..()
 		if(target && target.current)
@@ -225,7 +235,7 @@ datum/objective/anti_revolution/demote
 				return 0
 		return 1
 
-datum/objective/debrain//I want braaaainssss
+/datum/objective/debrain//I want braaaainssss
 	find_target()
 		..()
 		if(target && target.current)
@@ -259,7 +269,7 @@ datum/objective/debrain//I want braaaainssss
 		return 0
 
 
-datum/objective/protect//The opposite of killing a dude.
+/datum/objective/protect//The opposite of killing a dude.
 	find_target()
 		..()
 		if(target && target.current)
@@ -288,7 +298,7 @@ datum/objective/protect//The opposite of killing a dude.
 		return 0
 
 
-datum/objective/hijack
+/datum/objective/hijack
 	explanation_text = "Hijack the emergency shuttle by escaping without any organic life-forms, other than yourself."
 
 	check_completion()
@@ -314,7 +324,7 @@ datum/objective/hijack
 		return 1
 
 
-datum/objective/block
+/datum/objective/block
 	explanation_text = "Do not allow any organic lifeforms to escape on the shuttle alive."
 
 	check_completion()
@@ -335,7 +345,7 @@ datum/objective/block
 						return 0
 		return 1
 
-datum/objective/silence
+/datum/objective/silence
 	explanation_text = "Do not allow anyone to escape the station.  Only allow the shuttle to be called when everyone is dead and your story is the only one left."
 
 	check_completion()
@@ -356,7 +366,7 @@ datum/objective/silence
 		return 1
 
 
-datum/objective/escape
+/datum/objective/escape
 	explanation_text = "Escape on the shuttle or an escape pod alive and free."
 
 	check_completion()
@@ -398,7 +408,7 @@ datum/objective/escape
 		else
 			return 0
 
-datum/objective/die
+/datum/objective/die
 	explanation_text = "Die a glorious death."
 
 	check_completion()
@@ -410,7 +420,7 @@ datum/objective/die
 
 
 
-datum/objective/survive
+/datum/objective/survive
 	explanation_text = "Stay alive until the end."
 
 	check_completion()
@@ -423,7 +433,7 @@ datum/objective/survive
 
 
 
-datum/objective/multiply
+/datum/objective/multiply
 	explanation_text = "Procreate, and protect your spawn."
 	var/already_completed=0
 	check_completion()
@@ -441,7 +451,7 @@ datum/objective/multiply
 		return 0
 
 // Similar to the anti-rev objective, but for traitors
-datum/objective/brig
+/datum/objective/brig
 	var/already_completed = 0
 
 	find_target()
@@ -477,7 +487,7 @@ datum/objective/brig
 		return 0
 
 // Harm a crew member, making an example of them
-datum/objective/harm
+/datum/objective/harm
 	var/already_completed = 0
 
 	find_target()
@@ -521,7 +531,7 @@ datum/objective/harm
 		return 0
 
 
-datum/objective/nuclear
+/datum/objective/nuclear
 	explanation_text = "Destroy the station with a nuclear device."
 
 
@@ -618,9 +628,8 @@ datum/objective/capture
 			return 0
 		return 1
 
-datum/objective/blood
+/datum/objective/blood
 	proc/gen_amount_goal(low = 150, high = 400)
-		//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\proc/gen_amount_goal() called tick#: [world.time]")
 		target_amount = rand(low,high)
 		target_amount = round(round(target_amount/5)*5)
 		explanation_text = "Accumulate atleast [target_amount] units of blood in total."
@@ -632,9 +641,8 @@ datum/objective/blood
 			return 1
 		else
 			return 0
-datum/objective/absorb
+/datum/objective/absorb
 	proc/gen_amount_goal(var/lowbound = 4, var/highbound = 6)
-		//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\proc/gen_amount_goal() called tick#: [world.time]")
 		target_amount = rand (lowbound,highbound)
 		if (ticker)
 			var/n_p = 1 //autowin
@@ -644,7 +652,7 @@ datum/objective/absorb
 						n_p ++
 			else if (ticker.current_state == GAME_STATE_PLAYING)
 				for(var/mob/living/carbon/human/P in player_list)
-					if(P.client && !(P.mind in ticker.mode.changelings) && P.mind!=owner)
+					if(P.client && !P.GetRole("changeling") && P.mind!=owner)
 						n_p ++
 			target_amount = min(target_amount, n_p)
 
@@ -652,73 +660,13 @@ datum/objective/absorb
 		return target_amount
 
 	check_completion()
-		if(blocked) return 0
-		if(owner && owner.changeling && owner.changeling.absorbed_dna && (owner.changeling.absorbedcount >= target_amount))
+		if(!owner)
+			return 0
+		var/antag_role/changeling/changeling=owner.GetRole("changeling")
+		if(changeling && changeling.absorbed_dna && (changeling.absorbedcount >= target_amount))
 			return 1
 		else
 			return 0
-
-
-
-/* Isn't suited for global objectives
-/*---------CULTIST----------*/
-
-		eldergod
-			explanation_text = "Summon Nar-Sie via the use of an appropriate rune. It will only work if nine cultists stand on and around it."
-
-			check_completion()
-				if(eldergod) //global var, defined in rune4.dm
-					return 1
-				return 0
-
-		survivecult
-			var/num_cult
-
-			explanation_text = "Our knowledge must live on. Make sure at least 5 acolytes escape on the shuttle to spread their work on an another station."
-
-			check_completion()
-				if(emergency_shuttle.location<2)
-					return 0
-
-				var/cultists_escaped = 0
-
-				var/area/shuttle/escape/centcom/C = /area/shuttle/escape/centcom
-				for(var/turf/T in	get_area_turfs(C.type))
-					for(var/mob/living/carbon/H in T)
-						if(iscultist(H))
-							cultists_escaped++
-
-				if(cultists_escaped>=5)
-					return 1
-
-				return 0
-
-		sacrifice //stolen from traitor target objective
-
-			proc/find_target() //I don't know how to make it work with the rune otherwise, so I'll do it via a global var, sacrifice_target, defined in rune15.dm
-				//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \			proc/find_target() called tick#: [world.time]")
-				var/list/possible_targets = call(/datum/game_mode/cult/proc/get_unconvertables)()
-
-				//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\dar/list/possible_targets = call(/datum/game_mode/cult/proc/get_unconvertables)() called tick#: [world.time]")
-
-				if(possible_targets.len > 0)
-					sacrifice_target = pick(possible_targets)
-
-				if(sacrifice_target && sacrifice_target.current)
-					explanation_text = "Sacrifice [sacrifice_target.current.real_name], the [sacrifice_target.assigned_role]. You will need the sacrifice rune (Hell join blood) and three acolytes to do so."
-				else
-					explanation_text = "Free Objective"
-
-				return sacrifice_target
-
-			check_completion() //again, calling on a global list defined in rune15.dm
-				if(sacrifice_target.current in sacrificed)
-					return 1
-				else
-					return 0
-
-/*-------ENDOF CULTIST------*/
-*/
 
 // /vg/; Vox Inviolate for humans :V
 /datum/objective/minimize_casualties

@@ -21,6 +21,8 @@
 	var/station_was_nuked = 0 //see nuclearbomb.dm and malfunction.dm
 	var/explosion_in_progress = 0 //sit back and relax
 	var/list/datum/mind/modePlayer = new
+	var/list/available_roles = new // What roles are used in this mode?
+	var/list/player_roles = new
 	var/list/restricted_jobs = list()	// Jobs it doesn't make sense to be.  I.E chaplain or AI cultist
 	var/list/protected_jobs = list()	// Jobs that can't be traitors
 	var/required_players = 0
@@ -36,19 +38,17 @@
 	var/eldergod = 1 // Can cultists spawn Nar-Sie? (Set to 0 on cascade or narsie spawn)
 	var/completion_text = ""
 
-	var/list/datum/mind/deathsquad = list()
-	var/list/datum/mind/ert = list()
+	var/waittime_l = 600 //lower bound on time before intercept arrives (in tenths of seconds)
+	var/waittime_h = 1800 //upper bound on time before intercept arrives (in tenths of seconds)
+
 	var/rage = 0
 
 /datum/game_mode/proc/announce() //to be calles when round starts
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/announce() called tick#: [world.time]")
 	world << "<B>Notice</B>: [src] did not define announce()"
-
 
 ///can_start()
 ///Checks to see if the game can be setup and ran with the current number of players or whatnot.
 /datum/game_mode/proc/can_start()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/can_start() called tick#: [world.time]")
 	var/playerC = 0
 	for(var/mob/new_player/player in player_list)
 		if((player.client)&&(player.ready))
@@ -62,20 +62,105 @@
 			return 1
 	return 0
 
+/datum/game_mode/proc/add_player_role_association(var/datum/mind/M, var/role_id)
+	if(!(M in player_roles))
+		player_roles[M] = list(role_id)
+	else if(!(role_id in player_roles[M]))
+		var/list/mind_list = player_roles[M]
+		mind_list += role_id
+		player_roles[M] = mind_list
+
+/datum/game_mode/proc/remove_player_role_association(var/datum/mind/M, var/role_id)
+	if(role_id in player_roles[M])
+		var/list/mind_list = player_roles[M]
+		mind_list.Remove(role_id)
+		player_roles[M] = mind_list
+
 
 ///pre_setup()
 ///Attempts to select players for special roles the mode might have.
 /datum/game_mode/proc/pre_setup()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/pre_setup() called tick#: [world.time]")
+	// People who are currently assigned roles.
+	player_roles=list()
+
+	// For each available role, select some players..
+	for(var/role_id in available_roles)
+		// Instantiate our role.
+		var/antag_role/role = ticker.antag_types[role_id]
+
+		// Do scaling, if needed.
+		if(!role.calculateRoleNumbers())
+			continue
+
+		// Select players who wanted to be this role.
+		var/list/available_minds = get_players_for_role(role.be_flag)//ticker.minds.Copy()
+
+		// For up to X players (where X is between min and max players allowed in this role)
+		for(var/i=0;i<rand(role.min_players,role.max_players);i++)
+
+			// Pop a random mind off the queue
+			var/datum/mind/M
+			if(available_minds.len)
+				M=pick(available_minds)
+			if(!M && ticker.minds.len)
+				M=pick(ticker.minds)
+			if(!M)
+				break
+
+			available_minds.Remove(M)
+
+			// Check if they already have a role, or this role can be slapped on top of other roles
+			if(M in player_roles && role.flags & ROLE_ADDITIVE)
+				continue
+
+			// Do a sanity check
+			if(role.CanBeAssigned(M))
+
+				// Assign the role
+				M.assignRole(role)
+
+	// Run PreSetup hooks on all assigned roles.
+	for(var/datum/mind/M in ticker.minds)
+		if(M.antag_roles.len>0)
+			for(var/rid in M.antag_roles)
+				var/antag_role/R=M.GetRole(rid)
+				R.OnPreSetup(M)
 	return 1
 
 
 ///post_setup()
 ///Everyone should now be on the station and have their normal gear.  This is the place to give the special roles extra things
 /datum/game_mode/proc/post_setup()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/post_setup() called tick#: [world.time]")
+	// Run ForgeGroupObjectives on all antag_role groups.
+	for(var/antag_id in ticker.antag_types)
+		var/antag_role/group = ticker.antag_types[antag_id]
+		if(group.faction) continue
+		group.faction.OnPostSetup()
+		group.faction.ForgeObjectives()
+
+	// Run PostSetup hooks on all assigned roles.
+	for(var/datum/mind/M in ticker.minds)
+		if(M.antag_roles.len>0)
+			for(var/rid in M.antag_roles)
+				var/antag_role/R=M.GetRole(rid)
+				R.antag = M
+				// Select a random partner, if needed.
+				if(R.flags & ROLE_NEED_HOST)
+					for(var/datum/mind/HM in ticker.minds)
+						if(HM.current && R.CanBeHost(HM))
+							R.host=HM
+
+				if(!R.OnPostSetup())
+					log_admin("MODE FAILURE: [name] UNABLE TO COMPLETE POST-SETUP FOR ROLE [R.name] ON [R.antag.current]!")
+					return 0
+
+
 	spawn (ROUNDSTART_LOGOUT_REPORT_TIME)
 		display_roundstart_logout_report()
+
+	if(!no_intercept)
+		spawn(rand(waittime_l,waittime_h))
+			send_intercept()
 
 	feedback_set_details("round_start","[time2text(world.realtime)]")
 	if(ticker && ticker.mode)
@@ -89,19 +174,21 @@
 ///process()
 ///Called by the gameticker
 /datum/game_mode/proc/process()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/process() called tick#: [world.time]")
+	for(var/datum/mind/M in ticker.minds)
+		if(M.antag_roles.len>0)
+			for(var/rid in M.antag_roles)
+				var/antag_role/R=M.GetRole(rid)
+				R.process()
 	return 0
 
 
 /datum/game_mode/proc/check_finished() //to be called by ticker
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/check_finished() called tick#: [world.time]")
 	if(emergency_shuttle.location==2 || station_was_nuked)
 		return 1
 	return 0
 
 
-/datum/game_mode/proc/declare_completion()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/declare_completion() called tick#: [world.time]")
+/datum/game_mode/proc/declare_completion(var/autodeclare=1)
 	var/clients = 0
 	var/surviving_humans = 0
 	var/surviving_total = 0
@@ -115,6 +202,12 @@
 	var/escaped_on_shuttle = 0
 
 	var/list/area/escape_locations = list(/area/shuttle/escape/centcom, /area/shuttle/escape_pod1/centcom, /area/shuttle/escape_pod2/centcom, /area/shuttle/escape_pod3/centcom, /area/shuttle/escape_pod5/centcom)
+
+	if(autodeclare)
+		for(var/role_id in available_roles)
+			var/antag_role/R=ticker.antag_types[role_id]
+			if(!R) continue
+			R.DeclareAll()
 
 	for(var/mob/M in player_list)
 		if(M.client)
@@ -173,16 +266,13 @@
 
 
 /datum/game_mode/proc/check_win() //universal trigger to be called at mob death, nuke explosion, etc. To be called from everywhere.
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/check_win() called tick#: [world.time]")
 	return 0
 
 
 /datum/game_mode/proc/send_intercept()
 
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/send_intercept() called tick#: [world.time]")
-
 	// AUTOFIXED BY fix_string_idiocy.py
-	// C:\Users\Rob\\documents\\\projects\vgstation13\code\game\gamemodes\game_mode.dm:230: var/intercepttext = "<FONT size = 3><B>[command_name()] Update</B> Requested status information:</FONT><HR>"
+	// C:\Users\Rob\Documents\Projects\vgstation13\code\game\gamemodes\game_mode.dm:230: var/intercepttext = "<FONT size = 3><B>[command_name()] Update</B> Requested status information:</FONT><HR>"
 	var/intercepttext = {"<FONT size = 3><B>[command_name()] Update</B> Requested status information:</FONT><HR>
 <B> In case you have misplaced your copy, attached is a list of personnel whom reliable sources&trade; suspect may be affiliated with the Syndicate:</B><br> <I>Reminder: Acting upon this information without solid evidence will result in termination of your working contract with Nanotrasen.</I></br>"}
 	// END AUTOFIX
@@ -237,6 +327,7 @@
 	world << sound('sound/AI/commandreport.ogg')
 
 	command_alert("Summary downloaded and printed out at all communications consoles.", "Enemy communication intercept.")
+	intercept_sent=1
 /*	for(var/mob/M in player_list)
 		if(!istype(M,/mob/new_player))
 			M << sound('sound/AI/intercept.ogg')
@@ -244,8 +335,7 @@
 		set_security_level(SEC_LEVEL_BLUE)*/
 
 
-/datum/game_mode/proc/get_players_for_role(var/role, override_jobbans=1, poll=0)
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/get_players_for_role() called tick#: [world.time]")
+/datum/game_mode/proc/get_players_for_role(var/role, override_jobbans=1)
 	var/list/players = list()
 	var/list/candidates = list()
 	var/list/drafted = list()
@@ -330,18 +420,15 @@
 
 
 /datum/game_mode/proc/latespawn(var/mob)
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/latespawn() called tick#: [world.time]")
 
 /*
 /datum/game_mode/proc/check_player_role_pref(var/role, var/mob/new_player/player)
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/check_player_role_pref() called tick#: [world.time]")
 	if(player.preferences.be_special & role)
 		return 1
 	return 0
 */
 
 /datum/game_mode/proc/num_players()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/num_players() called tick#: [world.time]")
 	. = 0
 	for(var/mob/new_player/P in player_list)
 		if(P.client && P.ready)
@@ -358,7 +445,6 @@
 //Keeps track of all living heads//
 ///////////////////////////////////
 /datum/game_mode/proc/get_living_heads()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/get_living_heads() called tick#: [world.time]")
 	var/list/heads = list()
 	for(var/mob/living/carbon/human/player in mob_list)
 		if(player.stat!=2 && player.mind && (player.mind.assigned_role in command_positions))
@@ -370,7 +456,6 @@
 //Keeps track of all heads//
 ////////////////////////////
 /datum/game_mode/proc/get_all_heads()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/game_mode/proc/get_all_heads() called tick#: [world.time]")
 	var/list/heads = list()
 	for(var/mob/player in mob_list)
 		if(player.mind && (player.mind.assigned_role in command_positions))
@@ -439,7 +524,6 @@ proc/display_roundstart_logout_report()
 
 
 proc/get_nt_opposed()
-	//writepanic("[__FILE__].[__LINE__] \\/proc/get_nt_opposed() called tick#: [world.time]")
 	var/list/dudes = list()
 	for(var/mob/living/carbon/human/man in player_list)
 		if(man.client)

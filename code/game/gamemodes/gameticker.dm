@@ -40,10 +40,38 @@ var/global/datum/controller/gameticker/ticker
 	// Hack
 	var/obj/machinery/media/jukebox/superjuke/thematic/theme = null
 
+	var/list/antag_types=list()
+
+/datum/controller/gameticker/proc/RoleCount(var/role_id)
+	var/antag_role/R = ticker.antag_types[role_id]
+	if(!R)
+		return list()
+	return R.minds.len
+
+/datum/controller/gameticker/proc/GetPlayersWithRole(var/role_id)
+	var/antag_role/R = ticker.antag_types[role_id]
+	if(!R)
+		return list()
+	return R.minds
+
+/datum/controller/gameticker/proc/GetAllGoodMinds()
+	return minds - GetAllBadMinds()
+
+/datum/controller/gameticker/proc/GetAllBadMinds()
+	var/list/bad_minds[0]
+	for(var/role_id in antag_types)
+		var/antag_role/R = antag_types[role_id]
+		if(R.flags & ROLE_GOOD)
+			continue
+
+		bad_minds |= R.minds
+	return bad_minds
+
 #define LOBBY_TICKING 1
 #define LOBBY_TICKING_RESTARTED 2
 /datum/controller/gameticker/proc/pregame()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/controller/gameticker/proc/pregame() called tick#: [world.time]")
+	antag_types.Cut()
+	// TODO: Get this list from a file, hardcoding is shitty.
 	var/oursong = file(pick(
 		"sound/music/space.ogg",
 		"sound/music/traitor.ogg",
@@ -334,7 +362,6 @@ var/global/datum/controller/gameticker/ticker
 
 
 /datum/controller/gameticker/proc/create_characters()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/controller/gameticker/proc/create_characters() called tick#: [world.time]")
 	for(var/mob/new_player/player in player_list)
 		if(player.ready && player.mind)
 			if(player.mind.assigned_role=="AI")
@@ -346,15 +373,12 @@ var/global/datum/controller/gameticker/ticker
 				player.FuckUpGenes(player.create_character())
 				del(player)
 
-
 /datum/controller/gameticker/proc/collect_minds()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/controller/gameticker/proc/collect_minds() called tick#: [world.time]")
 	for(var/mob/living/player in player_list)
 		if(player.mind)
 			ticker.minds += player.mind
 
 /datum/controller/gameticker/proc/equip_characters()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/controller/gameticker/proc/equip_characters() called tick#: [world.time]")
 	var/captainless=1
 	for(var/mob/living/carbon/human/player in player_list)
 		if(player && player.mind && player.mind.assigned_role)
@@ -373,7 +397,6 @@ var/global/datum/controller/gameticker/ticker
 			M.store_position()//updates the players' origin_ vars so they retain their location when the round starts.
 
 /datum/controller/gameticker/proc/process()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/controller/gameticker/proc/process() called tick#: [world.time]")
 	if(current_state != GAME_STATE_PLAYING)
 		return 0
 
@@ -445,8 +468,7 @@ var/global/datum/controller/gameticker/ticker
 	return 1
 
 /datum/controller/gameticker/proc/getfactionbyname(var/name)
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/controller/gameticker/proc/getfactionbyname() called tick#: [world.time]")
-	for(var/datum/faction/F in factions)
+	for(var/faction/F in factions)
 		if(F.name == name)
 			return F
 

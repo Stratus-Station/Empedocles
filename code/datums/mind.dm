@@ -44,6 +44,8 @@
 
 	var/role_alt_title
 
+	var/list/antag_roles = list() // List of id = /antag_roles.
+
 	var/datum/job/assigned_job
 
 	var/list/kills=list()
@@ -52,8 +54,8 @@
 
 	var/has_been_rev = 0//Tracks if this mind has been a rev or not
 
-	var/datum/faction/faction 			//associated faction
-	var/datum/changeling/changeling		//changeling holder
+	var/faction/faction 			//associated faction
+	//var/antag_role/changeling/changeling		//changeling holder
 	var/datum/vampire/vampire			//vampire holder
 
 	var/rev_cooldown = 0
@@ -61,7 +63,7 @@
 	// the world.time since the mob has been brigged, or -1 if not at all
 	var/brigged_since = -1
 
-		//put this here for easier tracking ingame
+	//put this here for easier tracking ingame
 	var/datum/money_account/initial_account
 	var/list/uplink_items_bought = list()
 	var/total_TC = 0
@@ -70,22 +72,51 @@
 	//fix scrying raging mages issue.
 	var/isScrying = 0
 
-
 /datum/mind/New(var/key)
 	src.key = key
 
+/datum/mind/proc/assignRole(var/antag_role/R)
+
+	if(!istype(R))
+		R=ticker.antag_types[R]
+
+	antag_roles[R.id]=new R.type(src,R)
+	ticker.mode.add_player_role_association(R.id)
+
+/datum/mind/proc/unassignRole(var/antag_role/R)
+
+	if(!istype(R))
+		R=ticker.antag_types[R]
+
+	var/antag_role/role=antag_roles[R.id]
+	role.Drop()
+
+/datum/mind/proc/QuickAssignRole(var/role_id)
+	assignRole(role_id)
+	var/antag_role/R=antag_roles[role_id]
+	R.ForgeObjectives()
+	R.Greet(1)
+
+/datum/mind/proc/GetRole(var/role_id)
+	return antag_roles[role_id]
 
 /datum/mind/proc/transfer_to(mob/living/new_character)
 	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/mind/proc/transfer_to() called tick#: [world.time]")
 	if(!istype(new_character))
 		error("transfer_to(): Some idiot has tried to transfer_to() a non mob/living mob. Please inform Carn")
 
+	for(var/antag_role/A in antag_roles)
+		A.PreMindTransfer(src)
+
 	if(current)					//remove ourself from our old body's mind variable
+	/*
 		if(changeling)
 			current.remove_changeling_powers()
-			current.verbs -= /datum/changeling/proc/EvolutionMenu
+			current.verbs -= /antag_role/changeling/proc/EvolutionMenu
 		if(vampire)
 			current.remove_vampire_powers()
+		*/
+
 		current.mind = null
 	if(new_character.mind)		//remove any mind currently in our new body's mind variable
 		new_character.mind.current = null
@@ -94,11 +125,15 @@
 
 	current = new_character		//link ourself to our new body
 	new_character.mind = src	//and link our new body to ourself
-
+	/*
 	if(changeling)
 		new_character.make_changeling()
 	if(vampire)
 		new_character.make_vampire()
+	*/
+
+	for(var/antag_role/A in antag_roles)
+		A.PostMindTransfer(src)
 	if(active)
 		new_character.key = key		//now transfer the key to link the client to our new body
 
@@ -127,14 +162,45 @@
 		alert("Not before round-start!", "Alert")
 		return
 
-	var/out = "<B>[name]</B>[(current&&(current.real_name!=name))?" (as [current.real_name])":""]<br>"
+	{"<html>
+	<head>
+	<title>[name]</title>
+	<style type="text/css">
+		html {
+			font-family:sans-serif;
+			font-size:small;
+		}
+		a{
+			color:#0066cc;
+			text-decoration:none;
+		}
 
-	// AUTOFIXED BY fix_string_idiocy.py
-	// C:\Users\Rob\\documents\\\projects\vgstation13\code\\datums\\mind.dm:110: out += "Mind currently owned by key: [key] [active?"(synced)":"(not synced)"]<br>"
-	out += {"Mind currently owned by key: [key] [active?"(synced)":"(not synced)"]<br>
-		Assigned role: [assigned_role]. <a href='?src=\ref[src];role_edit=1'>Edit</a><br>
-		Factions and special roles:<br>"}
-	// END AUTOFIX
+		a img {
+			border:1px solid #0066cc;
+			background:#dfdfdf;
+		}
+
+		a.color {
+			padding: 5px 10px;
+			font-size: large;
+			font-weight: bold;
+			border:1px solid white;
+		}
+
+		a.selected img,
+		a:hover {
+			background: #0066cc;
+			color: #ffffff;
+		}
+	</style>
+	</head>
+	<body>
+	<h1>[name][(current&&(current.real_name!=name))?" (as [current.real_name])":""]</h1>
+	<p>Mind currently owned by key: [key] [active?"(synced)":"(not synced)"]<br>
+	Assigned role: [assigned_role]. <a href='?src=\ref[src];role_edit=1'>Edit</a></p>
+
+	<h2>Roles</h2>"}
+
 	var/list/sections = list(
 		"hasborer",
 		"revolution",
@@ -149,6 +215,11 @@
 		"resteam",
 		"dsquad",
 	)
+
+	for(var/antag_id in ticker.antag_types)
+		var/antag_role/role_type = ticker.antag_types[antag_id]
+		out += role_type.GetEditMemoryMenu(src)
+
 	var/text = ""
 
 	if (istype(current, /mob/living/carbon/human) || istype(current, /mob/living/carbon/monkey) || istype(current, /mob/living/simple_animal/construct))
@@ -444,7 +515,24 @@
 	usr << browse(out, "window=edit_memory[src]")
 
 /datum/mind/Topic(href, href_list)
-	if(!check_rights(R_ADMIN))	return
+	if(!check_rights(R_ADMIN))
+		return
+
+	if("assign_role" in href_list)
+		if(GetRole(href_list["assign_role"]))
+			usr << "\red That role is already assigned."
+			return
+		assignRole(href_list["assign_role"])
+		log_admin("[key_name_admin(usr)] has assigned special role [href_list["assign_role"]] to [current].")
+		return
+
+	if("remove_role" in href_list)
+		if(!GetRole(href_list["assign_role"]))
+			usr << "\red That role isn't assigned."
+			return
+		unassignRole(href_list["assign_role"])
+		log_admin("[key_name_admin(usr)] has removed special role [href_list["assign_role"]] from [current].")
+		return
 
 	if (href_list["role_edit"])
 		var/new_role = input("Select new role", "Assigned role", assigned_role) as null|anything in get_all_jobs()
@@ -766,41 +854,12 @@
 	else if (href_list["changeling"])
 		switch(href_list["changeling"])
 			if("clear")
-				if(src in ticker.mode.changelings)
-					ticker.mode.changelings -= src
-					special_role = null
-					current.remove_changeling_powers()
-					current.verbs -= /datum/changeling/proc/EvolutionMenu
-					if(changeling)	del(changeling)
-					current << "<FONT color='red' size = 3><B>You grow weak and lose your powers! You are no longer a changeling and are stuck in your current form!</B></FONT>"
-					log_admin("[key_name_admin(usr)] has de-changeling'ed [current].")
+				var/antag_role/changeling = antag_roles["changeling"]
+				changeling.Drop()
 			if("changeling")
-				if(!(src in ticker.mode.changelings))
-					ticker.mode.changelings += src
-					ticker.mode.grant_changeling_powers(current)
-					special_role = "Changeling"
-					current << "<B><font color='red'>Your powers are awoken. A flash of memory returns to us...we are a changeling!</font></B>"
-					log_admin("[key_name_admin(usr)] has changeling'ed [current].")
-			if("autoobjectives")
-				ticker.mode.forge_changeling_objectives(src)
-				usr << "<span class='notice'>The objectives for changeling [key] have been generated. You can edit them and anounce manually.</span>"
-
-			if("initialdna")
-				if( !changeling || !changeling.absorbed_dna.len )
-					usr << "<span class='warning'>Resetting DNA failed!</span>"
-				else
-					current.dna = changeling.absorbed_dna[1]
-					current.real_name = current.dna.real_name
-					current.UpdateAppearance()
-					domutcheck(current, null)
-
-			if("set_genomes")
-				if( !changeling )
-					usr << "<span class='warning'>No changeling!</span>"
-					return
-				var/new_g = input(usr,"Number of genomes","Changeling",changeling.geneticpoints) as num
-				changeling.geneticpoints = Clamp(new_g, 0, 100)
-				log_admin("[key_name_admin(usr)] has set changeling [current] to [changeling.geneticpoints] genomes.")
+				assignRole(ticker.antag_types["changeling"])
+				current << "<B><font color='red'>Your powers are awoken. A flash of memory returns to us...we are a changeling!</font></B>"
+				log_admin("[key_name_admin(usr)] has changeling'ed [current].")
 
 	else if (href_list["vampire"])
 		switch(href_list["vampire"])
@@ -1166,6 +1225,11 @@ proc/clear_memory(var/silent = 1)
 		special_role = "malfunction"
 		A.icon_state = "ai-malf"
 
+/datum/mind/proc/make_Tratior()
+	if(!(src in ticker.mode.traitors))
+		ticker.mode.traitors += src
+		QuickAssignRole("traitor")
+
 /datum/mind/proc/make_Nuke()
 	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/mind/proc/make_Nuke() called tick#: [world.time]")
 	if(!(src in ticker.mode.syndicates))
@@ -1197,13 +1261,7 @@ proc/clear_memory(var/silent = 1)
 		ticker.mode.equip_syndicate(current)
 
 /datum/mind/proc/make_Changling()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/mind/proc/make_Changling() called tick#: [world.time]")
-	if(!(src in ticker.mode.changelings))
-		ticker.mode.changelings += src
-		ticker.mode.grant_changeling_powers(current)
-		special_role = "Changeling"
-		ticker.mode.forge_changeling_objectives(src)
-		ticker.mode.greet_changeling(src)
+	QuickAssignRole("changeling")
 
 /datum/mind/proc/make_Wizard()
 	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/mind/proc/make_Wizard() called tick#: [world.time]")
@@ -1229,43 +1287,7 @@ proc/clear_memory(var/silent = 1)
 
 
 /datum/mind/proc/make_Cultist()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/mind/proc/make_Cultist() called tick#: [world.time]")
-	if(!(src in ticker.mode.cult))
-		ticker.mode.cult += src
-		ticker.mode.update_cult_icons_added(src)
-		special_role = "Cultist"
-		current << "<span class='sinister'>You catch a glimpse of the Realm of Nar-Sie, The Geometer of Blood. You now see how flimsy the world is, you see that it should be open to the knowledge of Nar-Sie.</span>"
-		current << "<span class='sinister'>Assist your new compatriots in their dark dealings. Their goal is yours, and yours is theirs. You serve the Dark One above all else. Bring It back.</span>"
-		current << "<span class='sinister'>You can now speak and understand the forgotten tongue of the occult.</span>"
-		current.add_language("Cult")
-		var/datum/game_mode/cult/cult = ticker.mode
-		if (istype(cult))
-			cult.memoize_cult_objectives(src)
-		else
-			var/explanation = "Summon Nar-Sie via the use of the appropriate rune (Hell join self). It will only work if nine cultists stand on and around it."
-			current << "<B>Objective #1</B>: [explanation]"
-			current.memory += "<B>Objective #1</B>: [explanation]<BR>"
-			current << "The convert rune is join blood self"
-			current.memory += "The convert rune is join blood self<BR>"
-
-	var/mob/living/carbon/human/H = current
-	if (istype(H))
-		var/obj/item/weapon/tome/T = new(H)
-
-		var/list/slots = list (
-			"backpack" = slot_in_backpack,
-			"left pocket" = slot_l_store,
-			"right pocket" = slot_r_store,
-			"left hand" = slot_l_hand,
-			"right hand" = slot_r_hand,
-		)
-		var/where = H.equip_in_one_of_slots(T, slots)
-		if (!where)
-		else
-			H << "A tome, a message from your new master, appears in your [where]."
-
-	if (!ticker.mode.equip_cultist(current))
-		H << "Spawning an amulet from your Master failed."
+	QuickAssignRole("cultist")
 
 /datum/mind/proc/make_Rev()
 	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/mind/proc/make_Rev() called tick#: [world.time]")
@@ -1326,31 +1348,7 @@ proc/clear_memory(var/silent = 1)
 
 	return (duration <= world.time - brigged_since)
 
-/datum/mind/proc/make_traitor()
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/datum/mind/proc/make_traitor() called tick#: [world.time]")
-	if (!(src in ticker.mode.traitors))
-		ticker.mode.traitors += src
-
-		special_role = "traitor"
-
-		ticker.mode.forge_traitor_objectives(src)
-
-		current << {"
-		<SPAN CLASS='big bold center red'>ATTENTION</SPAN>
-		<SPAN CLASS='big center'>It's time to pay your debt to \the [syndicate_name()].</SPAN>
-		"}
-
-		ticker.mode.finalize_traitor(src)
-
-		ticker.mode.greet_traitor(src)
-
-		return TRUE
-
-	return FALSE
-
-//Initialisation procs
-/mob/proc/mind_initialize() // vgedit: /mob instead of /mob/living
-	//writepanic("[__FILE__].[__LINE__] ([src.type])([usr ? usr.ckey : ""])  \\/mob/proc/mind_initialize() called tick#: [world.time]")
+/mob/proc/mind_initialize()
 	if(mind)
 		mind.key = key
 	else
