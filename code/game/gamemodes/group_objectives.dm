@@ -7,7 +7,7 @@
 /datum/group_objective
 	var/explanation_text = "Nothing"	//What that group is supposed to do.
 	var/completed = 0					//currently only used for custom objectives.
-	var/antag_role/group
+	var/faction/group
 
 	New(var/antag_role/owner)
 		group = owner

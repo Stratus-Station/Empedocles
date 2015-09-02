@@ -41,6 +41,9 @@
 	var/waittime_l = 600 //lower bound on time before intercept arrives (in tenths of seconds)
 	var/waittime_h = 1800 //upper bound on time before intercept arrives (in tenths of seconds)
 
+	var/no_intercept=0
+	var/intercept_sent=0
+
 	var/rage = 0
 
 /datum/game_mode/proc/announce() //to be calles when round starts
@@ -130,7 +133,7 @@
 
 ///post_setup()
 ///Everyone should now be on the station and have their normal gear.  This is the place to give the special roles extra things
-/datum/game_mode/proc/post_setup()
+/datum/game_mode/proc/post_setup(no_intercept=0)
 	// Run ForgeGroupObjectives on all antag_role groups.
 	for(var/antag_id in ticker.antag_types)
 		var/antag_role/group = ticker.antag_types[antag_id]
