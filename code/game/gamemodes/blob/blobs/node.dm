@@ -15,6 +15,7 @@
 
 /obj/effect/blob/node/New(loc,newlook = "new",no_morph = 0)
 	blob_nodes += src
+	blobnet = new /datum/blobnet(src)
 	processing_objects.Add(src)
 	..(loc, newlook)
 
@@ -26,6 +27,7 @@
 
 /obj/effect/blob/node/Destroy()
 	blob_nodes -= src
+	qdel(blobnet)
 	if(!manual_remove && overmind)
 		to_chat(overmind,"<span class='warning'>A node blob that you had created has been destroyed.</span> <b><a href='?src=\ref[overmind];blobjump=\ref[loc]'>(JUMP)</a></b>")
 		overmind.special_blobs -= src
@@ -44,8 +46,8 @@
 		for(var/mob/M in viewers(src))
 			M.playsound_local(loc, adminblob_beat, 50, 0, null, FALLOFF_SOUNDS, 0)
 
-	for(var/i = 1; i < 8; i += i)
-		Pulse(5, i)
+	Pulse()
+	blobnet.send_pulse()
 
 	if(health < maxhealth)
 		health = min(maxhealth, health + 1)

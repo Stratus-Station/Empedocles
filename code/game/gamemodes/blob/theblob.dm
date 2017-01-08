@@ -36,6 +36,8 @@ var/list/blob_looks
 /obj/effect/blob/normal/update_icon(var/spawnend = 0)
 */
 
+#define MAX_PULSER_RANGE 10
+
 /obj/effect/blob
 	name = "blob"
 	icon = 'icons/mob/blob/blob_64x64.dmi'
@@ -73,6 +75,17 @@ var/list/blob_looks
 	var/manual_remove = 0
 	var/icon_size = 64
 
+	// BLOBNET CODE
+	// Set only if we're the host of the blobnet (the pulser)
+	var/datum/blobnet/blobnet = null
+	// The pulser we're nearest to.
+	var/obj/nearest_pulser = null
+	// The distance to that pulser
+	var/nearest_pulser_distance = -1
+	// Pulsers we're connected to.  At 0, we die.
+	var/pulser_count = 0
+
+
 /obj/effect/blob/blob_act()
 	return
 
@@ -88,6 +101,8 @@ var/list/blob_looks
 			blobmode.nuclear = 1
 	src.dir = pick(cardinal)
 	time_since_last_pulse = world.time
+
+	find_pulsers()
 
 	if(icon_size == 64)
 		if(spawning && !no_morph)
@@ -107,10 +122,29 @@ var/list/blob_looks
 		A.blob_act()
 	return
 
+/obj/effect/blob/proc/find_pulsers()
+	/// Sign up with all pulser blobs within MAX_PULSER_RANGE
+	for(var/b in orange(src, MAX_PULSER_RANGE))
+		if(b!=null && istype(b, /obj/effect/blob))
+			var/obj/effect/blob/B = b
+			var/datum/blobnet/BN=B.blobnet
+			if(BN!=null && !(src in BN.blobs))
+				BN.blobs += src
+				subscribe_to_pulser(B, get_dist(src, B))
+
+/obj/effect/blob/proc/drop_pulsers()
+	for(var/b in orange(src, MAX_PULSER_RANGE))
+		if(b!=null && istype(b, /obj/effect/blob))
+			var/obj/effect/blob/B = b
+			var/datum/blobnet/BN=B.blobnet
+			if(BN!=null && src in BN.blobs)
+				unsubscribe_from_pulser(B)
+				BN.blobs -= src
 
 /obj/effect/blob/Destroy()
 	dying = 1
 	blobs -= src
+	drop_pulsers()
 
 	if(icon_size == 64)
 		for(var/atom/movable/overlay/O in loc)
@@ -317,7 +351,8 @@ var/list/blob_looks_player = list(//Options available to players
 	for(var/obj/effect/blob/B in orange(src,1))
 		B.update_icon()
 
-/obj/effect/blob/proc/Pulse(var/pulse = 0, var/origin_dir = 0)//Todo: Fix spaceblob expand
+// BLOBNET: Now sent from pulsers. No recursion anymore.
+/obj/effect/blob/proc/Pulse()//Todo: Fix spaceblob expand
 	/*
 	if(time_since_last_pulse >= world.time)
 		return
@@ -332,26 +367,30 @@ var/list/blob_looks_player = list(//Options available to players
 	if(run_action())//If we can do something here then we dont need to pulse more
 		return
 
-	if(pulse > 30)
-		return//Inf loop check
-
 	//Looking for another blob to pulse
-	var/list/dirs = cardinal.Copy()
-	dirs.Remove(origin_dir)//Dont pulse the guy who pulsed us
-	for(var/i in 1 to 4)
-		if(!dirs.len)
-			break
-		var/dirn = pick_n_take(dirs)
-		var/turf/T = get_step(src, dirn)
-		var/obj/effect/blob/B = locate() in T
-		if(!B)
-			expand(T)//No blob here so try and expand
-			return
-		spawn(2)
-			B.Pulse((pulse+1),get_dir(src.loc,T))
-		return
-	return
+	var/dirn = pick(cardinal)
+	var/turf/T = get_step(src, dirn)
+	var/obj/effect/blob/B = locate() in T
+	if(!B)
+		expand(T)//No blob here so try and expand
 
+/obj/effect/blob/proc/subscribe_to_pulser(var/obj/pulser, var/distance)
+	nearest_pulser = pulser
+	if(nearest_pulser_distance > distance || nearest_pulser_distance == -1)
+		nearest_pulser_distance = distance
+	pulser_count++
+
+/obj/effect/blob/proc/unsubscribe_from_pulser(var/obj/pulser)
+	if(nearest_pulser == pulser)
+		nearest_pulser_distance=-1
+		nearest_pulser=null
+	pulser_count--
+	/* Automatic death shit here.
+	if(pulser_count == 0 || dont_autodie)
+		spawn(rand(5,50))
+			health=0
+			update_health()
+	*/
 
 /obj/effect/blob/proc/run_action()
 	return 0

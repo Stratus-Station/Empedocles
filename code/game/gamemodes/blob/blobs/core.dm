@@ -23,6 +23,7 @@
 /obj/effect/blob/core/New(loc, var/h = 200, var/client/new_overmind = null, var/new_rate = 2, var/mob/camera/blob/C = null,newlook = "new",no_morph = 0)
 	looks = newlook
 	blob_cores += src
+	blobnet = new /datum/blobnet(src)
 	processing_objects.Add(src)
 	creator = C
 	if((icon_size == 64) && !no_morph)
@@ -39,6 +40,7 @@
 
 /obj/effect/blob/core/Destroy()
 	blob_cores -= src
+	qdel(blobnet)
 
 	for(var/mob/camera/blob/O in blob_overminds)
 		if(overmind && (O != overmind))
@@ -91,12 +93,8 @@
 			for(var/mob/M in viewers(src))
 				M.playsound_local(loc, adminblob_beat, 50, 0, null, FALLOFF_SOUNDS, 0)
 
-		var/turf/T = get_turf(overmind) //The overmind's mind can expand the blob
-		var/obj/effect/blob/O = locate() in T //As long as it is 'thinking' about a blob already
-		for(var/i = 1; i < 8; i += i)
-			Pulse(0, i)
-			if(istype(O))
-				O.Pulse(0,i)
+		Pulse()
+		blobnet.send_pulse()
 		for(var/b_dir in alldirs)
 			if(!prob(5))
 				continue
