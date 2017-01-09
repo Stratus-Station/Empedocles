@@ -3,8 +3,11 @@ This is effectively the controller of the blobnet, and is what actually tracks b
 */
 /datum/blobnet
 	var/list/blobs=list()
+	var/list/corelinks=list()
+
 	var/maxrange=10
 	var/dirty=TRUE // Update
+	var/core=FALSE // Pulse even with no connected cores.
 
 	// If this dies, we die.
 	var/obj/effect/blob/blob=null
@@ -12,24 +15,32 @@ This is effectively the controller of the blobnet, and is what actually tracks b
 /datum/blobnet/New(var/obj/effect/blob/owner)
 	..()
 	blob=owner
+	core = istype(blob, /obj/effect/blob/core)
 	find_subjects()
 
 /datum/blobnet/Destroy()
 	for(var/obj/effect/blob/B in blobs)
 		B.unsubscribe_from_pulser(blob)
 	blobs.Cut()
+	corelinks.Cut()
 	..()
 
 /datum/blobnet/proc/send_pulse()
 	if(dirty)
 		dirty=FALSE
 		find_subjects()
-	var/list/newblobs=list()
-	for(var/obj/effect/blob/B in blobs)
-		if(B)
-			newblobs += B
-			B.Pulse()
-	blobs=newblobs
+	if(core || corelinks.len>0)
+		var/list/newblobs=list()
+		for(var/obj/effect/blob/B in blobs)
+			if(B)
+				newblobs += B
+				B.Pulse()
+		blobs=newblobs
+
+/datum/blobnet/proc/add_core(var/obj/effect/blob/core/C)
+	if(!(C in corelinks)
+		corelinks += C
+
 
 /datum/blobnet/proc/find_subjects()
 	// All connected blobs
@@ -42,6 +53,9 @@ This is effectively the controller of the blobnet, and is what actually tracks b
 	var/obj/effect/blob/B=null
 	// range squared (get_dist_squared doesn't need sqrt)
 	var/maxrangesqr=maxrange ** 2
+
+	// Delink all cores from this node.
+	corelinks.Cut()
 
 	// Loop until to_search is empty
 	var/iloopchk=1000
@@ -65,6 +79,9 @@ This is effectively the controller of the blobnet, and is what actually tracks b
 				continue
 			connected += B
 			to_search += B
+			if(B.blobnet)
+				for(var/obj/effect/blob/core/C in B.blobnet.get_cores())
+					add_core(C)
 
 	// Blobs in blobs but not connected (disconnected)
 	for(var/obj/effect/blob/dead in blobs-connected)
@@ -74,7 +91,7 @@ This is effectively the controller of the blobnet, and is what actually tracks b
 	// Blobs in connected but not blobs (newly connected)
 	for(var/obj/effect/blob/newB in connected-blobs)
 		if(newB)
-			newB.subscribe_to_pulser(src)
+			newB.subscribe_to_pulser(src, get_dist(newB,blob))
 
 	// Update connected list.
 	blobs=connected

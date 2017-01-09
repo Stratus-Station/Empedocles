@@ -463,12 +463,12 @@ var/list/blob_looks_player = list(//Options available to players
 
 /obj/effect/blob/normal/Delete()
 	..()
-/*
-/obj/effect/blob/normal/Pulse(var/pulse = 0, var/origin_dir = 0)
+
+/obj/effect/blob/normal/Pulse()
 	..()
 	if(icon_size == 64)
 		anim(target = loc, a_icon = icon, flick_anim = "pulse", sleeptime = 15, direction = dir, lay = 12, offX = -16, offY = -16, alph = 51)
-*/
+
 /obj/effect/blob/normal/update_icon(var/spawnend = 0)
 	if(icon_size == 64)
 		spawn(1)
