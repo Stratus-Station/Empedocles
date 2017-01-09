@@ -37,6 +37,7 @@ var/list/blob_looks
 */
 
 #define MAX_PULSER_RANGE 10
+#define MAX_PULSER_RANGE_SQR MAX_PULSER_RANGE ** 2
 
 /obj/effect/blob
 	name = "blob"
@@ -102,7 +103,7 @@ var/list/blob_looks
 	src.dir = pick(cardinal)
 	time_since_last_pulse = world.time
 
-	find_pulsers()
+	mark_pulsers_dirty()
 
 	if(icon_size == 64)
 		if(spawning && !no_morph)
@@ -122,29 +123,18 @@ var/list/blob_looks
 		A.blob_act()
 	return
 
-/obj/effect/blob/proc/find_pulsers()
-	/// Sign up with all pulser blobs within MAX_PULSER_RANGE
+/obj/effect/blob/proc/mark_pulsers_dirty()
+	// Tell all nearby pulsers to update their connected blobs.
 	for(var/b in orange(src, MAX_PULSER_RANGE))
-		if(b!=null && istype(b, /obj/effect/blob))
+		if(b && istype(b, /obj/effect/blob))
 			var/obj/effect/blob/B = b
-			var/datum/blobnet/BN=B.blobnet
-			if(BN!=null && !(src in BN.blobs))
-				BN.blobs += src
-				subscribe_to_pulser(B, get_dist(src, B))
-
-/obj/effect/blob/proc/drop_pulsers()
-	for(var/b in orange(src, MAX_PULSER_RANGE))
-		if(b!=null && istype(b, /obj/effect/blob))
-			var/obj/effect/blob/B = b
-			var/datum/blobnet/BN=B.blobnet
-			if(BN!=null && src in BN.blobs)
-				unsubscribe_from_pulser(B)
-				BN.blobs -= src
+			if(B.blobnet)
+				B.blobnet.dirty=1
 
 /obj/effect/blob/Destroy()
 	dying = 1
 	blobs -= src
-	drop_pulsers()
+	mark_pulsers_dirty()
 
 	if(icon_size == 64)
 		for(var/atom/movable/overlay/O in loc)

@@ -107,6 +107,10 @@
 
 	return dist
 
+// sqrt is slow.  This is good for simple  distance checks that don't need to be displayed
+/proc/get_dist_squared(atom/Loc1 as turf|mob|obj,atom/Loc2 as turf|mob|obj)
+	return ((Loc1.x - Loc2.x)**2) + ((Loc1.y - Loc2.y)**2)
+
 /proc/circlerangeturfs(center=usr,radius=3)
 
 
