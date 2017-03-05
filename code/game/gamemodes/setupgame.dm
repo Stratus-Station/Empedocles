@@ -233,8 +233,8 @@ var/NOIRBLOCK = 0
 
 /proc/setupfactions()
 	// Populate the factions list:
-	for(var/x in typesof(/datum/faction))
-		var/datum/faction/F = new x
+	for(var/x in typesof(/faction))
+		var/faction/F = new x
 		if(!F.name)
 			del(F)
 			continue
@@ -243,5 +243,5 @@ var/NOIRBLOCK = 0
 			ticker.availablefactions.Add(F)
 
 	// Populate the syndicate coalition:
-	for(var/datum/faction/syndicate/S in ticker.factions)
+	for(var/faction/syndicate/S in ticker.factions)
 		ticker.syndicate_coalition.Add(S)

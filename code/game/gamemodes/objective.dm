@@ -7,8 +7,8 @@ var/list/potential_theft_objectives=list(
 	//"salvage" = typesof(/datum/theft_objective/number/salvage) - /datum/theft_objective/number/salvage
 )
 
-
 /datum/objective
+	var/antag_role/role
 	var/datum/mind/owner = null			//Who owns the objective.
 	var/explanation_text = "Nothing"	//What that person is supposed to do.
 	var/datum/mind/target = null		//If they are focused on a particular person.
@@ -17,7 +17,11 @@ var/list/potential_theft_objectives=list(
 	var/blocked = 0                     // Universe fucked, you lost.
 	var/list/bad_assassinate_targets = list("AI","Cyborg","Mobile MMI","Trader")
 
-/datum/objective/New(var/text)
+/datum/objective/New(var/antag_role/parent, var/text)
+	if(!istype(parent.antag))
+		WARNING("parent.antag is not /datum/mind!")
+	role = parent
+	owner = parent.antag
 	if(text)
 		explanation_text = text
 
@@ -31,6 +35,14 @@ var/list/potential_theft_objectives=list(
 			possible_targets += possible_target
 	if(possible_targets.len > 0)
 		target = pick(possible_targets)
+
+/**
+ *  /antag_role/AppendObjective calls this.
+ *
+ * Should perform a basic check and return 1 on success, 0 on failure.
+ */
+/datum/objective/proc/PostAppend()
+	return 1
 
 
 /datum/objective/proc/find_target_by_role(role, role_type = 0)//Option sets either to check assigned role or special role. Default to assigned.
@@ -660,7 +672,7 @@ var/list/potential_theft_objectives=list(
 					n_p ++
 		else if (ticker.current_state == GAME_STATE_PLAYING)
 			for(var/mob/living/carbon/human/P in player_list)
-				if(P.client && !(P.mind in ticker.mode.changelings) && P.mind!=owner)
+				if(P.client && !P.GetRole("changeling") && P.mind!=owner)
 					n_p ++
 		target_amount = min(target_amount, n_p)
 
@@ -670,10 +682,9 @@ var/list/potential_theft_objectives=list(
 /datum/objective/absorb/check_completion()
 	if(blocked)
 		return 0
-	if(owner && owner.changeling && owner.changeling.absorbed_dna && (owner.changeling.absorbedcount >= target_amount))
-		return 1
-	else
-		return 0
+	// Antag Roles~
+	var/antag_role/changeling/changeling=owner.GetRole("changeling")
+	return changeling && changeling.absorbed_dna && (changeling.absorbedcount >= target_amount)
 
 
 

@@ -44,6 +44,8 @@
 
 	var/role_alt_title
 
+	var/list/antag_roles = list() // List of id = /antag_roles.
+
 	var/datum/job/assigned_job
 
 	var/list/kills=list()
@@ -52,8 +54,6 @@
 
 	var/has_been_rev = 0//Tracks if this mind has been a rev or not
 
-	var/datum/faction/faction 			//associated faction
-	var/datum/changeling/changeling		//changeling holder
 	var/datum/vampire/vampire			//vampire holder
 
 	var/rev_cooldown = 0
@@ -61,7 +61,7 @@
 	// the world.time since the mob has been brigged, or -1 if not at all
 	var/brigged_since = -1
 
-		//put this here for easier tracking ingame
+	//put this here for easier tracking ingame
 	var/datum/money_account/initial_account
 	var/list/uplink_items_bought = list()
 	var/total_TC = 0
@@ -77,16 +77,47 @@
 /datum/mind/New(var/key)
 	src.key = key
 
+/datum/mind/proc/assignRole(var/antag_role/R)
+
+	if(!istype(R))
+		R=ticker.antag_types[R]
+
+	antag_roles[R.id]=new R.type(src,R)
+	ticker.mode.add_player_role_association(R.id)
+
+/datum/mind/proc/unassignRole(var/antag_role/R)
+
+	if(!istype(R))
+		R=ticker.antag_types[R]
+
+	var/antag_role/role=antag_roles[R.id]
+	role.Drop()
+
+/datum/mind/proc/QuickAssignRole(var/role_id)
+	assignRole(role_id)
+	var/antag_role/R=antag_roles[role_id]
+	R.ForgeObjectives()
+	R.Greet(1)
+
+/datum/mind/proc/GetRole(var/role_id)
+	return antag_roles[role_id]
+
 /datum/mind/proc/transfer_to(mob/living/new_character)
 	if(!istype(new_character))
 		error("transfer_to(): Some idiot has tried to transfer_to() a non mob/living mob. Please inform Carn")
 
+	for(var/antag_role/A in antag_roles)
+		A.PreMindTransfer(src)
+
 	if(current)					//remove ourself from our old body's mind variable
+	/*
 		if(changeling)
 			current.remove_changeling_powers()
 			current.verbs -= /datum/changeling/proc/EvolutionMenu
 		if(vampire)
 			current.remove_vampire_powers()
+	*/
+
 		current.mind = null
 	if(new_character.mind)		//remove any mind currently in our new body's mind variable
 		new_character.mind.current = null
@@ -95,11 +126,15 @@
 
 	current = new_character		//link ourself to our new body
 	new_character.mind = src	//and link our new body to ourself
-
+	/*
 	if(changeling)
 		new_character.make_changeling()
 	if(vampire)
 		new_character.make_vampire()
+	*/
+
+	for(var/antag_role/A in antag_roles)
+		A.PostMindTransfer(src)
 	if(active)
 		new_character.key = key		//now transfer the key to link the client to our new body
 
@@ -125,25 +160,54 @@
 		alert("Not before round-start!", "Alert")
 		return
 
-	var/out = "<B>[name]</B>[(current&&(current.real_name!=name))?" (as [current.real_name])":""]<br>"
+	//var/out = "<B>[name]</B>[(current&&(current.real_name!=name))?" (as [current.real_name])":""]<br>"
 
-	out += {"Mind currently owned by key: [key] [active?"(synced)":"(not synced)"]<br>
+	var/out = {"<html>
+	<head>
+	<title>[name]</title>
+	<style type="text/css">
+		html {
+			font-family:sans-serif;
+			font-size:small;
+		}
+		a{
+			color:#0066cc;
+			text-decoration:none;
+		}
+
+		a img {
+			border:1px solid #0066cc;
+			background:#dfdfdf;
+		}
+
+		a.color {
+			padding: 5px 10px;
+			font-size: large;
+			font-weight: bold;
+			border:1px solid white;
+		}
+
+		a.selected img,
+		a:hover {
+			background: #0066cc;
+			color: #ffffff;
+		}
+	</style>
+	</head>
+	<body>
+	<h1>[name][(current&&(current.real_name!=name))?" (as [current.real_name])":""]</h1>
+	<p>Mind currently owned by key: [key] [active?"(synced)":"(not synced)"]<br>
 		Assigned role: [assigned_role]. <a href='?src=\ref[src];role_edit=1'>Edit</a><br>
-		Factions and special roles:<br>"}
-	var/list/sections = list(
-		"revolution",
-		"cult",
-		"wizard",
-		"apprentice",
-		"changeling",
-		"vampire",
-		"nuclear",
-		"traitor", // "traitorchan",
-		"monkey",
-		"malfunction",
-		"resteam",
-		"dsquad",
-	)
+		Factions and special roles:</p>
+
+	<h2>Roles</h2>"}
+
+	// NEW HOTNESS
+	for(var/antag_id in ticker.antag_types)
+		var/antag_role/role_type = ticker.antag_types[antag_id]
+		out += role_type.GetEditMemoryMenu(src)
+
+#ifdef PLEASE_PORT_THIS_SHIT_ALSO_COMMENTS_DONT_WORK
 	var/text = ""
 
 	if (istype(current, /mob/living/carbon/human) || istype(current, /mob/living/carbon/monkey) || istype(current, /mob/living/simple_animal/construct))
@@ -423,10 +487,27 @@
 
 	out += {"<a href='?src=\ref[src];obj_add=1'>Add objective</a><br><br>
 		<a href='?src=\ref[src];obj_announce=1'>Announce objectives</a><br><br>"}
+#endif
 	usr << browse(out, "window=edit_memory[src]")
 
 /datum/mind/Topic(href, href_list)
 	if(!check_rights(R_ADMIN))
+		return
+
+	if("assign_role" in href_list)
+		if(GetRole(href_list["assign_role"]))
+			usr << "\red That role is already assigned."
+			return
+		assignRole(href_list["assign_role"])
+		log_admin("[key_name_admin(usr)] has assigned special role [href_list["assign_role"]] to [current].")
+		return
+
+	if("remove_role" in href_list)
+		if(!GetRole(href_list["assign_role"]))
+			usr << "\red That role isn't assigned."
+			return
+		unassignRole(href_list["assign_role"])
+		log_admin("[key_name_admin(usr)] has removed special role [href_list["assign_role"]] from [current].")
 		return
 
 	if (href_list["role_edit"])
@@ -441,6 +522,7 @@
 			return
 		memory = new_memo
 
+#ifdef PLEASE_PORT_THIS_SHIT_ALSO_COMMENTS_DONT_WORK
 	else if (href_list["obj_edit"] || href_list["obj_add"])
 		var/datum/objective/objective
 		var/objective_pos
@@ -1104,7 +1186,7 @@
 					assigned_role = "MODE"
 					special_role = "Death Commando"
 					log_admin("[key_name(usr)] has deathsquad'ed [key_name(current)].")
-
+#endif
 
 	edit_memory()
 /*
@@ -1207,12 +1289,7 @@ proc/clear_memory(var/silent = 1)
 		ticker.mode.equip_syndicate(current)
 
 /datum/mind/proc/make_Changling()
-	if(!(src in ticker.mode.changelings))
-		ticker.mode.changelings += src
-		ticker.mode.grant_changeling_powers(current)
-		special_role = "Changeling"
-		ticker.mode.forge_changeling_objectives(src)
-		ticker.mode.greet_changeling(src)
+	QuickAssignRole("changeling")
 
 /datum/mind/proc/make_Wizard()
 	if(!(src in ticker.mode.wizards))
@@ -1237,40 +1314,7 @@ proc/clear_memory(var/silent = 1)
 
 
 /datum/mind/proc/make_Cultist()
-	if(!(src in ticker.mode.cult))
-		ticker.mode.cult += src
-		ticker.mode.update_cult_icons_added(src)
-		special_role = "Cultist"
-		to_chat(current, "<span class='sinister'>You catch a glimpse of the Realm of Nar-Sie, The Geometer of Blood. You now see how flimsy the world is, you see that it should be open to the knowledge of Nar-Sie.</span>")
-		to_chat(current, "<span class='sinister'>Assist your new compatriots in their dark dealings. Their goal is yours, and yours is theirs. You serve the Dark One above all else. Bring It back.</span>")
-		to_chat(current, "<span class='sinister'>You can now speak and understand the forgotten tongue of the occult.</span>")
-		current.add_language(LANGUAGE_CULT)
-		var/datum/game_mode/cult/cult = ticker.mode
-		if (istype(cult))
-			cult.memoize_cult_objectives(src)
-		else
-			var/explanation = "Summon Nar-Sie via the use of the appropriate rune (Hell join self). It will only work if nine cultists stand on and around it."
-			to_chat(current, "<B>Objective #1</B>: [explanation]")
-			current.memory += "<B>Objective #1</B>: [explanation]<BR>"
-			to_chat(current, "The convert rune is join blood self")
-			current.memory += "The convert rune is join blood self<BR>"
-
-	var/mob/living/carbon/human/H = current
-	if (istype(H))
-		var/obj/item/weapon/tome/T = new(H)
-
-		var/list/slots = list (
-			"backpack" = slot_in_backpack,
-			"left pocket" = slot_l_store,
-			"right pocket" = slot_r_store,
-		)
-		var/where = H.equip_in_one_of_slots(T, slots, put_in_hand_if_fail = 1)
-
-		if(where)
-			to_chat(H, "A tome, a message from your new master, appears in your [where].")
-
-	if (!ticker.mode.equip_cultist(current))
-		to_chat(H, "Spawning an amulet from your Master failed.")
+	QuickAssignRole("cultist")
 
 /datum/mind/proc/make_Rev()
 	if (ticker.mode.head_revolutionaries.len>0)
@@ -1330,25 +1374,7 @@ proc/clear_memory(var/silent = 1)
 	return (duration <= world.time - brigged_since)
 
 /datum/mind/proc/make_traitor()
-	if (!(src in ticker.mode.traitors))
-		ticker.mode.traitors += src
-
-		special_role = "traitor"
-
-		ticker.mode.forge_traitor_objectives(src)
-
-		to_chat(current, {"
-		<SPAN CLASS='big bold center red'>ATTENTION</SPAN>
-		<SPAN CLASS='big center'>It's time to pay your debt to \the [syndicate_name()].</SPAN>
-		"})
-
-		ticker.mode.finalize_traitor(src)
-
-		ticker.mode.greet_traitor(src)
-
-		return TRUE
-
-	return FALSE
+	QuickAssignRole("traitor")
 
 //Initialisation procs
 /mob/proc/mind_initialize() // vgedit: /mob instead of /mob/living

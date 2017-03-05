@@ -43,9 +43,38 @@ var/datum/controller/gameticker/ticker
 	// Hack
 	var/obj/machinery/media/jukebox/superjuke/thematic/theme = null
 
+	var/list/antag_types=list()
+
+/datum/controller/gameticker/proc/RoleCount(var/role_id)
+	var/antag_role/R = ticker.antag_types[role_id]
+	if(!R)
+		return list()
+	return R.minds.len
+
+/datum/controller/gameticker/proc/GetPlayersWithRole(var/role_id)
+	var/antag_role/R = ticker.antag_types[role_id]
+	if(!R)
+		return list()
+	return R.minds
+
+/datum/controller/gameticker/proc/GetAllGoodMinds()
+	return minds - GetAllBadMinds()
+
+/datum/controller/gameticker/proc/GetAllBadMinds()
+	var/list/bad_minds[0]
+	for(var/role_id in antag_types)
+		var/antag_role/R = antag_types[role_id]
+		if(R.flags & ROLE_GOOD)
+			continue
+
+		bad_minds |= R.minds
+	return bad_minds
+
 #define LOBBY_TICKING 1
 #define LOBBY_TICKING_RESTARTED 2
 /datum/controller/gameticker/proc/pregame()
+	antag_types.Cut()
+	// TODO: Get this list from a file, hardcoding is shitty.
 	var/oursong = file(pick(
 		"sound/music/space.ogg",
 		"sound/music/traitor.ogg",
@@ -342,7 +371,6 @@ var/datum/controller/gameticker/ticker
 				player.FuckUpGenes(player.create_character())
 				qdel(player)
 
-
 /datum/controller/gameticker/proc/collect_minds()
 	for(var/mob/living/player in player_list)
 		if(player.mind)
@@ -450,7 +478,7 @@ var/datum/controller/gameticker/ticker
 	return 1
 
 /datum/controller/gameticker/proc/getfactionbyname(var/name)
-	for(var/datum/faction/F in factions)
+	for(var/faction/F in factions)
 		if(F.name == name)
 			return F
 

@@ -21,6 +21,8 @@
 	var/station_was_nuked = 0 //see nuclearbomb.dm and malfunction.dm
 	var/explosion_in_progress = 0 //sit back and relax
 	var/list/datum/mind/modePlayer = new
+	var/list/available_roles = new // What roles are used in this mode?
+	var/list/player_roles = new
 	var/list/restricted_jobs = list()	// Jobs it doesn't make sense to be.  I.E chaplain or AI cultist
 	var/list/protected_jobs = list()	// Jobs that can't be traitors
 	var/required_players = 0
@@ -36,15 +38,18 @@
 	var/eldergod = 1 // Can cultists spawn Nar-Sie? (Set to 0 on cascade or narsie spawn)
 	var/completion_text = ""
 
-	var/list/datum/mind/deathsquad = list()
-	var/list/datum/mind/ert = list()
+	var/waittime_l = 600 //lower bound on time before intercept arrives (in tenths of seconds)
+	var/waittime_h = 1800 //upper bound on time before intercept arrives (in tenths of seconds)
+
+	var/no_intercept=0
+	var/intercept_sent=0
+
 	var/ert_reason
 	var/rage = 0
 	var/can_be_mixed = FALSE
 
 /datum/game_mode/proc/announce() //to be calles when round starts
 	to_chat(world, "<B>Notice</B>: [src] did not define announce()")
-
 
 ///can_start()
 ///Checks to see if the game can be setup and ran with the current number of players or whatnot.
@@ -65,16 +70,99 @@
 	message_admins("Failed to start a round of [name]. Only [playerC] players ready out of [(master_mode=="secret") ? "[required_players_secret]" : "[required_players]"] needed.")
 	return 0
 
+/datum/game_mode/proc/add_player_role_association(var/datum/mind/M, var/role_id)
+	if(!(M in player_roles))
+		player_roles[M] = list(role_id)
+	else if(!(role_id in player_roles[M]))
+		var/list/mind_list = player_roles[M]
+		mind_list += role_id
+		player_roles[M] = mind_list
+
+/datum/game_mode/proc/remove_player_role_association(var/datum/mind/M, var/role_id)
+	if(role_id in player_roles[M])
+		var/list/mind_list = player_roles[M]
+		mind_list.Remove(role_id)
+		player_roles[M] = mind_list
+
 
 ///pre_setup()
 ///Attempts to select players for special roles the mode might have.
 /datum/game_mode/proc/pre_setup()
+	// People who are currently assigned roles.
+	player_roles=list()
+
+	// For each available role, select some players..
+	for(var/role_id in available_roles)
+		// Instantiate our role.
+		var/antag_role/role = ticker.antag_types[role_id]
+
+		// Do scaling, if needed.
+		if(!role.calculateRoleNumbers())
+			continue
+
+		// Select players who wanted to be this role.
+		var/list/available_minds = get_players_for_role(role.be_flag)//ticker.minds.Copy()
+
+		// For up to X players (where X is between min and max players allowed in this role)
+		for(var/i=0;i<rand(role.min_players,role.max_players);i++)
+
+			// Pop a random mind off the queue
+			var/datum/mind/M
+			if(available_minds.len)
+				M=pick(available_minds)
+			if(!M && ticker.minds.len)
+				M=pick(ticker.minds)
+			if(!M)
+				break
+
+			available_minds.Remove(M)
+
+			// Check if they already have a role, or this role can be slapped on top of other roles
+			if(M in player_roles && role.flags & ROLE_ADDITIVE)
+				continue
+
+			// Do a sanity check
+			if(role.CanBeAssigned(M))
+
+				// Assign the role
+				M.assignRole(role)
+
+	// Run PreSetup hooks on all assigned roles.
+	for(var/datum/mind/M in ticker.minds)
+		if(M.antag_roles.len>0)
+			for(var/rid in M.antag_roles)
+				var/antag_role/R=M.GetRole(rid)
+				R.OnPreSetup(M)
 	return 1
 
 
 ///post_setup()
 ///Everyone should now be on the station and have their normal gear.  This is the place to give the special roles extra things
-/datum/game_mode/proc/post_setup()
+/datum/game_mode/proc/post_setup(no_intercept=0)
+	// Run ForgeGroupObjectives on all antag_role groups.
+	for(var/antag_id in ticker.antag_types)
+		var/antag_role/group = ticker.antag_types[antag_id]
+		if(group.faction) continue
+		group.faction.OnPostSetup()
+		group.faction.ForgeObjectives()
+
+	// Run PostSetup hooks on all assigned roles.
+	for(var/datum/mind/M in ticker.minds)
+		if(M.antag_roles.len>0)
+			for(var/rid in M.antag_roles)
+				var/antag_role/R=M.GetRole(rid)
+				R.antag = M
+				// Select a random partner, if needed.
+				if(R.flags & ROLE_NEED_HOST)
+					for(var/datum/mind/HM in ticker.minds)
+						if(HM.current && R.CanBeHost(HM))
+							R.host=HM
+
+				if(!R.OnPostSetup())
+					log_admin("MODE FAILURE: [name] UNABLE TO COMPLETE POST-SETUP FOR ROLE [R.name] ON [R.antag.current]!")
+					return 0
+
+
 	spawn (ROUNDSTART_LOGOUT_REPORT_TIME)
 		display_roundstart_logout_report()
 
@@ -90,6 +178,11 @@
 ///process()
 ///Called by the gameticker
 /datum/game_mode/proc/process()
+	for(var/datum/mind/M in ticker.minds)
+		if(M.antag_roles.len>0)
+			for(var/rid in M.antag_roles)
+				var/antag_role/R=M.GetRole(rid)
+				R.process()
 	return 0
 
 
@@ -99,7 +192,7 @@
 	return 0
 
 
-/datum/game_mode/proc/declare_completion()
+/datum/game_mode/proc/declare_completion(var/autodeclare=1)
 	var/clients = 0
 	var/surviving_humans = 0
 	var/surviving_total = 0
@@ -113,6 +206,12 @@
 	var/escaped_on_shuttle = 0
 
 	var/list/area/escape_locations = list(/area/shuttle/escape/centcom, /area/shuttle/escape_pod1/centcom, /area/shuttle/escape_pod2/centcom, /area/shuttle/escape_pod3/centcom, /area/shuttle/escape_pod5/centcom)
+
+	if(autodeclare)
+		for(var/role_id in available_roles)
+			var/antag_role/R=ticker.antag_types[role_id]
+			if(!R) continue
+			R.DeclareAll()
 
 	for(var/mob/M in player_list)
 		if(M.client)
@@ -236,6 +335,7 @@
 			comm.messagetext.Add(intercepttext)
 
 	command_alert(/datum/command_alert/enemy_comms_interception)
+	intercept_sent=1
 /*	for(var/mob/M in player_list)
 		if(!istype(M,/mob/new_player))
 			M << sound('sound/AI/intercept.ogg')

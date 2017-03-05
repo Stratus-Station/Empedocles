@@ -183,7 +183,7 @@ var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon"
 	if(!istype(changeling_mob))
 		return
 	changeling_mob.make_changeling()
-
+/* Automatic
 /datum/game_mode/proc/auto_declare_completion_changeling()
 	var/text = ""
 	if(changelings.len)
@@ -251,7 +251,7 @@ var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon"
 					text += "<br><span class='sinister'>The Changeling was a smooth operator this round (did not purchase any uplink items)</span>"
 		text += "<BR><HR>"
 	return text
-
+*/
 /datum/changeling //stores changeling powers, changeling recharge thingie, changeling absorbed DNA and changeling ID (for changeling hivemind)
 	var/list/absorbed_dna = list()
 	var/list/absorbed_species = list()
@@ -309,15 +309,4 @@ var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon"
 	return 0
 
 /datum/mind/proc/remove_changeling_status(var/show_message = 1)
-	if(ischangeling(current))
-		ticker.mode.changelings -= src
-		special_role = null
-		current.remove_changeling_powers()
-		current.verbs -= /datum/changeling/proc/EvolutionMenu
-		if(changeling)
-			qdel(changeling)
-			changeling = null
-		if(show_message)
-			to_chat(current, "<FONT color='red' size = 3><B>You grow weak and lose your powers! You are no longer a changeling and are stuck in your current form!</B></FONT>")
-		return 1
-	return 0
+	unassignRole("changeling")
