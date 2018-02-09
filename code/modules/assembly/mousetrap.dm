@@ -104,11 +104,8 @@
 
 
 /obj/item/device/assembly/mousetrap/hitby(A as mob|obj)
-	. = ..()
-	if(.)
-		return
 	if(!armed)
-		return
+		return ..()
 	visible_message("<span class='warning'>[src] is triggered by [A].</span>")
 	triggered(null)
 

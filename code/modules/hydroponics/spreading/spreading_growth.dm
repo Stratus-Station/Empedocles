@@ -11,19 +11,18 @@
 /obj/effect/plantsegment/proc/update_neighbors()
 	// Update our list of valid neighboring turfs.
 	neighbors = list()
-	for(var/turf/simulated/T in get_cardinal_neighbors())
-		if(spread_distance_limit && get_dist(epicenter, T) > spread_distance_limit)
+	for(var/turf/simulated/floor in get_cardinal_neighbors())
+		if(get_dist(epicenter, floor) > spread_distance)
 			continue
-		if(locate(/obj/effect/plantsegment) in T.contents)
+		if(locate(/obj/effect/plantsegment) in floor.contents)
 			continue
-		if(T.density)
-			if(!isnull(seed.chems[PHENOL]))
-				spawn(rand(5,25))
-					T.ex_act(prob(80) ? 3 : 2)
+		if(floor.density)
+			if(!isnull(seed.chems[PACID]))
+				spawn(rand(5,25)) floor.ex_act(3)
 			continue
-		if(!Adjacent(T) || !T.Enter(src))
+		if(!Adjacent(floor) || !floor.Enter(src))
 			continue
-		neighbors |= T
+		neighbors |= floor
 	// Update all of our friends.
 	var/turf/T = get_turf(src)
 	for(var/obj/effect/plantsegment/neighbor in range(1,src))
@@ -125,8 +124,6 @@
 		for(var/obj/effect/plantsegment/neighbor in check_turf.contents)
 			neighbor.neighbors |= check_turf
 			plant_controller.add_plant(neighbor)
-	spawn(1)
-		if(src)
-			qdel(src)
+	spawn(1) if(src) qdel(src) //fuck linebreaks amirite
 
 #undef NEIGHBOR_REFRESH_TIME

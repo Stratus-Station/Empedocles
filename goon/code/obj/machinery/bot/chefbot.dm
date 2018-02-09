@@ -148,7 +148,9 @@
 
 /obj/machinery/bot/chefbot/emag_act(var/mob/user, var/obj/item/card/emag/E)
 	if(!src.emagged)
-		spark(src, 1)
+		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		s.set_up(1, 1, src)
+		s.start()
 		src.emagged = 1
 		icon_state = "chefbot-anim1"
 		if(user)
@@ -214,7 +216,9 @@
 
 /obj/machinery/bot/chefbot/explode()
 	src.on = 0
-	spark(src)
+	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	s.set_up(3, 1, src)
+	s.start()
 	src.visible_message("<span class = 'warning'><B>[src] blows apart!</B></span>", 1)
 	if(src.emagged)
 		explosion(get_turf(src), -1, 0, 2)

@@ -56,7 +56,8 @@
 							"/obj/item/weapon/stock_parts/manipulator/nano/pico" = 2,
 							"/obj/item/weapon/stock_parts/micro_laser/high/ultra" = 1,
 							"/obj/item/weapon/stock_parts/subspace/crystal" = 1,
-							"/obj/item/weapon/stock_parts/console_screen" = 1)
+							"/obj/item/weapon/stock_parts/console_screen" = 1,
+							"/obj/item/stack/cable_coil" = 5)
 
 //////////////////////////////////////
 // RUST Fuel Injector board
@@ -71,7 +72,8 @@
 							"/obj/item/weapon/stock_parts/manipulator/nano/pico" = 2,
 							"/obj/item/weapon/stock_parts/scanning_module/adv/phasic" = 1,
 							"/obj/item/weapon/stock_parts/matter_bin/adv/super" = 1,
-							"/obj/item/weapon/stock_parts/console_screen" = 1)
+							"/obj/item/weapon/stock_parts/console_screen" = 1,
+							"/obj/item/stack/cable_coil" = 5)
 
 //Gyrotron controller board.
 /obj/item/weapon/circuitboard/rust_gyrotron_control

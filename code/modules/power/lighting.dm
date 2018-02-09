@@ -389,7 +389,9 @@ var/global/list/obj/machinery/light/alllights = list()
 		to_chat(user, "You stick \the [W] into the light socket!")//If not stick it in the socket.
 
 		if(has_power() && (W.is_conductor()))
-			spark(src)
+			var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+			s.set_up(3, 1, src)
+			s.start()
 			//if(!user.mutations & M_RESIST_COLD)
 			if (prob(75))
 				electrocute_mob(user, get_area(src), src, rand(0.7,1.0))
@@ -420,7 +422,7 @@ var/global/list/obj/machinery/light/alllights = list()
 		update(0)
 
 /obj/machinery/light/attack_ghost(mob/user)
-	if(!can_spook())
+	if(blessed)
 		return
 	src.add_hiddenprint(user)
 	src.flicker(1)
@@ -532,7 +534,9 @@ var/global/list/obj/machinery/light/alllights = list()
 		if(status == LIGHT_OK || status == LIGHT_BURNED)
 			playsound(get_turf(src), 'sound/effects/Glasshit.ogg', 75, 1)
 		if(on)
-			spark(src)
+			var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+			s.set_up(3, 1, src)
+			s.start()
 	status = LIGHT_BROKEN
 	update()
 

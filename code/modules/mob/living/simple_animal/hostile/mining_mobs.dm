@@ -10,7 +10,7 @@
 	max_n2 = 0
 	unsuitable_atoms_damage = 15
 	faction = "mining"
-	environment_smash_flags = SMASH_LIGHT_STRUCTURES | SMASH_CONTAINERS | SMASH_WALLS
+	environment_smash = 2
 	minbodytemp = 0
 	heat_damage_per_tick = 20
 	response_help = "pokes"
@@ -39,9 +39,6 @@
 	..()
 
 /mob/living/simple_animal/hostile/asteroid/hitby(atom/movable/AM, speed)//No floor tiling them to death, wiseguy
-	. = ..()
-	if(.)
-		return
 	if(istype(AM, /obj/item))
 		var/obj/item/T = AM
 		if(!stat)
@@ -249,7 +246,7 @@ obj/item/asteroid/basilisk_hide/New()
 	throw_message = "falls right through the strange body of the"
 	ranged_cooldown = 0
 	ranged_cooldown_cap = 0
-	environment_smash_flags = 0
+	environment_smash = 0
 	retreat_distance = 3
 	minimum_distance = 3
 	pass_flags = PASSTABLE
@@ -399,7 +396,7 @@ obj/item/asteroid/basilisk_hide/New()
 	melee_damage_upper = 2
 	attacktext = "slashes"
 	throw_message = "falls right through the strange body of the"
-	environment_smash_flags = 0
+	environment_smash = 0
 	pass_flags = PASSTABLE
 
 /mob/living/simple_animal/hostile/asteroid/hivelordbrood/New()

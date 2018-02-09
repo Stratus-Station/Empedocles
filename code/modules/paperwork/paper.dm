@@ -185,9 +185,7 @@
 	overlays.len = 0
 	updateinfolinks()
 	update_icon()
-	if(istype(loc, /obj/item/weapon/storage/bag/clipboard))
-		var/obj/C = loc
-		C.update_icon()
+
 
 /obj/item/weapon/paper/proc/parsepencode(var/mob/user,var/obj/item/i, var/t)
 	if(istype(i,/obj/item/weapon/pen))
@@ -253,49 +251,35 @@
 		var/id = href_list["write"]
 		//var/t = strip_html_simple(input(usr, "What text do you wish to add to " + (id=="end" ? "the end of the paper" : "field "+id) + "?", "[name]", null),8192) as message
 		//var/t =  strip_html_simple(input("Enter what you want to write:", "Write", null, null)  as message, MAX_MESSAGE_LEN)
-		var/new_text
+		var/t = sanitize(input("Enter what you want to write:", "Write", null, null) as message, MAX_MESSAGE_LEN)
+		var/obj/item/i = usr.get_active_hand() // Check to see if he still got that darn pen, also check if he's using a crayon or pen.
+		if(!istype(i,/obj/item/weapon/pen) && !istype(i,/obj/item/toy/crayon))
+			to_chat(usr, "<span class='warning'>Please ensure your pen is in your active hand and that you're holding the paper.</span>")
+			return
 
-		//Wrap this part in a loop to prevent text from getting lost
-		do
-			new_text = sanitize(input("Enter what you want to write:", "Write", new_text) as null|message, MAX_MESSAGE_LEN)
-			var/obj/item/i = usr.get_active_hand() // Check to see if he still got that darn pen, also check if he's using a crayon or pen.
+		if(!Adjacent(usr, 1)) //the 1 means that the paper can be in one other item and be written on
+			return
 
-			//The user either entered a non-value, or logged off
-			if(isnull(new_text) || !usr.key)
-				return
+		log += "<br />\[[time_stamp()]] [key_name(usr)] added: [t]"
 
-			//Not writing with a pen or crayon
-			if(!istype(i,/obj/item/weapon/pen) && !istype(i,/obj/item/toy/crayon))
-				to_chat(usr, "<span class='warning'>Please ensure your pen is in your active hand and that you're holding the paper.</span>")
-				continue
-
-			//Lost the paper or lost consciousness
-			if(!Adjacent(usr, 1) || usr.isUnconscious()) //the 1 means that the paper can be in one other item and be written on
-				to_chat(usr, "<span class='warning'>You are to unable to write on this paper.</span>")
-				continue
-
-		while(isnull(new_text))
-
-		log += "<br />\[[time_stamp()]] [key_name(usr)] added: [new_text]"
-
-		new_text = replacetext(new_text, "\n", "<BR>")
+		t = replacetext(t, "\n", "<BR>")
 
 		spawn()
-			new_text = parsepencode(usr, usr.get_active_hand() ,new_text)
+			t = parsepencode(usr,i,t)
 
 			//Count the fields
 			var/laststart = 1
 			while(1)
-				var/j = findtext(new_text, "<span class=\"paper_field\">", laststart)
+				var/j = findtext(t, "<span class=\"paper_field\">", laststart)
 				if(j==0)
 					break
 				laststart = j+1
 				fields++
 
 			if(id!="end")
-				addtofield(text2num(id), new_text) // He wants to edit a field, let him.
+				addtofield(text2num(id), t) // He wants to edit a field, let him.
 			else
-				info += new_text // Oh, he wants to edit to the end of the file, let him.
+				info += t // Oh, he wants to edit to the end of the file, let him.
 				updateinfolinks()
 
 			show_text(usr, links = TRUE)
@@ -344,16 +328,11 @@
 
 		to_chat(user, "<span class='notice'>You stamp [src] with your rubber stamp.</span>")
 
-		if(istype(loc, /obj/item/weapon/storage/bag/clipboard))
-			var/obj/C = loc
-			C.update_icon()
-
-	else if(istype(P, /obj/item/weapon/photo) && !istype(src, /obj/item/weapon/paper/envelope))
-		if(img)
-			to_chat(user, "<span class='notice'>This paper already has a photo attached.</span>")
-			return
-
+	else if(istype(P, /obj/item/weapon/photo))
 		if(user.drop_item(P, src))
+			if(img)
+				to_chat(user, "<span class='notice'>This paper already has a photo attached.</span>")
+				return
 			img = P
 			to_chat(user, "<span class='notice'>You attach the photo to the piece of paper.</span>")
 	else if(P.is_hot())
@@ -529,6 +508,3 @@ var/global/list/paper_folding_results = list ( \
 /obj/item/weapon/paper/outoforder
 	name = "paper- 'OUT OF ORDER'"
 	info = "<B>OUT OF ORDER</B>"
-
-/obj/item/weapon/paper/manifest
-	name = "Supply Manifest"

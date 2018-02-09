@@ -7,13 +7,14 @@
 /obj/machinery/computer/message_monitor
 	name = "Message Monitor Console"
 	desc = "Used to Monitor the crew's messages, that are sent via PDA. Can also be used to view Request Console messages."
-	icon = 'icons/obj/machines/telecomms.dmi'
-	icon_state = "message_monitor"
-	var/hack_icon = "message_monitor_hacked"
-	var/normal_icon = "message_monitor"
+	icon_state = "comm_logs"
+	var/hack_icon = "comm_logsc"
+	var/normal_icon = "comm_logs"
 	circuit = "/obj/item/weapon/circuitboard/message_monitor"
 	//Server linked to.
 	var/obj/machinery/message_server/linkedServer = null
+	//Sparks effect - For emag
+	var/datum/effect/effect/system/spark_spread/spark_system = new /datum/effect/effect/system/spark_spread
 	//Messages - Saves me time if I want to change something.
 	var/noserver = "<span class='alert'>ALERT: No server detected.</span>"
 	var/incorrectkey = "<span class='warning'>ALERT: Incorrect decryption key!</span>"
@@ -52,7 +53,8 @@
 			icon_state = hack_icon // An error screen I made in the computers.dmi
 			emagged = 1
 			screen = 2
-			spark(src, 5, FALSE)
+			spark_system.set_up(5, 0, src)
+			src.spark_system.start()
 			var/obj/item/weapon/paper/monitorkey/MK = new/obj/item/weapon/paper/monitorkey
 			MK.forceMove(src.loc)
 			// Will help make emagging the console not so easy to get away with.

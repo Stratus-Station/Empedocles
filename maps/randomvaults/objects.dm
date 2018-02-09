@@ -10,16 +10,6 @@
 	icon_state = "firingrange"
 	dynamic_lighting = 1
 
-	//Used for bizarre/odd/reference vaults, entering them causes the wild wasteland sound to play
-	var/mysterious = FALSE
-
-/area/vault/New()
-	..()
-
-	if(mysterious)
-		//Create a narrator object to play a sound to everybody who enters the area
-		narrator = new /obj/effect/narration/mystery_sound(null)
-
 /area/vault/holomapAlwaysDraw()
 	return 0
 
@@ -255,22 +245,6 @@
 
 
 /area/vault/research
-
-
-/area/vault/rattlemebones
-	jammed = 2
-
-/area/vault/zathura
-
-/area/vault/zathura/surroundings
-	dynamic_lighting = FALSE
-	mysterious = TRUE
-
-/obj/effect/narration/mystery_sound
-	play_sound = 'sound/effects/wildwasteland.ogg'
-
-
-/area/vault/beach_party
 
 
 /obj/machinery/door/poddoor/droneship
@@ -569,7 +543,7 @@
 	update_icon()
 
 /mob/living/simple_animal/hostile/retaliate/malf_drone/vault
-	environment_smash_flags = SMASH_LIGHT_STRUCTURES | SMASH_CONTAINERS
+	environment_smash = 1
 	speak_chance = 1
 
 /obj/machinery/atmospherics/unary/vent/visible

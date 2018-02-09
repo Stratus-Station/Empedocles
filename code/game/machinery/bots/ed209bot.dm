@@ -187,9 +187,9 @@ Auto Patrol: []"},
 	src.add_fingerprint(usr)
 	if(lasercolor && (istype(usr,/mob/living/carbon/human)))
 		var/mob/living/carbon/human/H = usr
-		if((lasercolor == "b") && iswearingredtag(H))//Opposing team cannot operate it
+		if((lasercolor == "b") && (istype(H.wear_suit, /obj/item/clothing/suit/redtag)))//Opposing team cannot operate it
 			return
-		else if((lasercolor == "r") && iswearingbluetag(H))
+		else if((lasercolor == "r") && (istype(H.wear_suit, /obj/item/clothing/suit/bluetag)))
 			return
 	if ((href_list["power"]) && (src.allowed(usr)))
 		if (src.on)
@@ -769,7 +769,7 @@ Auto Patrol: []"},
 
 	if(src.lasercolor == "b")//Lasertag turrets target the opposing team, how great is that? -Sieve
 		threatcount = 0//They will not, however shoot at people who have guns, because it gets really fucking annoying
-		if(iswearingredtag(perp))
+		if(istype(perp.wear_suit, /obj/item/clothing/suit/redtag))
 			threatcount += PERP_LEVEL_ARREST
 		if(perp.find_held_item_by_type(/obj/item/weapon/gun/energy/tag/red))
 			threatcount += PERP_LEVEL_ARREST
@@ -778,7 +778,7 @@ Auto Patrol: []"},
 
 	if(src.lasercolor == "r")
 		threatcount = 0
-		if(iswearingbluetag(perp))
+		if(istype(perp.wear_suit, /obj/item/clothing/suit/bluetag))
 			threatcount += PERP_LEVEL_ARREST
 		if(perp.find_held_item_by_type(/obj/item/weapon/gun/energy/tag/blue))
 			threatcount += PERP_LEVEL_ARREST
@@ -856,11 +856,13 @@ Auto Patrol: []"},
 			if(!lasercolor)
 				new /obj/item/clothing/suit/armor/vest(Tsec)
 			if(lasercolor == "b")
-				new /obj/item/clothing/suit/tag/bluetag(Tsec)
+				new /obj/item/clothing/suit/bluetag(Tsec)
 			if(lasercolor == "r")
-				new /obj/item/clothing/suit/tag/redtag(Tsec)
+				new /obj/item/clothing/suit/redtag(Tsec)
 
-	spark(src)
+	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	s.set_up(3, 1, src)
+	s.start()
 
 	var/obj/effect/decal/cleanable/blood/oil/gib = getFromPool(/obj/effect/decal/cleanable/blood/oil, src.loc)
 	gib.New(gib.loc)
@@ -973,9 +975,9 @@ Auto Patrol: []"},
 						icon_state = "ed209_legs"
 
 		if(2)
-			if( istype(W, /obj/item/clothing/suit/tag/redtag) )
+			if( istype(W, /obj/item/clothing/suit/redtag) )
 				lasercolor = "r"
-			else if( istype(W, /obj/item/clothing/suit/tag/bluetag) )
+			else if( istype(W, /obj/item/clothing/suit/bluetag) )
 				lasercolor = "b"
 			if( lasercolor || istype(W, /obj/item/clothing/suit/armor/vest) )
 				if(user.drop_item(W))

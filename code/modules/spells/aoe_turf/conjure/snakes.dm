@@ -30,9 +30,7 @@
 		user = holder
 	if(wizard_snakes)
 		for(var/mob/M in wizard_snakes)
-			if(wizard_snakes[M] == user)
-				wizard_snakes[M] = null
-				wizard_snakes -= M
+			if(wizard_snakes[M] == holder)
 				qdel(M)
 
 /spell/aoe_turf/conjure/snakes/choose_targets(mob/user = usr)

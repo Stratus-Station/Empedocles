@@ -98,10 +98,14 @@
 	if(!can_move)
 		return 0
 	if(zoom)
-		occupant_message("Unable to move while in zoom mode.", TRUE)
+		if(world.time - last_message > 20)
+			src.occupant_message("Unable to move while in zoom mode.")
+			last_message = world.time
 		return 0
 	if(connected_port)
-		occupant_message("Unable to move while connected to the air system port", TRUE)
+		if(world.time - last_message > 20)
+			src.occupant_message("Unable to move while connected to the air system port")
+			last_message = world.time
 		return 0
 	if(!thrusters && src.pr_inertial_movement.active())
 		return 0

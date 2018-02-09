@@ -323,7 +323,7 @@
 
 
 
-/obj/machinery/power/am_control_unit/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open=NANOUI_FOCUS)
+/obj/machinery/power/am_control_unit/ui_interact(mob/user, ui_key = "main")
 	if(!user)
 		return
 
@@ -347,7 +347,7 @@
 		"siliconUser" = istype(user, /mob/living/silicon),
 	)
 
-	ui = nanomanager.get_open_ui(user, src, ui_key, ui, data, force_open)
+	var/datum/nanoui/ui = nanomanager.get_open_ui(user, src, ui_key)
 	if (!ui)
 		// the ui does not exist, so we'll create a new one
 		ui = new(user, src, ui_key, "ame.tmpl", "Antimatter Control Unit", 500, data["siliconUser"] ? 465 : 390)
@@ -356,6 +356,10 @@
 		ui.open()
 		// Auto update every Master Controller tick
 		ui.set_auto_update(1)
+	else
+		// The UI is already open so push the new data to it
+		ui.push_data(data)
+		return
 
 
 /obj/machinery/power/am_control_unit/Topic(href, href_list)

@@ -8,15 +8,15 @@ Doesn't work on other aliens/AI.*/
 /mob/living/carbon/alien/proc/powerc(X, Y)//Y is optional, checks for weed planting. X can be null.
 	if(stat)
 		to_chat(src, "<span class='alien'>You must be conscious to do this.</span>")
-		return FALSE
+		return 0
 	else if(X && getPlasma() < X)
 		to_chat(src, "<span class='alien'>Not enough plasma stored.</span>")
-		return FALSE
+		return 0
 	else if(Y && (!isturf(src.loc) || istype(src.loc, /turf/space)))
 		to_chat(src, "<span class='alien'>Bad place for a garden!</span>")
-		return FALSE
+		return 0
 	else
-		return TRUE
+		return 1
 
 /spell/aoe_turf/conjure/alienweeds
 	name = "Plant Weeds"
@@ -64,23 +64,23 @@ Doesn't work on other aliens/AI.*/
 	spell_flags = WAIT_FOR_CLICK
 	var/storedmessage
 
-/spell/targeted/alienwhisper/channel_spell(mob/user = usr, skipcharge = FALSE, force_remove = FALSE)
+/spell/targeted/alienwhisper/channel_spell(mob/user = usr, skipcharge = 0, force_remove = 0)
 	if(!..()) //We only make it to this point if we succeeded in channeling or are removing channeling
-		return FALSE
+		return 0
 	if(user.spell_channeling && !force_remove)
 		storedmessage = sanitize(input("Message:", "Alien Whisper") as text|null)
 		if(!storedmessage) //They refused to supply a spell channeling
 			channel_spell(force_remove = 1)
-			return FALSE
+			return 0
 	else
 		storedmessage = null
-	return TRUE
+	return 1
 
 /spell/targeted/alienwhisper/is_valid_target(var/target)
 	if(!(spell_flags & INCLUDEUSER) && target == usr)
-		return FALSE
+		return 0
 	if(get_dist(usr, target) > range) //Shouldn't be necessary but a good check in case of overrides
-		return FALSE
+		return 0
 	return istype(target, /mob)
 
 /spell/targeted/alienwhisper/cast(var/list/targets, mob/user)
@@ -88,7 +88,7 @@ Doesn't work on other aliens/AI.*/
 	if(!storedmessage) //Compatibility if someone reverts this to SELECTABLE from WAIT_FOR_CLICK
 		storedmessage = sanitize(input("Message:", "Alien Whisper") as text|null)
 		if(!storedmessage)
-			return TRUE
+			return 1
 	if(storedmessage)
 		var/turf/T = get_turf(user)
 		log_say("[key_name(user)] (@[T.x],[T.y],[T.z]) Alien Whisper: [storedmessage]")
@@ -146,12 +146,12 @@ Doesn't work on other aliens/AI.*/
 
 /spell/targeted/projectile/alienneurotoxin/is_valid_target(var/target, mob/user)
 	if(!(spell_flags & INCLUDEUSER) && target == usr)
-		return FALSE
+		return 0
 	if(get_dist(usr, target) > range)
-		return FALSE
+		return 0
 	if(isalien(target))
 		to_chat(user, "<span class='alien'>Your allies are not valid targets.</span>")
-		return FALSE
+		return 0
 	return !istype(target,/area)
 
 /spell/targeted/projectile/alienneurotoxin/cast(list/targets, mob/user)
@@ -209,11 +209,11 @@ Doesn't work on other aliens/AI.*/
 
 /spell/alienacid/is_valid_target(var/atom/target, mob/user)
 	if(get_dist(user, target) > range) //Shouldn't be necessary but a good check in case of overrides
-		return FALSE
+		return 0
 	if(!ismob(target) && target.acidable())
-		return TRUE
+		return 1
 	to_chat(user, "<span class='alien'>You cannot dissolve this object.</span>")
-	return FALSE
+	return 0
 
 /spell/alienacid/cast(list/targets, mob/user)
 	acidify(targets[1], user)
@@ -230,7 +230,7 @@ Doesn't work on other aliens/AI.*/
 		if(O in oview(1))
 			if(!O.acidable())
 				to_chat(usr, "<span class='alien'>You cannot dissolve this object.</span>")
-				return FALSE
+				return
 			AdjustPlasma(-200)
 			acidify(O, usr)
 		else
@@ -250,9 +250,9 @@ Doesn't work on other aliens/AI.*/
 	hud_state = "alien_regurgitate"
 	override_base = "alien"
 
-/spell/aoe_turf/alienregurgitate/cast_check(skipcharge = FALSE, mob/user)
+/spell/aoe_turf/alienregurgitate/cast_check(skipcharge = 0, mob/user)
 	if(!istype(user, /mob/living/carbon/alien/humanoid)) //why do they have this shit anyway
-		return FALSE
+		return 0
 	return ..()
 
 /spell/aoe_turf/alienregurgitate/cast(list/targets, mob/user)
@@ -307,14 +307,11 @@ a
 	holder_var_type = "plasma"
 	holder_var_amount = 500
 
-/spell/aoe_turf/evolve/drone/cast_check(skipcharge = FALSE, mob/living/carbon/alien/user)
-	if(user.handcuffed || user.locked_to)
-		to_chat(user, "<span class='danger'>You cannot evolve while you're restrained!</span>")
-		return FALSE
+/spell/aoe_turf/evolve/drone/cast_check(skipcharge = 0, mob/user)
 	var/mob/living/carbon/alien/humanoid/queen/Q = locate(/mob/living/carbon/alien/humanoid/queen) in living_mob_list
 	if(Q && Q.key)
 		to_chat(user, "<span class='notice'>We already have an alive queen.</span>")
-		return FALSE
+		return 0
 	return ..()
 
 /spell/aoe_turf/evolve/drone/spell_do_after(var/mob/user as mob, delay as num, var/numticks = 5)
@@ -344,13 +341,7 @@ a
 
 	var/spawning
 
-/spell/aoe_turf/evolve/larva/cast_check(skipcharge = FALSE, mob/living/carbon/alien/user)
-	if(user.handcuffed || user.locked_to)
-		to_chat(user, "<span class='danger'>You cannot evolve while you're restrained!</span>")
-		return FALSE
-	return ..()
-
-/spell/aoe_turf/evolve/larva/spell_do_after(mob/living/carbon/alien/user)
+/spell/aoe_turf/evolve/larva/spell_do_after(mob/user)
 	var/explanation_message = {"<span class='notice'><B>You are growing into a beautiful alien! It is time to choose a caste.</B><br>
 	There are three castes to choose from:<br>
 	<B>Hunters</B> are strong and agile, able to hunt away from the hive and rapidly move through ventilation shafts. Hunters generate plasma slowly and have low reserves.<br>
@@ -362,7 +353,7 @@ a
 		to_chat(user, explanation_message)
 		spawning = input(user, "Please choose which alien caste you shall evolve to.", "Evolving Choice Menu", null) as null|anything in list("Hunter","Sentinel","Drone","Repeat Explanation")
 	if(spawning == null)
-		return FALSE
+		return 0
 	switch(spawning)
 		if("Hunter")
 			spawning = /mob/living/carbon/alien/humanoid/hunter
@@ -394,10 +385,10 @@ a
 /spell/aoe_turf/alien_hide/cast(list/targets, mob/user)
 	if(user.plane != HIDING_MOB_PLANE)
 		user.plane = HIDING_MOB_PLANE
-		user.visible_message("<span class='danger'>\The [user.name] scurries to the ground !</span>", "<span class='alien'>You are now hiding.</span>")
+		user.visible_message("<span class='danger'>[src] scurries to the ground !</span>", "<span class='alien'>You are now hiding.</span>")
 	else
 		user.plane = MOB_PLANE
-		user.visible_message("<span class='warning'>\The [user.name] slowly peeks up from the ground...</span>", "<span class='alien'>You have stopped hiding.</span>")
+		user.visible_message("<span class='warning'>[src] slowly peeks up from the ground...</span>", "<span class='alien'>You have stopped hiding.</span>")
 
 /////////////////////////////////////////////
 

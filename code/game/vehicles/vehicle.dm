@@ -25,6 +25,7 @@
 	var/maint_access = 1
 	//var/dna	//dna-locking the mech
 	var/list/proc_res = list() //stores proc owners, like proc_res["functionname"] = owner reference
+	var/datum/effect/effect/system/spark_spread/spark_system = new
 	var/lights = 0
 	var/lights_power = 6
 
@@ -69,6 +70,8 @@
 	add_radio()
 	//add_cabin() //No cabin for non-airtights
 
+	spark_system.set_up(2, 0, src)
+	spark_system.attach(src)
 	add_cell()
 	add_iterators()
 	removeVerb(/obj/mecha/verb/disconnect_from_port)
@@ -185,7 +188,7 @@
 					leaked_gas = null
 		if(mecha.hasInternalDamage(MECHA_INT_SHORT_CIRCUIT))
 			if(mecha.get_charge())
-				spark(src, 2, FALSE)
+				mecha.spark_system.start()
 				mecha.cell.charge -= min(20,mecha.cell.charge)
 				mecha.cell.maxcharge -= min(20,mecha.cell.maxcharge)
 		return

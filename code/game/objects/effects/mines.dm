@@ -26,7 +26,9 @@
 	name = "Radiation Mine"
 
 /obj/effect/mine/dnascramble/trigger(mob/living/carbon/AM)
-	spark(src)
+	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	s.set_up(3, 1, src)
+	s.start()
 	AM.apply_radiation(50, RAD_INTERNAL)
 	randmutb(AM)
 	domutcheck(AM,null)
@@ -48,7 +50,9 @@
 	name = "Kick Mine"
 
 /obj/effect/mine/kick/trigger(mob/AM)
-	spark(src)
+	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	s.set_up(3, 1, src)
+	s.start()
 	del(AM.client)
 	qdel(src)
 
@@ -78,5 +82,7 @@
 /obj/effect/mine/stun/trigger(mob/AM)
 	if(ismob(AM))
 		AM.Stun(30)
-	spark(src)
+	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	s.set_up(3, 1, src)
+	s.start()
 	qdel(src)

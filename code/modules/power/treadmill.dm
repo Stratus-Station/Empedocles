@@ -86,9 +86,13 @@
 /obj/machinery/power/treadmill/Uncross(var/atom/movable/mover, var/turf/target)
 	if(istype(mover) && mover.checkpass(PASSGLASS))
 		return 1
-	if((flags & ON_BORDER) && (mover.dir == dir))
-		powerwalk(mover)
-		return !density
+	if(flags & ON_BORDER)
+		if(target) //Are we doing a manual check to see
+			if(get_dir(loc, target) == dir)
+				return !density
+		else if(mover.dir == dir) //Or are we using move code
+			powerwalk(mover)
+			return !density
 	return 1
 
 /obj/machinery/power/treadmill/Cross(atom/movable/mover, turf/target, height=1.5, air_group = 0)
@@ -101,10 +105,8 @@
 	else
 		return 1
 
-/obj/machinery/power/treadmill/wrenchAnchor(var/mob/user)
-	. = ..()
-	if(!.)
-		return
+/obj/machinery/power/treadmill/wrenchAnchor(mob/user)
+	..()
 	if(anchored)
 		connect_to_network()
 	else

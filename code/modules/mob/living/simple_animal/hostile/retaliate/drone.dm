@@ -22,7 +22,7 @@
 	speed = 9
 	projectiletype = /obj/item/projectile/beam/drone
 	projectilesound = 'sound/weapons/laser3.ogg'
-	environment_smash_flags = SMASH_LIGHT_STRUCTURES | SMASH_CONTAINERS | SMASH_WALLS
+	environment_smash = 2
 	minimum_distance = 3
 	retreat_distance = 2
 	can_butcher = 0
@@ -94,12 +94,16 @@
 	//repair a bit of damage
 	if(health != maxHealth && prob(3))
 		src.visible_message("<span class='warning'>  [bicon(src)] [src] shudders and shakes as some of it's damaged systems come back online.</span>")
-		spark(src)
+		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		s.set_up(3, 1, src)
+		s.start()
 		health += rand(25,100)
 
 	//spark for no reason
 	if(prob(5))
-		spark(src)
+		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		s.set_up(3, 1, src)
+		s.start()
 
 	//sometimes our targetting sensors malfunction, and we attack anyone nearby
 	if(prob(disabled ? 0 : 1) && hostile == 0)
@@ -142,7 +146,9 @@
 			src.visible_message("<span class='warning'> [bicon(src)] [src] begins to spark and shake violenty!</span>")
 		else
 			src.visible_message("<span class='warning'> [bicon(src)] [src] sparks and shakes like it's about to explode!</span>")
-		spark(src)
+		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		s.set_up(3, 1, src)
+		s.start()
 
 	if(!exploding && !disabled && prob(explode_chance))
 		exploding = 1
@@ -177,7 +183,9 @@
 		from_event.drones_list -= src
 		from_event = null
 	if(has_loot)
-		spark(src)
+		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		s.set_up(3, 1, src)
+		s.start()
 		var/obj/O
 
 		//shards

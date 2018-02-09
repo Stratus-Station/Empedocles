@@ -222,9 +222,8 @@ var/MAX_EXPLOSION_RANGE = 14
 #define PASSBLOB	16
 #define PASSMACHINE	32 //computers, vending machines, rnd machines
 #define PASSDOOR	64 //not just airlocks, but also firelocks, windoors etc
-#define PASSGIRDER	128 //not just airlocks, but also firelocks, windoors etc
 
-#define PASSALL 191 //really ugly, shouldn't this be PASSTABLE|PASSGLASS|PASSGRILLE etc?
+#define PASSALL 127
 
 
 /*
@@ -369,7 +368,6 @@ var/global/list/BODY_COVER_VALUE_LIST=list("[HEAD]" = COVER_PROTECTION_HEAD,"[EY
 #define DISABILITY_FLAG_DEAF        8
 #define DISABILITY_FLAG_BLIND       16
 #define DISABILITY_FLAG_MUTE		32
-#define DISABILITY_FLAG_VEGAN		64
 
 ///////////////////////////////////////
 // MUTATIONS
@@ -441,7 +439,6 @@ var/global/list/BODY_COVER_VALUE_LIST=list("[HEAD]" = COVER_PROTECTION_HEAD,"[EY
 #define M_SANS		211		// IF YOU SEE THIS WHILST BROWSING CODE, YOU HAVE BEEN VISITED BY: THE FONT OF SHITPOSTING. GREAT LUCK AND WEALTH WILL COME TO YOU, BUT ONLY IF YOU SAY 'fuck comic sans' IN YOUR PR.
 #define M_FARSIGHT	212		// Increases mob's view range by 2
 #define M_NOIR		213		// aww yis detective noir
-#define M_VEGAN		214
 
 var/global/list/NOIRMATRIX = list(0.33,0.33,0.33,0,\
 				 				  0.33,0.33,0.33,0,\
@@ -896,10 +893,10 @@ SEE_PIXELS	256
 #define GETPULSE_TOOL	1	//more accurate (med scanner, sleeper, etc)
 
 var/list/RESTRICTED_CAMERA_NETWORKS = list( //Those networks can only be accessed by preexisting terminals. AIs and new terminals can't use them.
-	CAMERANET_THUNDER,
-	CAMERANET_ERT,
-	CAMERANET_NUKE,
-	CAMERANET_CREED
+	"thunder",
+	"ERT",
+	"NUKE",
+	"CREED"
 	)
 
 //Generic species flags.
@@ -1280,7 +1277,6 @@ var/default_colour_matrix = list(1,0,0,0,\
 #define LANGUAGE_MOUSE "Mouse"
 #define LANGUAGE_GOLEM "Golem"
 #define LANGUAGE_SLIME "Slime"
-#define LANGUAGE_MARTIAN "Martian"
 
 //#define SAY_DEBUG 1
 #ifdef SAY_DEBUG
@@ -1548,6 +1544,3 @@ var/proccalls = 1
 #define NO_ANIMATION 0
 #define ITEM_ANIMATION 1
 #define PERSON_ANIMATION 2
-
-
-#define GOLEM_RESPAWN_TIME 10 MINUTES	//how much time must pass before someone who dies as an adamantine golem can use the golem rune again

@@ -92,8 +92,6 @@
 	autoignition_temperature=AUTOIGNITION_WOOD
 	sheettype = "wood"
 	w_type = RECYK_WOOD
-	siemens_coefficient = 0 //no conduct
-
 
 /obj/item/stack/sheet/wood/afterattack(atom/Target, mob/user, adjacent, params)
 	..()

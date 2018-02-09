@@ -91,12 +91,11 @@ var/global/list/obj/machinery/mirror/mirror_list = list()
 
 /obj/machinery/mirror/wrenchAnchor(var/mob/user)
 	. = ..()
-	if(!.)
-		return
-
-	if(beams && beams.len)
-		kill_all_beams()
-	update_beams()
+	if(. == 1)
+		if(beams && beams.len)
+			kill_all_beams()
+		update_beams()
+	return .
 
 /obj/machinery/mirror/beam_connect(var/obj/effect/beam/emitter/B)
 	if(istype(B))

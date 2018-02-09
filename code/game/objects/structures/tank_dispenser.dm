@@ -49,7 +49,9 @@
 
 
 /obj/structure/dispenser/attack_robot(mob/user as mob)
-	return attack_hand(user)
+	if(isMoMMI(user))
+		return attack_hand(user)
+	return ..()
 
 /obj/structure/dispenser/attack_hand(mob/user as mob)
 	user.set_machine(src)

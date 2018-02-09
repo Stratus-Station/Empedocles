@@ -9,10 +9,6 @@
 	origin_tech = Tc_MAGNETS + "=2"
 	mech_flags = null // So it can be scanned by the Device Analyser
 	clumsy_check = 0
-	advanced_tool_user_check = 0
-	nymph_check = 0
-	hulk_check = 0
-	golem_check = 0
 	var/charge_tick = 0
 	var/score = 0
 
@@ -20,7 +16,7 @@
 	fire_sound = 'sound/weapons/Laser.ogg'
 	var/laser_projectile = /obj/item/projectile/beam/lasertag/blue
 	var/taser_projectile = /obj/item/projectile/beam/lasertag/omni
-	var/needed_vest = /obj/item/clothing/suit/tag/bluetag
+	var/needed_vest = /obj/item/clothing/suit/bluetag
 
 /obj/item/weapon/gun/energy/tag/isHandgun()
 	return TRUE
@@ -50,13 +46,13 @@
 	icon_state = "bluetag"
 	laser_projectile = /obj/item/projectile/beam/lasertag/blue
 	taser_projectile = /obj/item/projectile/energy/tag/blue
-	needed_vest = /obj/item/clothing/suit/tag/bluetag
+	needed_vest = /obj/item/clothing/suit/bluetag
 
 /obj/item/weapon/gun/energy/tag/red
 	icon_state = "redtag"
 	laser_projectile = /obj/item/projectile/beam/lasertag/red
 	taser_projectile = /obj/item/projectile/energy/tag/red
-	needed_vest = /obj/item/clothing/suit/tag/redtag
+	needed_vest = /obj/item/clothing/suit/redtag
 
 /obj/item/weapon/gun/energy/tag/proc/makeLaser(var/mob/user)
 	projectile_type = laser_projectile
@@ -76,10 +72,11 @@
     else
         makeTaser(user)
 
-/obj/item/weapon/gun/energy/tag/special_check(var/mob/living/M)
-	if(istype(get_tag_armor(M), needed_vest))
-		return 1
-	to_chat(M, "<span class='warning'>You need to be wearing your laser tag vest!</span>")
+/obj/item/weapon/gun/energy/tag/special_check(var/mob/living/carbon/human/M)
+	if(ishuman(M))
+		if(istype(M.wear_suit, needed_vest))
+			return 1
+		to_chat(M, "<span class='warning'>You need to be wearing your laser tag vest!</span>")
 	return 0
 
 /obj/item/weapon/gun/energy/tag/New()

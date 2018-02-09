@@ -255,5 +255,4 @@
 /*
 /obj/item/device/flash/revsquad
 	limited_conversions = REVSQUAD_FLASH_USES
-	mech_flags = MECH_SCAN_FAIL
 */

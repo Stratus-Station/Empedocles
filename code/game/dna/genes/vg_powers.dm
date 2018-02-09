@@ -141,11 +141,9 @@ var/noir_master = list(new /obj/abstract/screen/plane_master/noir_master(),new /
 /datum/dna/gene/basic/noir/activate(var/mob/M)
 	..()
 	M.update_colour()
-	if(M.client) // wow it's almost like non-client mobs can get mutations!
-		M.client.screen += noir_master
+	M.client.screen += noir_master
 
 /datum/dna/gene/basic/noir/deactivate(var/mob/M,var/connected,var/flags)
 	if(..())
 		M.update_colour()
-		if(M.client)
-			M.client.screen -= noir_master
+		M.client.screen -= noir_master

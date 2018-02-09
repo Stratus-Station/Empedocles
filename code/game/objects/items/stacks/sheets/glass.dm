@@ -4,7 +4,6 @@
  *		Reinforced glass sheets
  *		Plasma Glass Sheets
  *		Reinforced Plasma Glass Sheets (AKA Holy fuck strong windows)
- *		Smart Glass Sheets
  */
 
 /obj/item/stack/sheet/glass

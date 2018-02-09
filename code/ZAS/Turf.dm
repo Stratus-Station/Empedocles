@@ -248,6 +248,8 @@
 			SSair.mark_zone_update(zone)
 			return zone.air
 		else
+			if(!air)
+				make_air()
 			c_copy_air()
 			return air
 	else
@@ -259,12 +261,14 @@
 	air = new/datum/gas_mixture
 	air.temperature = temperature
 	air.adjust(oxygen, carbon_dioxide, nitrogen, toxins)
+	air.group_multiplier = 1
 	air.volume = CELL_VOLUME
 
 /turf/simulated/proc/c_copy_air()
 	if(!air)
 		air = new/datum/gas_mixture
 	air.copy_from(zone.air)
+	air.group_multiplier = 1
 
 
 /turf/attack_hand(mob/user as mob)

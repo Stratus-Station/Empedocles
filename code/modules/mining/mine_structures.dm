@@ -32,7 +32,7 @@
 	if(start_with_lantern)
 		lantern = new /obj/item/device/flashlight/lantern/on(src)
 
-	update()
+	update_brightness()
 
 /obj/structure/hanging_lantern/attack_hand(mob/user)
 
@@ -44,7 +44,8 @@
 		lantern.add_fingerprint(user)
 		user.put_in_hands(lantern)
 		lantern = null
-		update()
+		update_brightness()
+		update_icon()
 
 /obj/structure/hanging_lantern/examine(mob/user)
 	..()
@@ -84,7 +85,8 @@
 			"<span class='notice'>You put \a [W.name] on the \the [src].</span>")
 			playsound(get_turf(src), 'sound/machines/click.ogg', 20, 1)
 			lantern = W
-			update()
+			update_brightness()
+			update_icon()
 			return 1
 
 /obj/structure/hanging_lantern/update_icon()
@@ -103,17 +105,16 @@
 	spawn()
 		for(var/i = 0; i < amount; i++)
 			if(!lantern)
+				update_brightness()
 				break
-			toggle_lantern()
+			set_light(0)
 			sleep(rand(5, 15))
-		toggle_lantern()
+			update_brightness()
+
 		flickering = 0
 
-/obj/structure/hanging_lantern/proc/update()
-	update_icon()
-	update_brightness()
-
 /obj/structure/hanging_lantern/proc/update_brightness()
+
 	if(lantern)
 		light_range = lantern.light_range
 		light_power = lantern.light_power
@@ -125,13 +126,7 @@
 
 	set_light(light_range, light_power, light_color)
 
-/obj/structure/hanging_lantern/proc/toggle_lantern()
-	if(lantern)
-		lantern.on = !lantern.on
-		lantern.update_brightness()
-	update()
-
-/obj/structure/hanging_lantern/verb/toggle_lantern_verb()
+/obj/structure/hanging_lantern/verb/toggle_lantern()
 	set name = "Toggle Mounted Lantern"
 	set desc = "Toggle the lantern mounted on a nearby lantern hook."
 	set category = "Object"
@@ -145,20 +140,14 @@
 		to_chat(usr, "<span class='warning>You don't have the dexterity to do this!</span>")
 		return 0
 
-	toggle_lantern()
+	lantern.on = !lantern.on
+	lantern.update_brightness()
 	usr.visible_message("<span class='notice'>[usr] toggles \the [lantern] hanging on \the [src] [lantern.on ? "on":"off"].</span>", \
 						"<span class='notice'>You toggle \the [lantern] hanging on \the [src] [lantern.on ? "on":"off"].</span>")
 
 /obj/structure/hanging_lantern/spook(mob/dead/observer/ghost)
 	if(..(ghost, TRUE))
 		flicker()
-
-/obj/structure/hanging_lantern/attack_ghost(var/mob/user)
-	if(!can_spook())
-		return
-	add_hiddenprint(user)
-	flicker(1)
-	investigation_log(I_GHOST, "|| was made to flicker by [key_name(user)][user.locked_to ? ", who was haunting [user.locked_to]" : ""]")
 
 /obj/structure/hanging_lantern/Destroy()
 

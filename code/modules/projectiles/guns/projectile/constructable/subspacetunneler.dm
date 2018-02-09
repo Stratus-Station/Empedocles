@@ -202,16 +202,15 @@
 			receive(target,user)
 			return
 
-/obj/item/weapon/subspacetunneler/remote_attack(atom/target, mob/user, atom/movable/eye)
-	return afterattack(target, user) //Allow using the tunneler through cameras and remote view
-
 /obj/item/weapon/subspacetunneler/proc/send(turf/T as turf, mob/living/user as mob|obj)
 	if(!T)
 		T = get_random_nearby_turf()
 	if(!T)
 		return
 	if(stored_items.len)
-		spark(src)
+		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		s.set_up(3, 1, src)
+		s.start()
 		var/choose = (stored_items.len > 1 ? rand(1,stored_items.len) : 1)
 		var/obj/O = stored_items[choose]
 		O.forceMove(T)
@@ -243,7 +242,9 @@
 	var/list/mobcheck = search_contents_for(/mob/living)
 	for(var/mob/living/M in mobcheck)
 		if(M == captive)
-			spark(src)
+			var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+			s.set_up(3, 1, src)
+			s.start()
 			captive.forceMove(T)
 			src.visible_message("<span class='warning'>\The [captive] breaks free from the storage bin of \the [src]!</span>")
 			playsound(captive, 'sound/effects/phasein.ogg', 50, 1)
@@ -326,7 +327,9 @@
 	update_icon()
 
 /obj/item/weapon/subspacetunneler/proc/consume_crystal(mob/user)
-	spark(src)
+	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	s.set_up(3, 1, src)
+	s.start()
 	var/obj/item/bluespace_crystal/B = loaded_crystal
 	if(istype(B, /obj/item/bluespace_crystal/artificial))
 		qdel(B)

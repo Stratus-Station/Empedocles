@@ -115,9 +115,6 @@
 	var/doFlushIn=0
 	var/num_contents=0
 
-/obj/machinery/disposal/deliveryChute/no_deconstruct
-	deconstructable = FALSE
-
 /obj/machinery/disposal/deliveryChute/New()
 	..()
 	processing_objects.Remove(src)
@@ -133,9 +130,6 @@
 	return
 
 /obj/machinery/disposal/deliveryChute/Bumped(var/atom/movable/AM) //Go straight into the chute
-	if(AM.anchored)
-		return
-
 	if(istype(AM, /obj/item/projectile) || istype(AM, /obj/item/weapon/dummy))
 		return
 

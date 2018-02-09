@@ -354,10 +354,8 @@ obj/item/weapon/banhammer/admin
 /obj/item/weapon/macuahuitl/Destroy()
 	if(blades.len)
 		for(var/i in blades)
-			var/blade = blades[i]
 			blades.Remove(i)
-			qdel(blade)
-			blade = null
+			qdel(i)
 	..()
 
 /obj/item/weapon/macuahuitl/proc/get_current_blade_count()

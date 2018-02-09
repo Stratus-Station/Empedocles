@@ -98,5 +98,3 @@
 
 	smoke.start()
 	src.uses -= 1
-
-	log_game("[key_name(user)] teleported to [thearea.name] using a scroll.")

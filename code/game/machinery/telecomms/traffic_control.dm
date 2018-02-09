@@ -1,7 +1,6 @@
 /obj/machinery/computer/telecomms/traffic
-	name = "telecommunications traffic control console"
-	icon = 'icons/obj/machines/telecomms.dmi'
-	icon_state = "traffic_control"
+	name = "Telecommunications Traffic Control"
+	icon_state = "computer_generic"
 	circuit = "/obj/item/weapon/circuitboard/comm_traffic"
 
 	var/screen = 0				// the screen number:
@@ -19,7 +18,7 @@
 	var/list/access_log = list()
 	var/process = 0
 
-	light_color = LIGHT_COLOR_ORANGE
+	light_color = LIGHT_COLOR_GREEN
 
 	req_access = list(access_tcomsat)
 

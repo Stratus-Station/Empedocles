@@ -249,8 +249,6 @@
 					newslime = primarytype
 				else
 					newslime = slime_mutation[rand(1,4)]
-				if(i == 4)
-					newslime = slime_mutation[rand(1,4)]
 
 				var/mob/living/carbon/slime/M = new newslime(loc)
 				M.nutrition = new_nutrition

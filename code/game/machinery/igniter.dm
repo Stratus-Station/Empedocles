@@ -134,11 +134,11 @@ var/global/list/igniters = list()
 
 /obj/machinery/sparker/attack_ai()
 	if (src.anchored)
-		return do_spark()
+		return src.spark()
 	else
 		return
 
-/obj/machinery/sparker/proc/do_spark()
+/obj/machinery/sparker/proc/spark()
 	if (!(powered()))
 		return
 
@@ -147,7 +147,9 @@ var/global/list/igniters = list()
 
 
 	flick("[base_state]-spark", src)
-	spark(src, 2)
+	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	s.set_up(2, 1, src)
+	s.start()
 	src.last_spark = world.time
 	use_power(1000)
 	var/turf/location = src.loc
@@ -159,7 +161,7 @@ var/global/list/igniters = list()
 	if(stat & (BROKEN|NOPOWER))
 		..(severity)
 		return
-	do_spark()
+	spark()
 	..(severity)
 
 /obj/machinery/ignition_switch/attack_ai(mob/user as mob)
@@ -187,7 +189,7 @@ var/global/list/igniters = list()
 	for(var/obj/machinery/sparker/M in igniters)
 		if (M.id_tag == src.id_tag)
 			spawn( 0 )
-				M.do_spark()
+				M.spark()
 
 	for(var/obj/machinery/igniter/M in igniters)
 		if(M.id_tag == src.id_tag)

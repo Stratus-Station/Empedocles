@@ -1,1 +1,0 @@
-#define RUST_GYROTRON_RANGE 25

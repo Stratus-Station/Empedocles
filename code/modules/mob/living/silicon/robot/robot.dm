@@ -69,6 +69,7 @@
 	var/lower_mod = 0
 	var/jetpack = 0
 	var/datum/effect/effect/system/ion_trail_follow/ion_trail = null
+	var/datum/effect/effect/system/spark_spread/spark_system//So they can initialize sparks whenever/N
 	var/jeton = 0
 
 	var/killswitch = 0
@@ -85,6 +86,10 @@
 
 
 /mob/living/silicon/robot/New(loc,var/syndie = 0,var/unfinished = 0,var/startup_sound='sound/voice/liveagain.ogg')
+	spark_system = new /datum/effect/effect/system/spark_spread()
+	spark_system.set_up(5, 0, src)
+	spark_system.attach(src)
+
 	if(isMoMMI(src))
 		wires = new /datum/wires/robot/mommi(src)
 	else
@@ -123,7 +128,7 @@
 	if(!scrambledcodes && !camera)
 		camera = new /obj/machinery/camera(src)
 		camera.c_tag = real_name
-		camera.network = list(CAMERANET_SS13,CAMERANET_ROBOTS)
+		camera.network = list("SS13","Robots")
 		if(wires.IsCameraCut()) // 5 = BORG CAMERA
 			camera.status = 0
 
@@ -291,8 +296,8 @@
 		if("Supply")
 			module = new /obj/item/weapon/robot_module/miner(src)
 			radio.insert_key(new/obj/item/device/encryptionkey/headset_cargo(radio))
-			if(camera && CAMERANET_ROBOTS in camera.network)
-				camera.network.Add(CAMERANET_MINE)
+			if(camera && "Robots" in camera.network)
+				camera.network.Add("MINE")
 			module_sprites["Basic"] = "Miner_old"
 			module_sprites["Advanced Droid"] = "droid-miner"
 			module_sprites["Treadhead"] = "Miner"
@@ -308,8 +313,8 @@
 		if("Medical")
 			module = new /obj/item/weapon/robot_module/medical(src)
 			radio.insert_key(new/obj/item/device/encryptionkey/headset_med(radio))
-			if(camera && CAMERANET_ROBOTS in camera.network)
-				camera.network.Add(CAMERANET_MEDBAY)
+			if(camera && "Robots" in camera.network)
+				camera.network.Add("Medical")
 			module_sprites["Basic"] = "Medbot"
 			module_sprites["Advanced Droid"] = "droid-medical"
 			module_sprites["Needles"] = "medicalrobot"
@@ -348,8 +353,8 @@
 		if("Engineering")
 			module = new /obj/item/weapon/robot_module/engineering(src)
 			radio.insert_key(new/obj/item/device/encryptionkey/headset_eng(radio))
-			if(camera && CAMERANET_ROBOTS in camera.network)
-				camera.network.Add(CAMERANET_ENGI)
+			if(camera && "Robots" in camera.network)
+				camera.network.Add("Engineering")
 			module_sprites["Basic"] = "Engineering"
 			module_sprites["Antique"] = "engineerrobot"
 			module_sprites["Engiseer"] = "Engiseer"
@@ -711,7 +716,7 @@
 	..(Proj)
 	updatehealth()
 	if(prob(75) && Proj.damage > 0)
-		spark(src, 5, FALSE)
+		spark_system.start()
 	return 2
 
 
@@ -1025,7 +1030,7 @@
 		return 0
 
 	else
-		spark(src, 5, FALSE)
+		spark_system.start()
 		return ..()
 
 /mob/living/silicon/robot/verb/unlock_own_cover()
@@ -1088,7 +1093,7 @@
 		uneq_all()
 		AdjustKnockdown(5)
 		animate(src, transform = turn(matrix(), 90), pixel_y -= 6 * PIXEL_MULTIPLIER, dir = rotate, time = 2, easing = EASE_IN | EASE_OUT)
-		spark(src, 5, FALSE)
+		spark_system.start()
 		visible_message("<span class='danger'>\The [disarmer] has tipped over \the [src]!</span>")
 		if (prob(2))
 			locked = 0

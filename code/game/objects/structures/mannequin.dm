@@ -138,15 +138,15 @@
 /obj/structure/mannequin/attack_paw(mob/user as mob)
 	return attack_hand(user)
 
-/obj/structure/mannequin/wrenchAnchor(var/mob/user)
+/obj/structure/mannequin/wrenchAnchor(var/mob/user, var/time_to_wrench=30)
 	if(trapped_strip)
 		Awaken()
-		return FALSE
-	. = ..()
+		return
+	..()
 
 /obj/structure/mannequin/attackby(var/obj/item/weapon/W,var/mob/user)
 	if(iswrench(W))
-		return wrenchAnchor(user, 5 SECONDS)
+		return wrenchAnchor(user, 50)
 	else if(user.a_intent == I_HURT)
 		user.delayNextAttack(8)
 		getDamage(W.force)
@@ -771,7 +771,7 @@
 
 /obj/structure/block/attackby(var/obj/item/weapon/W,var/mob/user)
 	if(iswrench(W))
-		return wrenchAnchor(user, 5 SECONDS)
+		return wrenchAnchor(user, 50)
 	else if(istype(W, /obj/item/weapon/chisel))
 
 		var/chosen_sculpture = input("Choose a sculpture type.", "[name]") as null|anything in available_sculptures

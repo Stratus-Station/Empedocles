@@ -4,9 +4,9 @@
 	light_color = LIGHT_COLOR_GREEN
 
 /obj/machinery/computer/telecomms/server
-	name = "telecommunications server monitoring console"
-	icon = 'icons/obj/machines/telecomms.dmi'
-	icon_state = "server_monitor"
+	name = "Telecommunications Server Monitor"
+	icon_state = "comm_serv"
+
 
 	var/screen = 0				// the screen number:
 	var/list/servers = list()	// the servers located by the computer

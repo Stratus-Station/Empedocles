@@ -47,23 +47,3 @@
 	materials = list(MAT_IRON = 30, MAT_GLASS = 10)
 	category = "Data"
 	build_path = /obj/item/weapon/disk/tech_disk
-
-/datum/design/botany_disk
-	name = "Floral Data Disk"
-	desc = "Produce additional disks for copying botany genetic data."
-	id = "floral_disk"
-	req_tech = list(Tc_PROGRAMMING = 2, Tc_BIOTECH = 2)
-	build_type = PROTOLATHE | AUTOLATHE
-	materials = list(MAT_IRON = 30, MAT_GLASS = 10)
-	category = "Data"
-	build_path = /obj/item/weapon/disk/botany
-
-/datum/design/cloning_disk
-	name = "Genetic Data Disk"
-	desc = "Produce additional disks for copying cloning genetic data."
-	id = "cloning_disk"
-	req_tech = list(Tc_PROGRAMMING = 2, Tc_BIOTECH = 3)
-	build_type = PROTOLATHE | AUTOLATHE
-	materials = list(MAT_IRON = 30, MAT_GLASS = 10)
-	category = "Data"
-	build_path = /obj/item/weapon/disk/data

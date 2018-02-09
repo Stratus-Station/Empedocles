@@ -253,7 +253,9 @@
 		if(prob(20))
 			Stun(2)
 
-		spark(loc, 5)
+		var/datum/effect/effect/system/spark_spread/SparkSpread = new
+		SparkSpread.set_up(5, 1, loc)
+		SparkSpread.start()
 
 		return damage
 

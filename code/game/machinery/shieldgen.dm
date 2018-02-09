@@ -108,9 +108,6 @@
 
 
 /obj/machinery/shield/hitby(AM as mob|obj)
-	. = ..()
-	if(.)
-		return
 	//Let everyone know we've been hit!
 	visible_message("<span class='danger'>[src] was hit by [AM].</span>")
 
@@ -135,6 +132,10 @@
 	//The shield becomes dense to absorb the blow.. purely asthetic.
 	opacity = 1
 	spawn(20) if(src) opacity = 0
+
+	return ..()
+
+
 
 /obj/machinery/shieldgen
 		name = "Emergency shield projector"
@@ -257,17 +258,16 @@
 		update_icon()
 		return 1
 
-/obj/machinery/shieldgen/wrenchAnchor(var/mob/user)
+/obj/machinery/shieldgen/wrenchAnchor(mob/user)
 	if(locked)
 		to_chat(user, "The bolts are covered, unlocking this would retract the covers.")
-		return FALSE
+		return
 	if(active)
 		to_chat(user, "Turn \the [src] off first!")
-		return FALSE
 	if(panel_open)
 		to_chat(user, "You have to close \the [src]'s maintenance panel before you can do that.")
-		return FALSE
-	. = ..()
+		return
+	return ..()
 
 /obj/machinery/shieldgen/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	if(..())
@@ -472,14 +472,14 @@
 		CF.forceMove(T)
 		CF.dir = field_dir
 
-/obj/machinery/shieldwallgen/wrenchAnchor(var/mob/user)
+/obj/machinery/shieldwallgen/wrenchAnchor(mob/user)
 	if(active)
 		to_chat(user, "Turn off the field generator first.")
-		return FALSE
-	. = ..()
-	if(!.)
 		return
-	power()
+	if(..())
+		power()
+		return 1
+
 
 /obj/machinery/shieldwallgen/attack_ghost(mob/user)
 	if(isAdminGhost(user))

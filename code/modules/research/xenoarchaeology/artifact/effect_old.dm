@@ -156,7 +156,9 @@
 					if (user.buckled)
 						user.buckled.unbuckle()
 					user.forceMove(pick(randomturfs))
-					spark(originator, 3, FALSE)
+					var/datum/effect/effect/system/spark_spread/sparks = new /datum/effect/effect/system/spark_spread()
+					sparks.set_up(3, 0, get_turf(originator)) //no idea what the 0 is
+					sparks.start()
 				return 1
 			if("sleepy")
 				to_chat(user, pick("<span class='notice'>You feel like taking a nap.</span>","<span class='notice'>You feel a yawn coming on.</span>","<span class='notice'>You feel a little tired.</span>"))
@@ -360,7 +362,9 @@
 						if(M.buckled)
 							M.buckled.unbuckle()
 						M.forceMove(pick(randomturfs))
-						spark(originator, 3, FALSE)
+						var/datum/effect/effect/system/spark_spread/sparks = new /datum/effect/effect/system/spark_spread()
+						sparks.set_up(3, 0, get_turf(originator)) //no idea what the 0 is
+						sparks.start()
 				return 1
 			if("dnaswitch")
 				for(var/mob/living/H in range(src.aurarange,originator))
@@ -474,7 +478,9 @@
 						if(M.buckled)
 							M.buckled.unbuckle()
 						M.forceMove(pick(randomturfs))
-						spark(originator, 3, FALSE)
+						var/datum/effect/effect/system/spark_spread/sparks = new /datum/effect/effect/system/spark_spread()
+						sparks.set_up(3, 0, get_turf(originator)) //no idea what the 0 is
+						sparks.start()
 				return 1
 			if("dnaswitch")
 				for(var/mob/living/H in range(200, originator))

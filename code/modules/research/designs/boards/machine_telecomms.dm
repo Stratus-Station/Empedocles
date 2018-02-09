@@ -1,6 +1,6 @@
 /datum/design/subspace_receiver
-	name = "Circuit Design (telecommunications subspace receiver)"
-	desc = "Allows for the construction of a telecommunications subspace receiver."
+	name = "Circuit Design (Subspace Receiver)"
+	desc = "Allows for the construction of Subspace Receiver equipment."
 	id = "s-receiver"
 	req_tech = list(Tc_PROGRAMMING = 4, Tc_ENGINEERING = 3, Tc_BLUESPACE = 2)
 	build_type = IMPRINTER
@@ -9,8 +9,8 @@
 	build_path = /obj/item/weapon/circuitboard/telecomms/receiver
 
 /datum/design/telecomms_bus
-	name = "Circuit Design (telecommunications bus)"
-	desc = "Allows for the construction of a telecommunications bus."
+	name = "Circuit Design (Bus Mainframe)"
+	desc = "Allows for the construction of Telecommunications Bus Mainframes."
 	id = "s-bus"
 	req_tech = list(Tc_PROGRAMMING = 4, Tc_ENGINEERING = 4)
 	build_type = IMPRINTER
@@ -19,8 +19,8 @@
 	build_path = /obj/item/weapon/circuitboard/telecomms/bus
 
 /datum/design/telecomms_hub
-	name = "Circuit Design (telecommunications hub)"
-	desc = "Allows for the construction of a telecommunications hub."
+	name = "Circuit Design (Hub Mainframe)"
+	desc = "Allows for the construction of Telecommunications Hub Mainframes."
 	id = "s-hub"
 	req_tech = list(Tc_PROGRAMMING = 4, Tc_ENGINEERING = 4)
 	build_type = IMPRINTER
@@ -29,8 +29,8 @@
 	build_path = /obj/item/weapon/circuitboard/telecomms/hub
 
 /datum/design/telecomms_relay
-	name = "Circuit Design (telecommunications relay)"
-	desc = "Allows for the construction of a telecommunications relay."
+	name = "Circuit Design (Relay Mainframe)"
+	desc = "Allows for the construction of Telecommunications Relay Mainframes."
 	id = "s-relay"
 	req_tech = list(Tc_PROGRAMMING = 3, Tc_ENGINEERING = 4, Tc_BLUESPACE = 3)
 	build_type = IMPRINTER
@@ -39,8 +39,8 @@
 	build_path = /obj/item/weapon/circuitboard/telecomms/relay
 
 /datum/design/telecomms_processor
-	name = "Circuit Design (telecommunications processor)"
-	desc = "Allows for the construction of a telecommunications processor."
+	name = "Circuit Design (Processor Unit)"
+	desc = "Allows for the construction of Telecommunications Processor equipment."
 	id = "s-processor"
 	req_tech = list(Tc_PROGRAMMING = 4, Tc_ENGINEERING = 4)
 	build_type = IMPRINTER
@@ -49,8 +49,8 @@
 	build_path = /obj/item/weapon/circuitboard/telecomms/processor
 
 /datum/design/telecomms_server
-	name = "Circuit Design (telecommunications server)"
-	desc = "Allows for the construction of a telecommunications server."
+	name = "Circuit Design (Server Mainframe)"
+	desc = "Allows for the construction of Telecommunications Servers."
 	id = "s-server"
 	req_tech = list(Tc_PROGRAMMING = 4, Tc_ENGINEERING = 4)
 	build_type = IMPRINTER
@@ -59,8 +59,8 @@
 	build_path = /obj/item/weapon/circuitboard/telecomms/server
 
 /datum/design/subspace_broadcaster
-	name = "Circuit Design (telecommunications subspace broadcaster)"
-	desc = "Allows for the construction of a telecommunications subspace broadcaster."
+	name = "Circuit Design (Subspace Broadcaster)"
+	desc = "Allows for the construction of Subspace Broadcasting equipment."
 	id = "s-broadcaster"
 	req_tech = list(Tc_PROGRAMMING = 4, Tc_ENGINEERING = 4, Tc_BLUESPACE = 2)
 	build_type = IMPRINTER

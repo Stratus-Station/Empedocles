@@ -39,10 +39,13 @@
 				user.apply_damage(5, BURN, OE.name)
 				time = 150
 				to_chat(user, "<span class='warning'>[src] overload\s from the massive current, shocking you in the process!")
-			spark(user, 5)
+			var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+			s.set_up(5, 1, user)
+			s.start()
 		if(L.damage <= 0)
 			returnToPool(L)
-		else
+			//del(L)
+		if(L)
 			playsound(get_turf(src), 'sound/effects/eleczap.ogg', 75, 1)
 			L.tang = adjustAngle(get_angle(U,T))
 			L.icon = midicon
@@ -162,12 +165,12 @@
 	item_state = "white"
 	_color = "mime"
 	species_fit = list(VOX_SHAPED)
-
-/obj/item/clothing/gloves/white/advanced //mime traitor gloves, spawn in a silent hand gun with two shots
+	
+/obj/item/clothing/gloves/white/advanced //mime traitor gloves, spawn in a silent hand gun with two shots 
 	actions_types = list(/datum/action/item_action/toggle_gun)
 	var/obj/item/weapon/gun/projectile/handgun/current_gun = null
 	var/charging = FALSE
-
+	
 /obj/item/clothing/gloves/white/advanced/attack_self(mob/user)
 	var/mob/living/carbon/human/M = user
 	if(!istype(M))
@@ -193,7 +196,7 @@
 			to_chat(M, "<span class = 'warning'> Your hand is full! </span>")
 	else
 		to_chat(M, "<span class ='warning'>You need to regain your focus before channeling another gun!</span>")
-
+			
 /obj/item/clothing/gloves/white/stunglove // For Clown Planet's mimes. - N3X
 	New()
 		..()

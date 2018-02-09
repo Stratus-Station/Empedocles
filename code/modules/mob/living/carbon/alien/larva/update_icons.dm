@@ -12,7 +12,7 @@
 
 	if(stat == DEAD)
 		icon_state = "larva[state]_dead"
-	else if (handcuffed)
+	else if (handcuffed || legcuffed)
 		icon_state = "larva[state]_cuff"
 	else if (stunned)
 		icon_state = "larva[state]_stun"

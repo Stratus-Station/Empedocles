@@ -556,7 +556,7 @@
 
 	//Clicking on itself will empty it, if it has the verb to do that.
 	if(user.get_active_hand() == src)
-		if(src.verbs.Find(/obj/item/weapon/storage/verb/quick_empty) && contents.len)
+		if(src.verbs.Find(/obj/item/weapon/storage/verb/quick_empty))
 			src.quick_empty()
 			return
 
@@ -577,8 +577,7 @@
 		return
 	// Now make the cardboard
 	to_chat(user, "<span class='notice'>You fold \the [src] flat.</span>")
-	var/folded = new src.foldable(get_turf(src),foldable_amount)
-	transfer_fingerprints_to(folded)
+	new src.foldable(get_turf(src),foldable_amount)
 	qdel(src)
 //BubbleWrap END
 /obj/item/weapon/storage/proc/can_see_contents()

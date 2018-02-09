@@ -83,9 +83,7 @@
 	healthcheck()
 
 /obj/effect/alien/resin/hitby(AM as mob|obj)
-	. = ..()
-	if(.)
-		return
+	..()
 	for(var/mob/O in viewers(src, null))
 		O.show_message("<span class='danger'>[src] was hit by [AM].</span>", 1)
 	var/tforce = 0
@@ -96,6 +94,7 @@
 	playsound(loc, 'sound/effects/attackblob.ogg', 100, 1)
 	health = max(0, health - tforce)
 	healthcheck()
+	..()
 
 /obj/effect/alien/resin/attack_hand(mob/living/user)
 	user.delayNextAttack(10)

@@ -186,12 +186,15 @@
 	var/last_relay = 0
 	var/obj/machinery/portable_atmospherics/canister/internal_tank
 	var/health = 100
+	var/datum/effects/system/spark_spread/spark_system = new
 
 	New()
 		..()
 		internal_tank = new /obj/machinery/portable_atmospherics/canister/air(src)
 		pr_inertial_movement = new /datum/global_iterator/space_ship_inertial_movement(list(src),0)
 		pr_speed_increment = new /datum/global_iterator/space_ship_speed_increment(list(src),0)
+		src.spark_system.set_up(2, 0, src)
+		src.spark_system.attach(src)
 		return
 
 	proc/inspace()
@@ -235,7 +238,7 @@
 		if(isnum(value))
 			src.health -= value
 			if(src.health>0)
-				spark(src, 2, FALSE)
+				src.spark_system.start()
 //				to_chat(world, "[src] health is [health]")
 			else
 				src.ex_act(1)

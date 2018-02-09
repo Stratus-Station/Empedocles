@@ -9,10 +9,6 @@
 
 #define ismonkey(A) istype(A, /mob/living/carbon/monkey)
 
-#define ismartian(A) istype(A, /mob/living/carbon/martian)
-
-#define ishigherbeing(A) (ishuman(A) || ismartian(A))
-
 #define isvox(A) (ishuman(A) && A.species && istype(A.species, /datum/species/vox))
 
 #define isdiona(A) (ishuman(A) && A.species && istype(A.species, /datum/species/diona))
@@ -38,8 +34,6 @@
 #define ishorrorform(A) (ishuman(A) && A.species && istype(A.species, /datum/species/horror))
 
 #define isgrue(A) (ishuman(A) && A.species && istype(A.species, /datum/species/grue))
-
-#define ishologram(A) (istype(A, /mob/living/simple_animal/hologram/advanced))
 
 #define isbrain(A) istype(A, /mob/living/carbon/brain)
 
@@ -99,8 +93,6 @@
 
 #define isobserver(A) istype(A, /mob/dead/observer)
 
-#define isjustobserver(A) (isobserver(A) && !isAdminGhost(A))
-
 #define isnewplayer(A) istype(A, /mob/new_player)
 
 #define isovermind(A) istype(A, /mob/camera/blob)
@@ -108,12 +100,6 @@
 #define isorgan(A) istype(A, /datum/organ/external)
 
 #define isitem(A) istype(A, /obj/item)
-
-#define isclothing(A) istype(A, /obj/item/clothing)
-
-#define iswearingredtag(A) istype(get_tag_armor(A), /obj/item/clothing/suit/tag/redtag)
-
-#define iswearingbluetag(A) istype(get_tag_armor(A), /obj/item/clothing/suit/tag/bluetag)
 
 #define isEmag(A) istype(A, /obj/item/weapon/card/emag)
 
@@ -123,7 +109,7 @@
 
 #define iswelder(A) istype(A, /obj/item/weapon/weldingtool)
 
-#define iscablecoil(A) istype(A, /obj/item/stack/cable_coil)
+#define iscoil(A) istype(A, /obj/item/stack/cable_coil)
 
 #define iscoin(A) is_type_in_list(A, list(/obj/item/weapon/coin, /obj/item/weapon/reagent_containers/food/snacks/chococoin))
 
@@ -141,11 +127,9 @@
 
 #define iscrowbar(A) istype(A, /obj/item/weapon/crowbar)
 
+#define iswire(O) istype(O, /obj/item/stack/cable_coil)
+
 #define issolder(A) istype(A, /obj/item/weapon/solder)
-
-#define issocketwrench(A) istype(A, /obj/item/weapon/wrench/socket)
-
-#define isswitchtool(A) istype(A, /obj/item/weapon/switchtool)
 
 #define iscamera(A) istype(A, /obj/machinery/camera)
 
@@ -159,10 +143,6 @@
 
 #define iswindow(A) (istype(A, /obj/structure/window))
 
-#define isgripper(G) (istype(G, /obj/item/weapon/gripper))
-
-#define isAPC(A) istype(A, /obj/machinery/power/apc)
-
 #define isimage(A) (istype(A, /image))
 
 #define isdatum(A) (istype(A, /datum))
@@ -172,8 +152,6 @@
 #define isatom(A) (istype(A, /atom))
 
 #define isatommovable(A) (istype(A, /atom/movable))
-
-#define isrealobject(A) (istype(A, /obj/item) || istype(A, /obj/structure) || istype(A, /obj/machinery) || istype(A, /obj/mecha))
 
 #define ismatrix(A) (istype(A, /matrix))
 
@@ -208,6 +186,8 @@
 #define isbadmonkey(H) ((/datum/disease/jungle_fever in H.viruses) || (H.mind && H.mind.GetRole(MADMONKEY)))
 
 #define isdeathsquad(H) (H.mind && H.mind.GetRole(DEATHSQUAD))
+
+
 
 
 //Macro for AREAS!

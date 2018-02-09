@@ -236,7 +236,9 @@
 		//playsound(get_turf(src), 'sound/weapons/emitter.ogg', 25, 1)
 
 		if(prob(35))
-			spark(src, 5)
+			var/datum/effect/effect/system/spark_spread/Sparks = new
+			Sparks.set_up(5, 1, src)
+			Sparks.start()
 
 		//A.dumbfire()
 
@@ -248,11 +250,12 @@
 		user.visible_message("<span class='danger'>[user] shorts out \the [src]'s lock.</span>", "<span class='warning'>You short out \the [src]'s lock.</span>")
 		return
 
-/obj/machinery/power/emitter/wrenchAnchor(var/mob/user)
+/obj/machinery/power/emitter/wrenchAnchor(mob/user)
+
 	if(active)
 		to_chat(user, "<span class='warning'>Turn off \the [src] first.</span>")
-		return FALSE
-	. = ..()
+		return
+	return ..()
 
 /obj/machinery/power/emitter/weldToFloor()
 

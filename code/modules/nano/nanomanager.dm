@@ -86,10 +86,8 @@
 	}
 	if (!isnull(ui))
 		// The UI is already open
-		if (force_open != NANOUI_FORCE_OPEN)
+		if (!force_open)
 			ui.push_data(data)
-			if (force_open == NANOUI_FOCUS)
-				ui.focus()
 			return ui
 		else
 			//testing("nanomanager/try_update_ui mob [user.name] [src_object:name] [ui_key] [force_open] - forcing opening of ui")

@@ -29,27 +29,18 @@
 
 /obj/machinery/power/initialize()
 	..()
-
 	if(starting_terminal)
-		find_terminal()
-
-/obj/machinery/power/spawned_by_map_element()
-	..()
-
-	find_terminal()
-
-/obj/machinery/power/proc/find_terminal()
-	for(var/d in cardinal)
-		var/turf/T = get_step(src, d)
-		for(var/obj/machinery/power/terminal/term in T)
-			if(term && term.dir == turn(d, 180))
-				terminal = term
+		for(var/d in cardinal)
+			var/turf/T = get_step(src, d)
+			for(var/obj/machinery/power/terminal/term in T)
+				if(term && term.dir == turn(d, 180))
+					terminal = term
+					break
+			if(terminal)
 				break
 		if(terminal)
-			break
-	if(terminal)
-		terminal.master = src
-		update_icon()
+			terminal.master = src
+			update_icon()
 
 /obj/machinery/power/Destroy()
 	disconnect_from_network()
@@ -91,7 +82,7 @@
 		return powernet.load
 	else
 		return 0
-
+		
 /obj/machinery/power/proc/get_powernet()
 	check_rebuild()
 	return powernet

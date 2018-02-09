@@ -700,7 +700,9 @@ var/global/list/floorbot_targets=list()
 			T.amount = src.amount
 			amount = 0
 
-	spark(src)
+	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	s.set_up(3, 1, src)
+	s.start()
 	qdel(src)
 	return
 

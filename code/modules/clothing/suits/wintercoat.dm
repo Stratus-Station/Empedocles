@@ -111,7 +111,6 @@
 /obj/item/clothing/suit/wintercoat/cmo
 	name = "Chief Medical Officer's winter coat"
 	icon_state = "coatcmo"
-	allowed = list(/obj/item/roller)
 
 #define HAS_HOOD 1
 #define NO_HOOD 0

@@ -123,8 +123,6 @@
 
 
 /obj/item/mecha_parts/mecha_equipment/Topic(href,href_list)
-	if(usr.incapacitated() || usr != chassis.occupant)
-		return TRUE
 	testing("[src] topic")
 	if(href_list["detach"])
 		detach()
@@ -137,17 +135,12 @@
 		send_byjax(chassis.occupant,"exosuit.browser","\ref[src]",src.get_equip_info())
 	return
 
-/obj/item/mecha_parts/mecha_equipment/proc/occupant_message(var/message, var/prevent_spam = FALSE)
+/obj/item/mecha_parts/mecha_equipment/proc/occupant_message(message)
 	if(chassis)
-		chassis.occupant_message("[bicon(src)] [message]", prevent_spam)
+		chassis.occupant_message("[bicon(src)] [message]")
+	return
 
 /obj/item/mecha_parts/mecha_equipment/proc/log_message(message)
 	if(chassis)
 		chassis.log_message("<i>[src]:</i> [message]")
-	return
-
-/obj/item/mecha_parts/mecha_equipment/proc/on_mech_step()
-	return
-
-/obj/item/mecha_parts/mecha_equipment/proc/on_mech_turn()
 	return

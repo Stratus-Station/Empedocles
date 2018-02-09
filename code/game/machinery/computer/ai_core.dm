@@ -19,20 +19,9 @@
 	. = ..()
 	laws = new base_law_type
 
-/obj/structure/AIcore/update_icon()
-	switch(state)
-		if(NOCIRCUITBOARD)
-			icon_state = "0"
-		if(UNSECURED_CIRCUITBOARD)
-			icon_state = "1"
-		if(SECURED_CIRCUITBOARD)
-			icon_state = "2"
-		if(WIREDFRAME)
-			icon_state = "3[brain ? "b" : ""]"
-		if(GLASS_PANELED)
-			icon_state = "4"
+/obj/structure/AIcore/wrenchAnchor/wrenchAnchor(var/mob/user)
 
-/obj/structure/AIcore/attackby(var/obj/item/P, var/mob/user)
+/obj/structure/AIcore/attackby(obj/item/P as obj, mob/user as mob)
 	if(iswrench(P))
 		wrenchAnchor(user, time_to_wrench = 2 SECONDS)
 	switch(state)
@@ -43,16 +32,17 @@
 					to_chat(user, "The welder must be on for this task.")
 					return
 				playsound(loc, 'sound/items/Welder.ogg', 50, 1)
-				if(do_after(user, src, 2 SECONDS))
-					if(!src || state != NOCIRCUITBOARD || !WT.remove_fuel(0, user))
+				if(do_after(user, src, 20))
+					if(!src || !WT.remove_fuel(0, user))
 						return
 					to_chat(user, "<span class='notice'>You deconstruct the frame.</span>")
-					drop_stack(/obj/item/stack/sheet/plasteel, loc, 4, user)
+					new /obj/item/stack/sheet/plasteel( loc, 4)
 					qdel(src)
 			if(istype(P, /obj/item/weapon/circuitboard/aicore) && !circuit)
 				if(user.drop_item(P, src))
 					playsound(loc, 'sound/items/Deconstruct.ogg', 50, 1)
 					to_chat(user, "<span class='notice'>You place the circuit board inside the frame.</span>")
+					icon_state = "1"
 					circuit = P
 					state = UNSECURED_CIRCUITBOARD
 		if(UNSECURED_CIRCUITBOARD)
@@ -60,10 +50,12 @@
 				playsound(loc, 'sound/items/Screwdriver.ogg', 50, 1)
 				to_chat(user, "<span class='notice'>You screw the circuit board into place.</span>")
 				state = SECURED_CIRCUITBOARD
+				icon_state = "2"
 			if(iscrowbar(P) && circuit)
 				playsound(loc, 'sound/items/Crowbar.ogg', 50, 1)
 				to_chat(user, "<span class='notice'>You remove the circuit board.</span>")
 				state = NOCIRCUITBOARD
+				icon_state = "0"
 				circuit.forceMove(loc)
 				circuit = null
 		if(SECURED_CIRCUITBOARD)
@@ -71,15 +63,17 @@
 				playsound(loc, 'sound/items/Screwdriver.ogg', 50, 1)
 				to_chat(user, "<span class='notice'>You unfasten the circuit board.</span>")
 				state = UNSECURED_CIRCUITBOARD
-			if(iscablecoil(P))
-				var/obj/item/stack/cable_coil/cable_coil = P
-				if(cable_coil.amount >= 5)
+				icon_state = "1"
+			if(istype(P, /obj/item/stack/cable_coil))
+				if(P:amount >= 5)
 					playsound(loc, 'sound/items/Deconstruct.ogg', 50, 1)
-					if(do_after(user, src, 2 SECONDS))
-						if(!src || state != SECURED_CIRCUITBOARD || !cable_coil || !cable_coil.use(5))
-							return
+					if(do_after(user, src, 20))
+						P:amount -= 5
+						if(!P:amount)
+							qdel(P)
 						to_chat(user, "<span class='notice'>You add cables to the frame.</span>")
 						state = WIREDFRAME
+						icon_state = "3"
 		if(WIREDFRAME)
 			if(iswirecutter(P))
 				if(brain)
@@ -88,16 +82,23 @@
 					playsound(loc, 'sound/items/Wirecutter.ogg', 50, 1)
 					to_chat(user, "<span class='notice'>You remove the cables.</span>")
 					state = SECURED_CIRCUITBOARD
-					drop_stack(/obj/item/stack/cable_coil, loc, 5, user)
-			var/obj/item/stack/sheet/glass/rglass/rglass = P
-			if(istype(rglass))
-				if(rglass.amount >= 2)
+					icon_state = "2"
+					var/obj/item/stack/cable_coil/A = new /obj/item/stack/cable_coil( loc )
+					A.amount = 5
+
+			if(istype(P, /obj/item/stack/sheet/glass/rglass))
+				if(P:amount >= 2)
 					playsound(loc, 'sound/items/Deconstruct.ogg', 50, 1)
-					if(do_after(user, src, 2 SECONDS))
-						if(!src || state != WIREDFRAME || !rglass || !rglass.use(2))
-							return
-						to_chat(user, "<span class='notice'>You put in the glass panel.</span>")
-						state = GLASS_PANELED
+					if(do_after(user, src, 20))
+						if (P)
+							P:amount -= 2
+							if(!P:amount)
+								qdel(P)
+							if(!P:amount)
+								qdel(P)
+							to_chat(user, "<span class='notice'>You put in the glass panel.</span>")
+							state = GLASS_PANELED
+							icon_state = "4"
 
 			if(istype(P, /obj/item/device/mmi))
 				if(!P:brainmob)
@@ -123,20 +124,28 @@
 					if (user.drop_item(P, src))
 						brain = P
 						to_chat(user, "Added [P].")
+						icon_state = "3b"
 
 			if(iscrowbar(P) && brain)
 				playsound(loc, 'sound/items/Crowbar.ogg', 50, 1)
 				to_chat(user, "<span class='notice'>You remove the brain.</span>")
 				brain.forceMove(loc)
 				brain = null
+				icon_state = "3"
 
 		if(GLASS_PANELED)
 			if(iscrowbar(P))
 				playsound(loc, 'sound/items/Crowbar.ogg', 50, 1)
 				to_chat(user, "<span class='notice'>You remove the glass panel.</span>")
 				state = WIREDFRAME
-				drop_stack(/obj/item/stack/sheet/glass/rglass, loc, 2, user)
-			else if(isscrewdriver(P))
+				if (brain)
+					icon_state = "3b"
+				else
+					icon_state = "3"
+				new /obj/item/stack/sheet/glass/rglass( loc, 2 )
+				return
+
+			if(isscrewdriver(P))
 				playsound(loc, 'sound/items/Screwdriver.ogg', 50, 1)
 				to_chat(user, "<span class='notice'>You connect the monitor.</span>")
 				var/mob/living/silicon/ai/A = new /mob/living/silicon/ai ( loc, laws, brain )
@@ -144,8 +153,6 @@
 					A.rename_self("ai", 1)
 				feedback_inc("cyborg_ais_created",1)
 				qdel(src)
-				return // To avoid running update_icon
-	update_icon()
 
 /obj/structure/AIcore/deactivated
 	name = "Inactive AI"

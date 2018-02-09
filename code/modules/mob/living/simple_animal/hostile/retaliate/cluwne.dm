@@ -329,7 +329,6 @@
 	maxHealth = 100
 	health = 100
 	size = 1
-	environment_smash_flags = SMASH_LIGHT_STRUCTURES
 
 	speed = 1
 	turns_per_move = 1

@@ -271,6 +271,8 @@
 	H.update_hair()
 	playsound(get_turf(src), 'sound/effects/spray2.ogg', 50, 1, -6)
 
+#define INVISIBLESPRAY "invisiblespray"
+
 /obj/item/weapon/invisible_spray
 	name = "can of invisible spray"
 	desc = "A can of... invisibility? The label reads: \"Wears off after five minutes.\""
@@ -284,10 +286,10 @@
 	var/static/list/prohibited_objects = list( //For fun removal
 		)
 
-/obj/item/weapon/invisible_spray/preattack(atom/movable/target, mob/user, proximity_flag, click_parameters)
+/obj/item/weapon/invisible_spray/preattack(atom/target, mob/user, proximity_flag, click_parameters)
 	if (!proximity_flag)
 		return 0
-	if(!istype(target))
+	if(istype(target, /turf))
 		return
 	if(!sprays_left)
 		to_chat(user, "\The [src] is empty.")
@@ -298,10 +300,6 @@
 	if(is_type_in_list(target,prohibited_objects))
 		to_chat(user, "<span class='notice'>For some reason, you don't think that would work.</span>")
 		return 1
-	if(permanent)
-		invisible_time = 0
-	target.make_invisible(INVISIBLESPRAY, invisible_time)
-	/*
 	if(istype(target, /mob))
 		if(istype(target, /mob/living/carbon/human) || istype(target, /mob/living/carbon/monkey))
 			var/mob/living/carbon/C = target
@@ -336,7 +334,6 @@
 						if(ismob(O.loc))
 							var/mob/M = O.loc
 							M.regenerate_icons()
-	*/
 	if(target == user)
 		to_chat(user, "You spray yourself with \the [src].")
 	else
@@ -344,9 +341,6 @@
 	playsound(get_turf(src), 'sound/effects/spray2.ogg', 50, 1, -6)
 	sprays_left--
 	if(istype(target, /obj/machinery/power/supermatter))
-		return 0
-	if(istype(target, /obj/machinery/singularity))
-		animate(target, color = grayscale, time = 6 SECONDS)
 		return 0
 	return 1
 

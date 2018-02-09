@@ -78,7 +78,9 @@
 		to_chat(M, "<span class='warning'>\The [src] buzzes.</span>")
 		return 1
 	if(prob(5))
-		spark(src)
+		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		s.set_up(3, 1, src)
+		s.start()
 		M.apply_effects(3,3,,,5)
 		power_supply.use(250)
 		to_chat(M, "<span class='danger'>\The [src] shocks you!.</span>")

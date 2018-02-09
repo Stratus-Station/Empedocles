@@ -87,7 +87,9 @@
 				user.put_in_hands(I)
 			else
 				bound.forceMove(get_turf(user))
-			spark(oldloc, 3, FALSE)
+			var/datum/effect/effect/system/spark_spread/sparks = new /datum/effect/effect/system/spark_spread()
+			sparks.set_up(3, 0, oldloc)
+			sparks.start()
 			take_charge(user)
 		return 1
 	return 0

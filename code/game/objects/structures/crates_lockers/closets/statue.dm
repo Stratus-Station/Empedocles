@@ -166,7 +166,7 @@
 	return
 
 /obj/structure/closet/statue/attack_animal(mob/living/simple_animal/user as mob)
-	if(user.environment_smash_flags & SMASH_CONTAINERS)
+	if(user.environment_smash)
 		for(var/mob/M in src)
 			shatter(M)
 

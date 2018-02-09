@@ -65,10 +65,10 @@ var/list/obj/machinery/prism/prism_list = list()
 
 /obj/machinery/prism/wrenchAnchor(var/mob/user)
 	. = ..()
-	if(!.)
-		return
-	if(beams && beams.len)
-		update_beams()
+	if(. == 1)
+		if(beams && beams.len)
+			update_beams()
+	return .
 
 /obj/machinery/prism/beam_connect(var/obj/effect/beam/emitter/B)
 	if(istype(B))

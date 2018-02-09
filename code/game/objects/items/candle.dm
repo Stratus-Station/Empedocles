@@ -6,7 +6,6 @@
 	item_state = "candle1"
 	w_class = W_CLASS_TINY
 	heat_production = 1000
-	source_temperature = TEMPERATURE_FLAME
 	light_color = LIGHT_COLOR_FIRE
 
 	var/wax = 200
@@ -24,7 +23,7 @@
 
 /obj/item/candle/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	..()
-	if(W.is_hot() || W.sharpness_flags & (HOT_EDGE))
+	if(W.is_hot())
 		light("<span class='notice'>[user] lights [src] with [W].</span>")
 
 /obj/item/candle/proc/light(var/flavor_text = "<span class='notice'>[usr] lights [src].</span>")
@@ -54,7 +53,7 @@
 		return
 	update_icon()
 	if(istype(T)) //Start a fire if possible
-		T.hotspot_expose(source_temperature, 5, surfaces = 0)
+		T.hotspot_expose(700, 5, surfaces = 0)
 
 /obj/item/candle/attack_self(mob/user as mob)
 	if(lit)
@@ -64,10 +63,10 @@
 
 /obj/item/candle/is_hot()
 	if(lit)
-		return source_temperature
+		return heat_production
 	return 0
 
 /obj/item/weapon/match/is_hot()
 	if(lit)
-		return source_temperature
+		return heat_production
 	return 0

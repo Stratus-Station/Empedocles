@@ -270,7 +270,9 @@
 /obj/item/weapon/gun/energy/plasma/failure_check(var/mob/living/carbon/human/M)
 	if(prob(15))
 		fire_delay += rand(2, 6)
-		spark(src)
+		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		s.set_up(3, 1, src)
+		s.start()
 		to_chat(M, "<span class='warning'>\The [src] sparks violently.</span>")
 		return 1
 	if(prob(5))

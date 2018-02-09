@@ -135,7 +135,9 @@
 					if(M)
 						M.moved_recently = 0
 		to_chat(M, "<span class='danger'>You feel a sharp shock!</span>")
-		spark(M)
+		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		s.set_up(3, 1, M)
+		s.start()
 
 		M.Knockdown(10)
 

@@ -1512,16 +1512,17 @@ proc/clear_memory(var/silent = 1)
 /proc/get_ghost_from_mind(var/datum/mind/mind)
 	if(!mind)
 		return
-	for(var/mob/M in player_list)
-		M = M.get_bottom_transmogrification()
-		if(isobserver(M))
-			if(M.mind == mind)
-				return M
+	for(var/mob/dead/observer/G in player_list)
+		if(G.mind == mind)
+			return G
 
 /proc/mind_can_reenter(var/datum/mind/mind)
 	var/mob/dead/observer/G = get_ghost_from_mind(mind)
-	var/mob/M
-	if(G)
-		M = G.get_top_transmogrification()
-		if(M.client && G.can_reenter_corpse)
-			return G
+	if(G && G.client && G.can_reenter_corpse)
+		return TRUE
+	return FALSE
+
+/proc/get_faction_from_mind(var/datum/mind/mind)
+	if(!mind)
+		return 0
+	return mind.faction

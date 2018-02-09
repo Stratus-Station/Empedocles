@@ -256,13 +256,10 @@
 
 //Broadcast something over the radio!
 /obj/machinery/computer/slot_machine/proc/broadcast(var/message)
-	if(!message || !z)
+	if(!message)
 		return
-	var/datum/speech/speech = radio.create_speech(message, frequency=COMMON_FREQ, transmitter=radio)
-	speech.name = capitalize(name)
-	speech.job = "Money Snatcher"
-	speech.as_name = "Slot machine #[id]"
-	Broadcast_Message(speech, level = list(z))
+
+	Broadcast_Message(radio, all_languages[LANGUAGE_GALACTIC_COMMON], null, radio, message, "[capitalize(src.name)]", "Money Snatcher", "Slot machine #[id]", 0, 0, list(0,1), 1459)
 
 /obj/machinery/computer/slot_machine/attack_hand(mob/user as mob)
 	if(..())
