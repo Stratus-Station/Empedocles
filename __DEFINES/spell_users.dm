@@ -8,3 +8,4 @@
 #define USER_TYPE_OTHER "other"
 #define USER_TYPE_SPELLBOOK "spellbook"
 #define USER_TYPE_ARTIFACT "artifact"
+#define USER_TYPE_VAMPIRE "vamp"
