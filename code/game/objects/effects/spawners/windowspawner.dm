@@ -12,7 +12,7 @@
 		var/turf/T = get_turf(src)
 		for(var/obj/structure/grille/G in get_turf(src))
 			// Complain noisily
-			log_runtime(EXCEPTION("Extra grille on turf: ([T.x],[T.y],[T.z])"), src)
+//			log_runtime(EXCEPTION("Extra grille on turf: ([T.x],[T.y],[T.z])"), src)
 			qdel(G) //just in case mappers don't know what they are doing
 
 		if(!useFull)
@@ -30,7 +30,7 @@
 		if(useGrille)
 			new /obj/structure/grille(get_turf(src))
 
-		src.air_update_turf(1) //atmos can pass otherwise
+//		src.air_update_turf(1) //atmos can pass otherwise
 
 		spawn(10)
 			qdel(src)

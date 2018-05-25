@@ -8,6 +8,7 @@
 	var/r_speed = 1.0
 	var/health = null
 	var/hitsound = null
+	var/usesound = null
 
 	var/w_class = W_CLASS_MEDIUM
 	var/attack_delay = 10 //Delay between attacking with this item, in 1/10s of a second (default = 1 second)
