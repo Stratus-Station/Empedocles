@@ -911,3 +911,10 @@ its easier to just keep the beam vertical.
 
 /atom/proc/initialize()
 	return
+
+/atom/proc/isinspace()
+	if(istype(get_turf(src), /turf/space))
+		return 1
+	else
+		return 0
+
