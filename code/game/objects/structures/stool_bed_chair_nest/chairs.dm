@@ -208,8 +208,9 @@
 /obj/structure/bed/chair/comfy
 	name = "comfy chair"
 	desc = "It looks comfy."
-	icon_state = "comfychair_black"
-
+	icon = 'icons/obj/objects2.dmi'
+	icon_state = "comfychair"
+	color = rgb(255,255,255)
 
 	sheet_amt = 1
 
@@ -248,19 +249,31 @@
 			to_chat(user, "You pull out \the [I] between \the [src]'s cushions.")
 
 /obj/structure/bed/chair/comfy/brown
-	icon_state = "comfychair_brown"
+	color = rgb(141,70,0)
+
+/obj/structure/bed/chair/comfy/red
+	color = rgb(218,2,10)
 
 /obj/structure/bed/chair/comfy/beige
-	icon_state = "comfychair_beige"
+	color = rgb(255,253,195)
 
 /obj/structure/bed/chair/comfy/teal
-	icon_state = "comfychair_teal"
+	color = rgb(0,234,250)
 
 /obj/structure/bed/chair/comfy/black
-	icon_state = "comfychair_black"
+	color = rgb(60,60,60)
 
 /obj/structure/bed/chair/comfy/lime
-	icon_state = "comfychair_lime"
+	color = rgb(255,251,0)
+
+/obj/structure/bed/chair/comfy/blue
+	color = rgb(2,9,210)
+
+/obj/structure/bed/chair/comfy/purp
+	color = rgb(112,2,176)
+
+/obj/structure/bed/chair/comfy/green
+	color = rgb(1,196,8)
 
 //Office chairs
 
@@ -341,6 +354,8 @@
 /obj/structure/bed/chair/comfy/couch
 	name = "couch"
 	desc = "Looks really comfy."
+	icon = 'icons/obj/stools-chairs-beds.dmi'
+	color = null
 	sheet_amt = 2
 	anchored = 1
 	noghostspin = 1
