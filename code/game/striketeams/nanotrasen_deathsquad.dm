@@ -36,7 +36,6 @@
 	return new_commando
 
 /datum/striketeam/deathsquad/greet_commando(var/mob/living/carbon/human/H)
-	H << 'sound/music/deathsquad.ogg'
 	if(H.key == leader_key)
 		to_chat(H, "<span class='notice'>You are [H.real_name], a tactical genius and the leader of the Death Squad, in the service of Nanotrasen.</span>")
 	else

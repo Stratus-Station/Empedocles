@@ -48,7 +48,6 @@ var/list/response_team_members = list()
 		user.forceMove(spawn_location.loc)
 
 	to_chat(user, "<span class='notice'>Congratulations, you've been selected to be part of an ERT. You can customize your character, but don't take too long, time is of the essence!</span>")
-	user << 'sound/music/ERT.ogg'
 
 	var/commando_name = copytext(sanitize(input(user, "Pick a name","Name") as null|text), 1, MAX_MESSAGE_LEN)
 
