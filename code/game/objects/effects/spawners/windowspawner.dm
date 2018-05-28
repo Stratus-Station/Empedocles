@@ -21,14 +21,14 @@
 					cdir = null
 					break
 				if(!cdir)	continue
-				var/obj/structure/window/WI = new windowtospawn(get_turf(src))
+				var/obj/structure/window/WI = new windowtospawn(T)
 				WI.dir = cdir
 		else
-			var/obj/structure/window/W = new windowtospawn(get_turf(src))
+			var/obj/structure/window/W = new windowtospawn(T)
 			W.dir = SOUTHWEST
 
 		if(useGrille)
-			new /obj/structure/grille(get_turf(src))
+			new /obj/structure/grille(T)
 
 //		src.air_update_turf(1) //atmos can pass otherwise
 

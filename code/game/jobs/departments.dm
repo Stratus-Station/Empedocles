@@ -1,1 +1,4 @@
-var/list/departments = list("Command", "Medical", "Engineering", "Security", "Civilian", "Cargo")
+/datum/department
+	var/name
+	var/color
+	var/jobs
