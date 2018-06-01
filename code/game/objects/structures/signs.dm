@@ -292,3 +292,8 @@
 
 /obj/structure/sign/russian/staff_only
 	icon_state = "RU_staff_only"
+
+/obj/structure/sign/whitedragon
+		name = "White Dragon"
+		desc = "A sign advertising White Dragon, a noodle bar. It's in some sort of ancient language you can't decipher..."
+		icon_state = "neonsign"
