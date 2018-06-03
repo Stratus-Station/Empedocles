@@ -5624,6 +5624,42 @@ obj/item/weapon/reagent_containers/food/snacks/butteredtoast
 	..()
 	reagents.add_reagent(NUTRIMENT, 2)
 
+/obj/item/weapon/reagent_containers/food/snacks/shanghaifry
+		name = "Shanghai Fried Noodles"
+		desc = "A noodlebox containing Shanghai-style udon noodles with beef cutlets, bok choy and onion. It smells heavenly."
+		icon_state = "chinese1"
 
+/obj/item/weapon/reagent_containers/food/snacks/shanghaifry/New()
+		..()
+		reagents.add_reagent(NUTRIMENT, 3)
+		bitesize = 3
 
+/obj/item/weapon/reagent_containers/food/snacks/chowmein
+			name = "Chow mein Noodles"
+			desc = "A noodlebox containing Chow mein-styled noodles. It appears to have chicken, mushrooms, carrots and some other vegetables inside."
+			icon_state = "chinese2"
 
+/obj/item/weapon/reagent_containers/food/snacks/chowmein/New()
+			..()
+			reagents.add_reagent(NUTRIMENT, 4)
+			bitesize = 2
+
+/obj/item/weapon/reagent_containers/food/snacks/kungpao
+			name = "Kung Pao Chicken Noodles"
+			desc = "A noodlebox containing noodles in Kung Pao sauce. It appears to have pieces of chicken, zucchini and mushrooms inside."
+			icon_state = "chinese3"
+
+/obj/item/weapon/reagent_containers/food/snacks/kungpao/New()
+			..()
+			reagents.add_reagent(NUTRIMENT, 3)
+			bitesize = 4
+
+/obj/item/weapon/reagent_containers/food/snacks/veggienoodles
+			name = "Vegetarian Chow mein Noodles "
+			desc = "A noodlebox containing a vegetarian-style Chow mein noodles. It appears numerous vegetables inside, instead of meat."
+			icon_state = "chinese4"
+
+/obj/item/weapon/reagent_containers/food/snacks/veggienoodles/New()
+			..()
+			reagents.add_reagent(NUTRIMENT, 5)
+			bitesize = 3
