@@ -3211,51 +3211,51 @@ var/global/num_vending_terminals = 1
 	pack = /obj/structure/vendomatpack/mining
 
 /obj/machinery/vending/whitedragonnoodles
-		name = "\improper White Dragon Noodle Vendor"
-		desc = "A vending machine that sells oriental food."
-		product_slogans = list(
-			"The Yayakuza send their regards!",
-			"Try our hand-crafted sushi!",
-			"A new life awaits you in the Off-World Colonies!",
-			"Contains No MSG!"
+	name = "\improper White Dragon Noodle Vendor"
+	desc = "A vending machine that sells oriental food."
+	product_slogans = list(
+		"The Yayakuza send their regards!",
+		"Try our hand-crafted sushi!",
+		"A new life awaits you in the Off-World Colonies!",
+		"Contains No MSG!"
+	)
+	product_ads = list(
+		"Yayakuza is recommending kiki!",
+		"Award-winning sushi",
+		"Mmm! So tasty!",
+		"Look at all the flavours we have to offer!",
+		"Go off-world!",
+		"Watch out for C-Beams!",
+		"Sent straight from the Off-World Colonies!",
+		"Try our sushi!",
+		"Try our new dishes!"
+	)
+	icon_state = "snack"
+	products = list(
+		/obj/item/weapon/reagent_containers/food/snacks/shanghaifry = 3,
+		/obj/item/weapon/reagent_containers/food/snacks/chowmein = 3,
+		/obj/item/weapon/reagent_containers/food/snacks/kungpao =3,
+		/obj/item/weapon/reagent_containers/food/snacks/veggienoodles = 3,
+		/obj/item/weapon/reagent_containers/food/snacks/fried_shrimp = 5,
+		/obj/item/weapon/reagent_containers/food/snacks/sushi_Ikura = 2,
+		/obj/item/weapon/reagent_containers/food/snacks/sushi_Tamago = 3,
+		/obj/item/weapon/reagent_containers/food/snacks/sushi_Ebi = 4,
+		/obj/item/weapon/reagent_containers/food/snacks/sushi_SmokedSalmon = 3,
+		/obj/item/weapon/reagent_containers/food/snacks/sushi_TobikoEgg = 1,
 		)
-		product_ads = list(
-			"Yayakuza is recommending kiki!",
-			"Award-winning sushi",
-			"Mmm! So tasty!",
-			"Look at all the flavours we have to offer!",
-			"Go off-world!",
-			"Watch out for C-Beams!",
-			"Sent straight from the Off-World Colonies!",
-			"Try our sushi!",
-			"Try our new dishes!"
+	contraband = list(
+		/obj/item/weapon/reagent_containers/food/snacks/higashikata = 1,
+		/obj/item/weapon/reagent_containers/food/snacks/sweetandsourpork = 1,
 		)
-		icon_state = "snack"
-		products = list(
-			/obj/item/weapon/reagent_containers/food/snacks/shanghaifry = 3,
-			/obj/item/weapon/reagent_containers/food/snacks/chowmein = 3,
-			/obj/item/weapon/reagent_containers/food/snacks/kungpao =3,
-			/obj/item/weapon/reagent_containers/food/snacks/veggienoodles = 3,
-			/obj/item/weapon/reagent_containers/food/snacks/fried_shrimp = 5,
-			/obj/item/weapon/reagent_containers/food/snacks/sushi_Ikura = 2,
-			/obj/item/weapon/reagent_containers/food/snacks/sushi_Tamago = 3,
-			/obj/item/weapon/reagent_containers/food/snacks/sushi_Ebi = 4,
-			/obj/item/weapon/reagent_containers/food/snacks/sushi_SmokedSalmon = 3,
-			/obj/item/weapon/reagent_containers/food/snacks/sushi_TobikoEgg = 1,
-			)
-		contraband = list(
-			/obj/item/weapon/reagent_containers/food/snacks/higashikata = 1,
-			/obj/item/weapon/reagent_containers/food/snacks/sweetandsourpork = 1,
-			)
-		prices = list(
-			/obj/item/weapon/reagent_containers/food/snacks/shanghaifry = 40,
-			/obj/item/weapon/reagent_containers/food/snacks/chowmein = 35,
-			/obj/item/weapon/reagent_containers/food/snacks/kungpao =30,
-			/obj/item/weapon/reagent_containers/food/snacks/veggienoodles = 50,
-			/obj/item/weapon/reagent_containers/food/snacks/fried_shrimp = 20,
-			/obj/item/weapon/reagent_containers/food/snacks/sushi_Ikura = 30,
-			/obj/item/weapon/reagent_containers/food/snacks/sushi_Tamago = 40,
-			/obj/item/weapon/reagent_containers/food/snacks/sushi_Ebi = 25,
-			/obj/item/weapon/reagent_containers/food/snacks/sushi_SmokedSalmon = 30,
-			/obj/item/weapon/reagent_containers/food/snacks/sushi_TobikoEgg = 40,
-			)
+	prices = list(
+		/obj/item/weapon/reagent_containers/food/snacks/shanghaifry = 40,
+		/obj/item/weapon/reagent_containers/food/snacks/chowmein = 35,
+		/obj/item/weapon/reagent_containers/food/snacks/kungpao =30,
+		/obj/item/weapon/reagent_containers/food/snacks/veggienoodles = 50,
+		/obj/item/weapon/reagent_containers/food/snacks/fried_shrimp = 20,
+		/obj/item/weapon/reagent_containers/food/snacks/sushi_Ikura = 30,
+		/obj/item/weapon/reagent_containers/food/snacks/sushi_Tamago = 40,
+		/obj/item/weapon/reagent_containers/food/snacks/sushi_Ebi = 25,
+		/obj/item/weapon/reagent_containers/food/snacks/sushi_SmokedSalmon = 30,
+		/obj/item/weapon/reagent_containers/food/snacks/sushi_TobikoEgg = 40,
+		)
