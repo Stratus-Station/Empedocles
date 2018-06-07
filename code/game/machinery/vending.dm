@@ -3216,7 +3216,7 @@ var/global/num_vending_terminals = 1
 		product_slogans = list(
 			"The Yayakuza send their regards!",
 			"Try our hand-crafted sushi!",
-			"A new life awaits you in the off-world colonies!",
+			"A new life awaits you in the Off-World Colonies!",
 			"Contains No MSG!"
 		)
 		product_ads = list(
@@ -3224,9 +3224,9 @@ var/global/num_vending_terminals = 1
 			"Award-winning sushi",
 			"Mmm! So tasty!",
 			"Look at all the flavours we have to offer!",
-			"Go off-world!.",
+			"Go off-world!",
 			"Watch out for C-Beams!",
-			"Sent straight from the Off-World Colonies!.",
+			"Sent straight from the Off-World Colonies!",
 			"Try our sushi!",
 			"Try our new dishes!"
 		)
