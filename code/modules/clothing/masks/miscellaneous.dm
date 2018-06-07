@@ -160,11 +160,6 @@ obj/item/clothing/mask/bandana/red
 	name = "red bandana"
 	icon_state = "bandred"
 
-obj/item/clothing/mask/joy
-	name = "joy mask"
-	desc = "Express your happiness or hide your sorrows with this laughing face with crying tears of joy cutout."
-	icon_state = "joy"
-
 /obj/item/clothing/mask/vamp_fangs
 	name = "false fangs"
 	desc = "For when you want people to think you're a vampire. Glows in the dark!"
