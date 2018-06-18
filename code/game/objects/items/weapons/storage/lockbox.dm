@@ -251,17 +251,17 @@
 	desc = "A locked box. When unlocked, the case will fall apart."
 	oneuse = 1
 
-/obj/item/storage/lockbox/medal
+/obj/item/weapon/storage/lockbox/medal
 	name = "medal box"
-	desc = "A locked box used to store various different medals."
+	desc = "A secure container which holds various medals."
 	icon_state = "medalbox+l"
-	item_state = "syringe_kit"
 	w_class = W_CLASS_LARGE
-	fits_max_w_class = W_CLASS_MEDIUM
-	max_combined_w_class = 14
+	max_combined_w_class = 20
 	storage_slots = 10
 	req_one_access = list(access_captain)
-	icon_locked = "medalbox+l"
+	locked = 1
+	broken = 0
+	icon_locked = "medalbox+1"
 	icon_closed = "medalbox"
 	icon_broken = "medalbox+b"
 
