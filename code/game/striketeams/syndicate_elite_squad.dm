@@ -41,7 +41,6 @@
 	return new_syndicate_commando
 
 /datum/striketeam/syndicate/greet_commando(var/mob/living/carbon/human/H)
-	H << 'sound/music/elite_syndie_squad.ogg'
 	to_chat(H, "<span class='notice'>You are [H.real_name], an Elite commando, in the service of the Syndicate.</span>")
 	to_chat(H, "<span class='notice'>Your mission is: <span class='danger'>[mission]</span></span>")
 
