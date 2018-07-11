@@ -4,7 +4,7 @@
 	name = "meat"
 	desc = "A slab of meat."
 	icon_state = "meat"
-	food_flags = FOOD_MEAT | FOOD_SKELETON_FRIENDLY
+	food_flags = FOOD_MEAT | FOOD_SKELETON_FRIENDLY | FOOD_NEEDS_COLD
 	var/subjectname = ""
 	var/subjectjob = null
 
@@ -13,6 +13,15 @@
 		..()
 		reagents.add_reagent(NUTRIMENT, 3)
 		src.bitesize = 3
+
+/obj/item/weapon/reagent_containers/food/snacks/meat/New()
+	..()
+	reagents.add_reagent(NUTRIMENT, 3)
+	src.bitesize = 3
+
+/obj/item/weapon/reagent_containers/food/snacks/meat/Rot()
+	..()
+	animate(src, color = grayscale, time = 3 SECONDS)
 
 /obj/item/weapon/reagent_containers/food/snacks/meat/New(atom/A, var/mob/M)
 	..(A)
@@ -301,4 +310,3 @@ var/global/list/valid_random_food_types = existing_typesof(/obj/item/weapon/reag
 	. = ..()
 	if(ishuman(eater))
 		eater.contract_disease(new /datum/disease/wendigo_transformation)
-
