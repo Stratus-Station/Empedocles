@@ -3212,7 +3212,7 @@ var/global/num_vending_terminals = 1
 
 /obj/machinery/vending/whitedragonnoodles
 	name = "\improper White Dragon Noodle Vendor"
-	desc = "A vending machine that sells oriental food."
+	desc = "A vending machine that sells oriental food, it appears to be made of a near-indestructible material, folded several times over."
 	product_slogans = list(
 		"The Yayakuza send their regards!",
 		"Try our hand-crafted sushi!",
