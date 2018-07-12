@@ -3230,13 +3230,13 @@ var/global/num_vending_terminals = 1
 		"Try our sushi!",
 		"Try our new dishes!"
 	)
-	icon_state = "snack"
+	icon_state = "whitedragonvend"
 	products = list(
-		/obj/item/weapon/reagent_containers/food/snacks/shanghaifry = 3,
-		/obj/item/weapon/reagent_containers/food/snacks/chowmein = 3,
-		/obj/item/weapon/reagent_containers/food/snacks/kungpao =3,
-		/obj/item/weapon/reagent_containers/food/snacks/veggienoodles = 3,
-		/obj/item/weapon/reagent_containers/food/snacks/fried_shrimp = 5,
+		/obj/item/weapon/reagent_containers/food/snacks/onigiri1 = 5,
+		/obj/item/weapon/reagent_containers/food/snacks/onigiri2 = 5,
+		/obj/item/weapon/reagent_containers/food/snacks/onigiri3 =3,
+		/obj/item/weapon/reagent_containers/food/snacks/MisoTastyRamen = 3,
+		/obj/item/weapon/reagent_containers/food/snacks/yakidangos = 5,
 		/obj/item/weapon/reagent_containers/food/snacks/sushi_Ikura = 2,
 		/obj/item/weapon/reagent_containers/food/snacks/sushi_Tamago = 3,
 		/obj/item/weapon/reagent_containers/food/snacks/sushi_Ebi = 4,
@@ -3248,11 +3248,11 @@ var/global/num_vending_terminals = 1
 		/obj/item/weapon/reagent_containers/food/snacks/sweetandsourpork = 1,
 		)
 	prices = list(
-		/obj/item/weapon/reagent_containers/food/snacks/shanghaifry = 40,
-		/obj/item/weapon/reagent_containers/food/snacks/chowmein = 35,
-		/obj/item/weapon/reagent_containers/food/snacks/kungpao =30,
-		/obj/item/weapon/reagent_containers/food/snacks/veggienoodles = 50,
-		/obj/item/weapon/reagent_containers/food/snacks/fried_shrimp = 20,
+		/obj/item/weapon/reagent_containers/food/snacks/onigiri1 = 30,
+		/obj/item/weapon/reagent_containers/food/snacks/onigiri2 = 30,
+		/obj/item/weapon/reagent_containers/food/snacks/onigiri3 =50,
+		/obj/item/weapon/reagent_containers/food/snacks/MisoTastyRamen = 70,
+		/obj/item/weapon/reagent_containers/food/snacks/yakidangos = 50,
 		/obj/item/weapon/reagent_containers/food/snacks/sushi_Ikura = 30,
 		/obj/item/weapon/reagent_containers/food/snacks/sushi_Tamago = 40,
 		/obj/item/weapon/reagent_containers/food/snacks/sushi_Ebi = 25,

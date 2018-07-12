@@ -144,6 +144,30 @@
 	name = "cyber mannequin pedestale"
 	icon_state = "mannequin_cyber_empty"
 
+/obj/item/trash/ramentrash
+	name = "\improper Empty Ramen Bowl"
+	icon_state= "ramen-trash"
+	starting_materials = list(MAT_CARDBOARD = 370)
+	w_type=RECYK_MISC
+
+/obj/item/trash/yakidangotrash
+	name = "\improper Leftover Yaki-Dango skewers"
+	icon_state= "yakidango-trash"
+	starting_materials = list(MAT_CARDBOARD = 370)
+	w_type=RECYK_MISC
+
+/obj/item/trash/onigiritrash
+	name = "\improper Onigiri remains"
+	icon_state= "onigiri-trash"
+	starting_materials = list(MAT_CARDBOARD = 370)
+	w_type=RECYK_MISC
+
+/obj/item/trash/surpriseo
+	name = "\improper Odoroki Package remains"
+	icon_state= "surprise-o"
+	starting_materials = list(MAT_CARDBOARD = 370)
+	w_type=RECYK_MISC
+
 /obj/item/trash/attack(mob/M as mob, mob/living/user as mob)
 	return
 

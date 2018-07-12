@@ -5624,42 +5624,57 @@ obj/item/weapon/reagent_containers/food/snacks/butteredtoast
 	..()
 	reagents.add_reagent(NUTRIMENT, 2)
 
-/obj/item/weapon/reagent_containers/food/snacks/shanghaifry
-	name = "Shanghai Fried Noodles"
-	desc = "A noodlebox containing Shanghai-style udon noodles with beef cutlets, bok choy and onion. It smells heavenly."
-	icon_state = "chinese1"
+/obj/item/weapon/reagent_containers/food/snacks/onigiri1
+	name = "Onigiri"
+	desc = "A riceball made of white rice, wrapped in seaweed. This one appears to be filled with Umeboshi."
+	icon_state = "onigiri"
+	trash = /obj/item/trash/onigiritrash
 
-/obj/item/weapon/reagent_containers/food/snacks/shanghaifry/New()
+/obj/item/weapon/reagent_containers/food/snacks/onigiri1/New()
 	..()
 	reagents.add_reagent(NUTRIMENT, 3)
-	bitesize = 3
-
-/obj/item/weapon/reagent_containers/food/snacks/chowmein
-	name = "Chow mein Noodles"
-	desc = "A noodlebox containing Chow mein-styled noodles. It appears to have chicken, mushrooms, carrots and some other vegetables inside."
-	icon_state = "chinese2"
-
-/obj/item/weapon/reagent_containers/food/snacks/chowmein/New()
-	..()
-	reagents.add_reagent(NUTRIMENT, 4)
 	bitesize = 2
 
-/obj/item/weapon/reagent_containers/food/snacks/kungpao
-	name = "Kung Pao Chicken Noodles"
-	desc = "A noodlebox containing noodles in Kung Pao sauce. It appears to have pieces of chicken, zucchini and mushrooms inside."
-	icon_state = "chinese3"
+/obj/item/weapon/reagent_containers/food/snacks/onigiri2
+	name = "Onigiri"
+	desc = "A riceball made of white rice, wrapped in seaweed. This one appears to be filled with Katsuobushi."
+	icon_state = "onigiri2"
+	trash = /obj/item/trash/onigiritrash
 
-/obj/item/weapon/reagent_containers/food/snacks/kungpao/New()
+/obj/item/weapon/reagent_containers/food/snacks/onigiri2/New()
 	..()
 	reagents.add_reagent(NUTRIMENT, 3)
-	bitesize = 4
+	bitesize = 2
 
-/obj/item/weapon/reagent_containers/food/snacks/veggienoodles
-	name = "Vegetarian Chow mein Noodles "
-	desc = "A noodlebox containing a vegetarian-style Chow mein noodles. It appears numerous vegetables inside, instead of meat."
-	icon_state = "chinese4"
+/obj/item/weapon/reagent_containers/food/snacks/onigiri3
+	name = "Onigiri"
+	desc = "A riceball made of white rice, wrapped in seaweed. This one has been shaped into a cute face!"
+	icon_state = "onigiri4"
+	trash = /obj/item/trash/onigiritrash
 
-/obj/item/weapon/reagent_containers/food/snacks/veggienoodles/New()
+/obj/item/weapon/reagent_containers/food/snacks/onigiri3/New()
+	..()
+	reagents.add_reagent(NUTRIMENT, 4)
+	bitesize = 3
+
+/obj/item/weapon/reagent_containers/food/snacks/yakidangos
+	name = "Yaki Dango"
+	desc = "A skewer of Dangos, these are sweets made of Rice Flour."
+	icon_state = "yakidango-s"
+	trash = /obj/item/trash/yakidangotrash
+
+/obj/item/weapon/reagent_containers/food/snacks/yakidangos/New()
+	..()
+	reagents.add_reagent(NUTRIMENT, 4)
+	bitesize = 3
+
+/obj/item/weapon/reagent_containers/food/snacks/MisoTastyRamen
+	name = "Miso Tasty Ramen"
+	desc = "A small recyclable bowl containing piping hot Ramen. This is the Miso Tasty variant."
+	icon_state = "rameno"
+	trash = /obj/item/trash/ramentrash
+
+/obj/item/weapon/reagent_containers/food/snacks/MisoTastyRamen/New()
 	..()
 	reagents.add_reagent(NUTRIMENT, 5)
-	bitesize = 3
+	bitesize = 5
