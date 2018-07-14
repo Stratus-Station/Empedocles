@@ -396,4 +396,4 @@
 /obj/structure/sign/whitedragon
 	name = "Eat at White Dragon!"
 	desc = "A sign advertising White Dragon, a noodle bar. It's in some sort of ancient language you can't decipher..."
-	icon_state = "neonsign"
+	icon_state = "whitedragon"
