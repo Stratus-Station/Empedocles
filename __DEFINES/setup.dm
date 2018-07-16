@@ -1371,6 +1371,7 @@ var/proccalls = 1
 #define FOOD_LIQUID	8
 #define FOOD_SKELETON_FRIENDLY 16 //Can be eaten by skeletons
 #define FOOD_LACTOSE 32 //Contains MILK
+#define FOOD_NEEDS_COLD 64	//Food needs to be frozen/refriderated or it will rot.
 /*
  *
  *
