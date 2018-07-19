@@ -1962,6 +1962,16 @@
 	reagents.add_reagent(NUTRIMENT, 6)
 	bitesize = 2
 
+/obj/item/weapon/reagent_containers/food/snacks/breadsandwich
+	name = "Bread Sandwiches"
+	desc = "It'll have to do"
+	icon_state = "breadsandwich"
+
+/obj/item/weapon/reagent_containers/food/snacks/breadsandwich/New()
+	..()
+	reagents.add_reagent(NUTRIMENT, 2)
+	bitesize = 3
+
 /obj/item/weapon/reagent_containers/food/snacks/toastedsandwich
 	name = "Toasted Sandwich"
 	desc = "Now if you only had a pepper bar."
@@ -5623,7 +5633,3 @@ obj/item/weapon/reagent_containers/food/snacks/butteredtoast
 /obj/item/weapon/reagent_containers/food/snacks/butterfedtoast/New()
 	..()
 	reagents.add_reagent(NUTRIMENT, 2)
-
-
-
-
