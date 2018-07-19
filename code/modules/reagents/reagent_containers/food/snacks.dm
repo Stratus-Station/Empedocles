@@ -1963,14 +1963,14 @@
 	bitesize = 2
 
 /obj/item/weapon/reagent_containers/food/snacks/breadsandwich
-	name = "Bread Sandwiches"
-	desc = "It'll have to do"
+	name = "Bread Sandwich"
+	desc = "Well, it's better than nothing..."
 	icon_state = "breadsandwich"
 
 /obj/item/weapon/reagent_containers/food/snacks/breadsandwich/New()
 	..()
-	reagents.add_reagent(NUTRIMENT, 2)
-	bitesize = 3
+	reagents.add_reagent(NUTRIMENT, 3)
+	bitesize = 1
 
 /obj/item/weapon/reagent_containers/food/snacks/toastedsandwich
 	name = "Toasted Sandwich"
