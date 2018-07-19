@@ -250,3 +250,29 @@
 /obj/item/weapon/storage/lockbox/oneuse
 	desc = "A locked box. When unlocked, the case will fall apart."
 	oneuse = 1
+
+/obj/item/weapon/storage/lockbox/medal
+	name = "medal box"
+	desc = "A secure container which holds various medals."
+	icon_state = "medalbox+l"
+	w_class = W_CLASS_LARGE
+	max_combined_w_class = 20
+	storage_slots = 10
+	req_one_access = list(access_captain)
+	locked = 1
+	broken = 0
+	icon_locked = "medalbox+1"
+	icon_closed = "medalbox"
+	icon_broken = "medalbox+b"
+
+/obj/item/storage/lockbox/medal/New()
+	..()
+	new /obj/item/clothing/accessory/medal/gold/heroism(src)
+	new /obj/item/clothing/accessory/medal/silver/security(src)
+	new /obj/item/clothing/accessory/medal/silver/valor(src)
+	new /obj/item/clothing/accessory/medal/nobel_science(src)
+	new /obj/item/clothing/accessory/medal/bronze_heart(src)
+	new /obj/item/clothing/accessory/medal/conduct(src)
+	new /obj/item/clothing/accessory/medal/conduct(src)
+	new /obj/item/clothing/accessory/medal/conduct(src)
+	new /obj/item/clothing/accessory/medal/gold/captain(src)
