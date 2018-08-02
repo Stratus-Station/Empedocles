@@ -42,7 +42,7 @@
 
 /obj/machinery/apiary/New()
 	..()
-	overlays += image('icons/obj/apiary_bees_etc.dmi', icon_state=apiary_icon)
+	overlays += image('icons/obj/insects_etc.dmi', icon_state=apiary_icon)
 	create_reagents(100)
 	consume = new()
 
@@ -55,16 +55,16 @@
 
 /obj/machinery/apiary/update_icon()
 	overlays.len = 0
-	overlays += image('icons/obj/apiary_bees_etc.dmi', icon_state=apiary_icon)
+	overlays += image('icons/obj/insects_etc.dmi', icon_state=apiary_icon)
 
 	var/image/I = null
 	switch(reagents.total_volume)
 		if(30 to 60)
-			I = image('icons/obj/apiary_bees_etc.dmi', icon_state="honey_1")
+			I = image('icons/obj/insects_etc.dmi', icon_state="honey_1")
 		if(60 to 90)
-			I = image('icons/obj/apiary_bees_etc.dmi', icon_state="honey_2")
+			I = image('icons/obj/insects_etc.dmi', icon_state="honey_2")
 		if(90 to INFINITY)
-			I = image('icons/obj/apiary_bees_etc.dmi', icon_state="honey_3")
+			I = image('icons/obj/insects_etc.dmi', icon_state="honey_3")
 	if(!I)
 		return
 	I.color = mix_color_from_reagents(reagents.reagent_list)
@@ -467,7 +467,7 @@
 
 /obj/machinery/apiary/wild
 	name = "angry-bee hive"
-	icon = 'icons/obj/apiary_bees_etc.dmi'
+	icon = 'icons/obj/insects_etc.dmi'
 	icon_state = "apiary-wild"
 	density = 1
 	anchored = 1

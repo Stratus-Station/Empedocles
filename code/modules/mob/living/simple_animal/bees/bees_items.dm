@@ -17,7 +17,7 @@
 /obj/item/queen_bee
 	name = "queen bee packet"
 	desc = "Place her into an apiary so she can get busy."
-	icon = 'icons/obj/apiary_bees_etc.dmi'
+	icon = 'icons/obj/insects_etc.dmi'
 	icon_state = "queen_larvae"
 	w_class = W_CLASS_TINY
 	var/datum/bee_species/species = null
@@ -32,7 +32,7 @@
 /obj/item/weapon/bee_net
 	name = "bug net"
 	desc = "For catching insects."
-	icon = 'icons/obj/apiary_bees_etc.dmi'
+	icon = 'icons/obj/insects_etc.dmi'
 	icon_state = "bee_net"
 	item_state = "bee_net"
 	w_class = W_CLASS_MEDIUM
@@ -139,7 +139,7 @@
 
 /obj/item/apiary
 	name = "moveable apiary"
-	icon = 'icons/obj/apiary_bees_etc.dmi'
+	icon = 'icons/obj/insects_etc.dmi'
 	icon_state = "apiary_item"
 	item_state = "giftbag"
 	w_class = W_CLASS_HUGE
@@ -148,7 +148,7 @@
 /obj/item/weapon/reagent_containers/food/snacks/beezeez
 	name = "packet of BeezEez"
 	desc = "Delicious nutrients for domesticated bees. Helps jumpstarting a new colony, and purging an existing one from toxins."
-	icon = 'icons/obj/apiary_bees_etc.dmi'
+	icon = 'icons/obj/insects_etc.dmi'
 	icon_state = "beezeez"
 	trash = /obj/item/trash/beezeez
 	volume = 3
@@ -161,7 +161,7 @@
 
 /obj/item/trash/beezeez
 	name = "empty packet of BeezEez"
-	icon = 'icons/obj/apiary_bees_etc.dmi'
+	icon = 'icons/obj/insects_etc.dmi'
 	icon_state = "beezeez-empty"
 
 

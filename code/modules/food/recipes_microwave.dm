@@ -264,22 +264,21 @@
 
 // Human ///////////////////////////////////////////////////////
 
-/datum/recipe/human //Parent datum only
-	make_food(var/obj/container as obj)
-		var/human_name
-		var/human_job
-		for(var/obj/item/weapon/reagent_containers/food/snacks/meat/human/HM in container)
-			if(HM.subjectname)
-				human_name = HM.subjectname
-				human_job = HM.subjectjob
-				break
-		var/lastname_index = findtext(human_name, " ")
-		if(lastname_index)
-			human_name = copytext(human_name,lastname_index+1)
-		var/obj/item/weapon/reagent_containers/food/snacks/human/HB = ..(container)
-		HB.name = human_name+HB.name
-		HB.job = human_job
-		return HB
+/datum/recipe/human/make_food(var/obj/container as obj)
+	var/human_name
+	var/human_job
+	for(var/obj/item/weapon/reagent_containers/food/snacks/meat/human/HM in container)
+		if(HM.subjectname)
+			human_name = HM.subjectname
+			human_job = HM.subjectjob
+			break
+	var/lastname_index = findtext(human_name, " ")
+	if(lastname_index)
+		human_name = copytext(human_name,lastname_index+1)
+	var/obj/item/weapon/reagent_containers/food/snacks/human/HB = ..(container)
+	HB.name = human_name+HB.name
+	HB.job = human_job
+	return HB
 
 /datum/recipe/human/burger
 	reagents = list(FLOUR = 5)
@@ -1170,6 +1169,14 @@
 		/obj/item/weapon/reagent_containers/food/snacks/cheesewedge,
 		)
 	result = /obj/item/weapon/reagent_containers/food/snacks/sandwich
+
+/datum/recipe/breadsandwich
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/breadslice,
+		/obj/item/weapon/reagent_containers/food/snacks/breadslice,
+		/obj/item/weapon/reagent_containers/food/snacks/breadslice,
+		)
+	result = /obj/item/weapon/reagent_containers/food/snacks/breadsandwich
 
 /datum/recipe/toastedsandwich
 	items = list(/obj/item/weapon/reagent_containers/food/snacks/sandwich)
@@ -2565,21 +2572,21 @@
 	)
 
 	result = /obj/item/weapon/reagent_containers/food/snacks/sliceable/ambrosia_brownies
-	
+
 /datum/recipe/butterfingers_r
 	items = list(/obj/item/organ/external/r_hand,
 	/obj/item/weapon/reagent_containers/food/snacks/butter,
 	)
 
  result = /obj/item/weapon/reagent_containers/food/snacks/butterfingers_r/
- 
+
 /datum/recipe/butterfingers_l
 	items = list(/obj/item/organ/external/l_hand,
 	/obj/item/weapon/reagent_containers/food/snacks/butter,
 	)
 
  result = /obj/item/weapon/reagent_containers/food/snacks/butterfingers_l/
- 
+
 /datum/recipe/butteredtoast
 	reagents = list(LIQUIDBUTTER = 2)
 	items = list(/obj/item/weapon/reagent_containers/food/snacks/breadslice,

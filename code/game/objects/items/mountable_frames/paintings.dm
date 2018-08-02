@@ -1,14 +1,14 @@
 //The paintings in the following list are those that have a chance to be bought in merch computers, or to appear when spawned randomly.
 var/global/list/available_paintings = list(
-	"duck",
-	"mario",
+	"bob",
+	"desert",
 	"gradius",
 	"kudzu",
 	"dwarf",
 	"xenolisa",
 	"bottles",
-	"aymao",
-	"flowey",
+	"dogpoker",
+	"sonman",
 	"sunset",
 	"Flowereater",
 	"Sadclown",
@@ -24,6 +24,8 @@ var/global/list/available_paintings = list(
 	"jmwt2",
 	"jmwt3",
 	"jmwt4",
+	"starry",
+	"wave",
 
 	)
 	//The following paintings either appear under certain conditions or have to be varedited by admins
@@ -65,12 +67,12 @@ var/global/list/available_paintings = list(
 		if("monkey")
 			name = "\improper Mr. Deempisi portrait"
 			desc = "Under the painting is a small plaque. It reads: 'While the meat grinder may not have spared you, fear not. Not one part of you has gone to waste... You were delicious.'"
-		if("duck")
-			name = "\improper Duck"
-			desc = "A painting of a duck. It has a crazed look in its eyes. You can almost imagine him asking you for some grapes."
-		if("mario")
-			name = "\improper Mario and Coin"
-			desc = "A painting of an italian plumber and an oversized golden plate. Apparently he's a video game mascot of sorts."
+		if("bob")
+			name = "\improper Bob Ross Portrait"
+			desc = "A painting of an ancient painter, he appears to be smiling happily at you. You can make out happy little trees in the background."
+		if("desert")
+			name = "\improper Desert Landscape"
+			desc = "A painting showcasing a vast desert landscape. Bones appear to be cast out in the desert..."
 		if("gradius")
 			name = "\improper Vic Viper"
 			desc = "A painting of a space ship. It makes you feel like diving right into an alien base and releasing your blasters right onto its core."
@@ -89,12 +91,12 @@ var/global/list/available_paintings = list(
 		if("bottles")
 			name = "\improper Bottle and Bottle"
 			desc = "A painting of two glass bottles filled with blue and red liquids. You can almost feel the intensity of the artistic discussions that led to this creation."
-		if("aymao")
-			name = "\improper Ay Mao"
-			desc = "A painting of the glorious leader of the Grey Democratic Republic. He looks dignified, and a bit high too."
-		if("flowey")
-			name = "\improper Flowey the Flower"
-			desc = "A painting of your best friend. Who's also a SERIAL MURDERER."
+		if("dogpoker")
+			name = "\improper Dogs Play Poker."
+			desc = "A painting of what appears to be a group of dogs sat around a table playing poker, you reckon Ian is one of them. "
+		if("sonman")
+			name = "\improper Apple Man"
+			desc = "A painting of what appears to be a formal man with an apple for a face, perhaps it is a Botanist?"
 		if("sunset")
 			name = "\improper Path toward the Sunset"
 			desc = "A painting by D.T.Link. The colours fill you with hope and determination."
@@ -149,6 +151,12 @@ var/global/list/available_paintings = list(
 		if("carp")
 			name = "\improper 'Singing' Mounted Carp"
 			desc = "Too unrobust to beat a carp to death with your bare hands and mount it on a plank of wood? Then this professionally taxidermied trophy is just for you! Note: Does not actually sing."
+		if("starry")
+			name = "\improper Star-filled Night"
+			desc = "A painting of a beautiful swirling landscape and a twisting skyline, it is painted in magnificent artstyle."
+		if("wave")
+			name = "\improper Crashing Waves"
+			desc = "A painting displaying huge crashing waves in the ocean, the text on the side appear to be in an ancient language you cannot understand"
 
 		else
 			name = "painting"
@@ -217,12 +225,12 @@ var/global/list/available_paintings = list(
 		if("monkey")
 			name = "\improper Mr. Deempisi portrait"
 			desc = "Under the painting is a small plaque. It reads: 'While the meat grinder may not have spared you, fear not. Not one part of you has gone to waste... You were delicious.'"
-		if("duck")
-			name = "\improper Duck"
-			desc = "A painting of a duck. It has a crazed look in its eyes. You can almost imagine him asking you for some grapes."
-		if("mario")
-			name = "\improper Mario and Coin"
-			desc = "A painting of an Italian plumber and an oversized golden plate. Apparently he's a video game mascot of sorts."
+		if("bob")
+			name = "\improper Bob Ross Portrait"
+			desc = "A painting of an ancient painter, he appears to be smiling happily at you. You can make out happy little trees in the background."
+		if("desert")
+			name = "\improper Desert Landscape"
+			desc = "A painting showcasing a vast desert landscape. Bones appear to be cast out in the desert..."
 		if("gradius")
 			name = "\improper Vic Viper"
 			desc = "A painting of a space ship. It makes you feel like diving right into an alien base and releasing your blasters right onto its core."
@@ -241,12 +249,12 @@ var/global/list/available_paintings = list(
 		if("bottles")
 			name = "\improper Bottle and Bottle"
 			desc = "A painting of two glass bottles filled with blue and red liquids. You can almost feel the intensity of the artistic discussions that led to this creation."
-		if("aymao")
-			name = "\improper Ay Mao"
-			desc = "A painting of the glorious leader of the Grey Democratic Republic. He looks dignified, and a bit high too."
-		if("flowey")
-			name = "\improper Flowey the Flower"
-			desc = "A painting of your best friend. Who's also a SERIAL MURDERER."
+		if("dogpoker")
+			name = "\improper Dogs Play Poker."
+			desc = "A painting of what appears to be a group of dogs sat around a table playing poker, you reckon Ian is one of them. "
+		if("sonman")
+			name = "\improper Apple Man"
+			desc = "A painting of what appears to be a formal man with an apple for a face, perhaps it is a Botanist?"
 		if("sunset")
 			name = "\improper Path toward the Sunset"
 			desc = "A painting by D.T.Link. The colours fill you with hope and determination."
@@ -301,6 +309,12 @@ var/global/list/available_paintings = list(
 		if("carp")
 			name = "\improper 'Singing' Mounted Carp"
 			desc = "Too unrobust to beat a carp to death with your bare hands and mount it on a plank of wood? Then this professionally taxidermied trophy is just for you! Note: Does not actually sing."
+		if("starry")
+			name = "\improper Star-filled Night"
+			desc = "A painting of a beautiful swirling landscape and a twisting skyline, it is painted in magnificent artstyle."
+		if("wave")
+			name = "\improper Crashing Waves"
+			desc = "A painting displaying huge crashing waves in the ocean, the text on the side appear to be in an ancient language you cannot understand"
 
 		else
 			name = "painting"

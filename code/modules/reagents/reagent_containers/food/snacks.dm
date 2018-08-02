@@ -14,6 +14,7 @@
 					//FOOD_ANIMAL	- stuff that is made from (or contains) animal products other than meat (eggs, honey, ...). Anything that vegans won't eat!
 					//FOOD_SWEET	- sweet stuff like chocolate and candy
 					//FOOD_LACTOSE  - contains milk
+					//FOOD_NEEDS_COLD - stuff that is not in a freezer/cold area will rot.
 
 					//Example: food_flags = FOOD_SWEET | FOOD_ANIMAL
 					//Unfortunately, food created by cooking doesn't inherit food_flags!
@@ -28,7 +29,10 @@
 	var/wrapped = 0 //Is the food wrapped (preventing one from eating until unwrapped)
 	var/dried_type = null //What can we dry the food into
 	var/deepfried = 0 //Is the food deep-fried ?
+	var/rotten = FALSE//Is the food rotten?
+	var/cold = 200 // How much time until it starts to decompose. Timer will freeze (pun intended) in cold environments such as a fridge.
 	var/filling_color = "#FFFFFF" //What color would a filling of this item be ?
+	var/list/valid_freezers = list(/obj/structure/closet/secure_closet/freezer, /obj/structure/closet/crate/freezer/surgery, /obj/machinery/smartfridge)
 	volume = 100 //Double amount snacks can carry, so that food prepared from excellent items can contain all the nutriments it deserves
 
 /obj/item/weapon/reagent_containers/food/snacks/Destroy()
@@ -99,6 +103,37 @@
 /obj/item/weapon/reagent_containers/food/snacks/New()
 
 	..()
+	if(food_flags & FOOD_NEEDS_COLD)
+		processing_objects.Add(src)
+
+/obj/item/weapon/reagent_containers/food/snacks/proc/Rot()
+	rotten = TRUE
+	cold = 0
+	name = "rotten [src.name]"
+	reagents.add_reagent(TOXIN, 6)
+	if(prob(25))
+		new /obj/item/weapon/reagent_containers/food/snacks/fly_eggs(src)
+	processing_objects.Remove(src)
+	return
+
+/obj/item/weapon/reagent_containers/food/snacks/proc/check_coldness()
+	if(is_type_in_list(loc, valid_freezers)) //Ideally we'll need a better system for freezers
+		return TRUE
+
+	var/turf/simulated/L = loc
+	if(istype(L))
+		var/datum/gas_mixture/env = L.return_air()
+		if(env.temperature < T0C)
+			return TRUE
+
+/obj/item/weapon/reagent_containers/food/snacks/process()
+	if(check_coldness())
+		return
+
+	cold--
+
+	if(cold <= 0)
+		Rot()
 
 /obj/item/weapon/reagent_containers/food/snacks/attack(mob/living/M, mob/user, def_zone, eat_override = 0)	//M is target of attack action, user is the one initiating it
 	if(!eatverb)
@@ -1961,6 +1996,16 @@
 	..()
 	reagents.add_reagent(NUTRIMENT, 6)
 	bitesize = 2
+
+/obj/item/weapon/reagent_containers/food/snacks/breadsandwich
+	name = "Bread Sandwich"
+	desc = "Well, it's better than nothing..."
+	icon_state = "breadsandwich"
+
+/obj/item/weapon/reagent_containers/food/snacks/breadsandwich/New()
+	..()
+	reagents.add_reagent(NUTRIMENT, 3)
+	bitesize = 1
 
 /obj/item/weapon/reagent_containers/food/snacks/toastedsandwich
 	name = "Toasted Sandwich"
@@ -5623,7 +5668,3 @@ obj/item/weapon/reagent_containers/food/snacks/butteredtoast
 /obj/item/weapon/reagent_containers/food/snacks/butterfedtoast/New()
 	..()
 	reagents.add_reagent(NUTRIMENT, 2)
-
-
-
-
