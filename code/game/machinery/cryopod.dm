@@ -226,7 +226,8 @@
 	find_control_computer()
 
 /obj/machinery/cryopod/proc/find_control_computer(urgent=0)
-	for(var/obj/machinery/computer/cryopod/C in areaMaster.contents) //locate() is shit, this actually works, and there's a decent chance it's faster than locate()
+	var/area/A = get_area()
+	for(var/obj/machinery/computer/cryopod/C in A.contents) //locate() is shit, this actually works, and there's a decent chance it's faster than locate()
 		control_computer = C
 		break
 
@@ -498,7 +499,7 @@
 			add_fingerprint(M)
 
 
-/obj/machinery/cryopod/MouseDrop_T(atom/movable/O as mob|obj, mob/user as mob)
+/obj/machinery/cryopod/MouseDropTo(atom/movable/O, mob/user)
 
 	if(O.loc == user) //no you can't pull things out of your ass
 		return
