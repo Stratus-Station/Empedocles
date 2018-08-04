@@ -21,7 +21,7 @@
 	layer = MOB_LAYER //icon draw layer
 	plane = MOB_PLANE
 	infra_luminosity = 15 //byond implementation is bugged.
-	var/hud_list[2]
+	var/list/hud_list = list()
 	var/initial_icon = null //Mech type for resetting icon. Only used for reskinning kits (see custom items)
 	var/can_move = 1
 	var/mob/living/carbon/occupant = null
@@ -50,7 +50,9 @@
 	var/obj/machinery/portable_atmospherics/canister/internal_tank
 	var/datum/gas_mixture/cabin_air
 	var/obj/machinery/atmospherics/unary/portables_connector/connected_port = null
-
+	
+	var/cursor_enabled = 0 //whether to display the mecha cursor	
+	
 	var/obj/item/device/radio/radio = null
 	var/obj/item/device/radio/electropack/electropack = null
 	var/obj/item/mecha_parts/mecha_tracking/tracking = null
@@ -74,7 +76,6 @@
 	var/list/equipment = new
 	var/obj/item/mecha_parts/mecha_equipment/selected
 	var/max_equip = 3
-	var/datum/events/events
 
 	var/turf/crashing = null
 	var/list/mech_parts = list(/obj/item/weapon/cell,
@@ -86,11 +87,13 @@
 						/obj/item/device/radio/electropack,
 						/obj/machinery/portable_atmospherics/scrubber/mech)
 
+	var/lock_controls = 0
+	var/list/intrinsic_spells = null
+
 /obj/mecha/New()
 	hud_list[DIAG_HEALTH_HUD] = image('icons/mob/hud.dmi', src, "huddiagmax")
 	hud_list[DIAG_CELL_HUD] = image('icons/mob/hud.dmi', src, "hudbattmax")
 	..()
-	events = new
 	add_radio()
 	add_cabin()
 	if(!add_airtank()) //we check this here in case mecha does not have an internal tank available by default - WIP
@@ -111,8 +114,42 @@
 /obj/mecha/Destroy()
 	src.go_out(loc, TRUE)
 	mechas_list -= src //global mech list
+	if(cell)
+		qdel(cell)
+		cell = null
+	if(internal_tank)
+		qdel(internal_tank)
+		internal_tank = null
+	if(cabin_air)
+		qdel(cabin_air)
+		cabin_air = null
+	connected_port = null
+	if(radio)
+		qdel(radio)
+		radio = null
+	if(electropack)
+		qdel(electropack)
+		electropack = null
+	if(tracking)
+		qdel(tracking)
+		tracking = null
+	if(pr_int_temp_processor)
+		qdel(pr_int_temp_processor)
+		pr_int_temp_processor = null
+	if(pr_inertial_movement)
+		qdel(pr_inertial_movement)
+		pr_inertial_movement = null
+	if(pr_give_air)
+		qdel(pr_give_air)
+		pr_give_air = null
+	if(pr_internal_damage)
+		qdel(pr_internal_damage)
+		pr_internal_damage = null
+	for(var/obj/item/mecha_parts/mecha_equipment/eq in equipment)
+		qdel(eq)
+	equipment = null
+	selected = null
 	..()
-	return
 
 /obj/mecha/can_apply_inertia()
 	return 1 //No anchored check - so that mechas can fly off into space
@@ -288,12 +325,6 @@
 ////////  Movement procs  ////////
 //////////////////////////////////
 
-/obj/mecha/Move(NewLoc, Dir = 0, step_x = 0, step_y = 0, glide_size_override = 0)
-	. = ..()
-	if(.)
-		events.fireEvent("onMove",get_turf(src))
-	return
-
 /obj/mecha/relaymove(mob/user,direction)
 	if(user != src.occupant) //While not "realistic", this piece is player friendly.
 		user.forceMove(get_turf(src))
@@ -302,12 +333,18 @@
 	if(connected_port)
 		occupant_message("Unable to move while connected to the air system port.", TRUE)
 		return 0
+	if(lock_controls) //No moving while using the Gravpult!
+		return 0
 	if(throwing)
 		return 0
 	if(state)
 		occupant_message("<font color='red'>Maintenance protocols in effect.</font>", TRUE)
 		return
 	return domove(direction)
+
+/obj/mecha/proc/set_control_lock(var/lock=0,var/delay=0)
+	spawn(delay)
+		lock_controls = lock
 
 /obj/mecha/proc/domove(direction)
 	return call((proc_res["dyndomove"]||src), "dyndomove")(direction)
@@ -319,6 +356,8 @@
 	if(src.pr_inertial_movement.active())
 		return 0
 	if(!has_charge(step_energy_drain))
+		return 0
+	if(lock_controls) //No moving while using the Gravpult!
 		return 0
 	var/move_result = 0
 	startMechWalking()
@@ -432,7 +471,7 @@
 			src.crashing = null
 
 		if(breakthrough)
-			if(crashing)
+			if(crashing && !istype(crashing,/turf/space))
 				spawn(1)
 					src.throw_at(crashing, 50, src.throw_speed)
 			else
@@ -1076,6 +1115,24 @@
 	src.occupant_message("Toggled lights [lights?"on":"off"].")
 	log_message("Toggled lights [lights?"on":"off"].")
 	return
+	
+/obj/mecha/verb/toggle_cursor()
+	set name = "Toggle Cursor"
+	set category = "Exosuit Interface"
+	set src = usr.loc
+	set popup_menu = 0
+	if(usr!=src.occupant)
+		return
+	cursor_enabled = !cursor_enabled
+	if(cursor_enabled)
+		if(src.occupant && src.occupant.client)
+			src.occupant.client.mouse_pointer_icon = file("icons/mouse/mecha_mouse.dmi")
+	else
+		if(src.occupant && src.occupant.client)
+			src.occupant.client.mouse_pointer_icon = initial(src.occupant.client.mouse_pointer_icon)
+	src.occupant_message("Toggled cursor [cursor_enabled?"on":"off"].")
+	log_message("Toggled cursor [cursor_enabled?"on":"off"].")
+	return
 
 
 /obj/mecha/verb/toggle_internal_tank()
@@ -1090,7 +1147,7 @@
 	src.log_message("Now taking air from [use_internal_tank?"internal airtank":"environment"].")
 	return
 
-/obj/mecha/MouseDrop_T(mob/M as mob, mob/user as mob)
+/obj/mecha/MouseDropTo(mob/M as mob, mob/user as mob)
 	if(M != user)
 		return
 	move_inside(M, user)
@@ -1100,9 +1157,11 @@
 	set name = "Enter Exosuit"
 	set src in oview(1)
 
-	if(usr.incapacitated() || usr.lying) //are you cuffed, dying, lying, stunned or other
+	if(usr.incapacitated() || usr.lying)
 		return
-	if (!ishuman(usr))
+	if(!Adjacent(usr) || !usr.Adjacent(src))
+		return
+	if(!ishuman(usr))
 		return
 	src.log_message("[usr] tries to move in.")
 	if (src.occupant)
@@ -1135,6 +1194,7 @@
 	if(enter_after(40,usr))
 		if(!src.occupant)
 			moved_inside(usr)
+			refresh_spells()
 		else if(src.occupant!=usr)
 			to_chat(usr, "[src.occupant] was faster. Try better next time, loser.")
 	else
@@ -1160,6 +1220,10 @@
 		if(!hasInternalDamage())
 			src.occupant << sound('sound/mecha/nominalsyndi.ogg',volume=50)
 
+		//change the cursor
+		if(H.client && cursor_enabled)
+			H.client.mouse_pointer_icon = file("icons/mouse/mecha_mouse.dmi")
+			
 		// -- Mode/mind specific stuff goes here
 		if(H.mind)
 			if(isrev(H) || isrevhead(H))
@@ -1231,6 +1295,11 @@
 		src.log_message("[mmi_as_oc] moved in as pilot.")
 		if(!hasInternalDamage())
 			src.occupant << sound('sound/mecha/nominalsyndi.ogg',volume=50)
+			
+		//change the cursor
+		if(occupant.client && cursor_enabled)
+			occupant.client.mouse_pointer_icon = file("icons/mouse/mecha_mouse.dmi")
+			
 		return 1
 	else
 		return 0
@@ -1275,7 +1344,7 @@
 		return
 	lock_dir = !lock_dir
 
-/obj/mecha/MouseDrop(over_object, src_location, var/turf/over_location, src_control, over_control, params)
+/obj/mecha/MouseDropFrom(over_object, src_location, var/turf/over_location, src_control, over_control, params)
 	if(usr != src.occupant || usr.incapacitated())
 		return
 	if(!istype(over_location) || over_location.density)
@@ -1301,6 +1370,9 @@
 	if(!src.occupant)
 		return
 
+	if(lock_controls) //No ejecting while using the Gravpult!
+		return
+
 	if(!exploding && exit == loc) //We don't actually want to eject our occupant on the same tile that we are, that puts them "under" us, which lets them use the mech like a personal forcefield they can shoot out of.
 		var/list/turf_candidates = list(get_step(loc, dir)) + trange(1, loc) //Evaluate all 9 turfs around us, but put "directly in front of us" as the first choice.
 		for(var/turf/simulated/T in turf_candidates)
@@ -1316,6 +1388,7 @@
 		mob_container = brain.container
 	else
 		return
+	var/obj/structure/deathsquad_gravpult/G = locate() in get_turf(src)
 	if(mob_container.forceMove(exit))//ejecting mob container
 	/*
 		if(ishuman(occupant) && (return_pressure() > HAZARD_HIGH_PRESSURE))
@@ -1347,6 +1420,7 @@
 		*/
 		empty_bad_contents()
 		src.occupant << browse(null, "window=exosuit")
+		remove_mech_spells()
 		if(istype(mob_container, /obj/item/device/mmi) || istype(mob_container, /obj/item/device/mmi/posibrain))
 			var/obj/item/device/mmi/mmi = mob_container
 			if(mmi.brainmob)
@@ -1354,7 +1428,11 @@
 			mmi.mecha = null
 			src.occupant.canmove = 0
 			src.verbs += /obj/mecha/verb/eject
-
+			
+		//change the cursor
+		if(src.occupant && src.occupant.client)
+			src.occupant.client.mouse_pointer_icon = initial(src.occupant.client.mouse_pointer_icon)
+			
 		// -- Mode/mind specific stuff goes here
 		if(src.occupant.mind)
 			if(isrev(src.occupant) || isrevhead(src.occupant))
@@ -1370,6 +1448,8 @@
 		src.occupant = null
 		src.icon_state = src.reset_icon()+"-open"
 		src.dir = dir_in
+		if (G)
+			G.hud_off()
 
 	return
 
@@ -1523,6 +1603,7 @@
 						<div class='header'>Electronics</div>
 						<div class='links'>
 						<a href='?src=\ref[src];toggle_lights=1'>Toggle Lights</a><br>
+						<a href='?src=\ref[src];toggle_cursor=1'>Toggle Cursor</a><br>
 						<b>Radio settings:</b><br>
 						Microphone: <a href='?src=\ref[src];rmictoggle=1'><span id="rmicstate">[radio.broadcasting?"Engaged":"Disengaged"]</span></a><br>
 						Speaker: <a href='?src=\ref[src];rspktoggle=1'><span id="rspkstate">[radio.listening?"Engaged":"Disengaged"]</span></a><br>
@@ -1707,6 +1788,11 @@
 		if(usr != src.occupant)
 			return
 		src.toggle_lights()
+		return
+	if (href_list["toggle_cursor"])
+		if(usr != src.occupant)
+			return
+		src.toggle_cursor()
 		return
 	if(href_list["toggle_airtank"])
 		if(usr != src.occupant)
@@ -1921,6 +2007,76 @@
 			src.occupant = cur_occupant
 */
 	return
+
+//////////////////////
+/////// Spells ///////
+//////////////////////
+/spell/mech
+	user_type = USER_TYPE_MECH
+	range = 0
+	invocation = "none"
+	invocation_type = SpI_NONE
+	panel = "Mech Modules"
+	spell_flags = null
+	charge_type = Sp_RECHARGE
+	charge_max = 0
+	charge_counter = 0
+	hud_state = "mecha_equip"
+	override_base = "mech"
+	var/obj/mecha/linked_mech
+	var/obj/item/mecha_parts/mecha_equipment/linked_equipment
+
+/spell/mech/New(var/obj/mecha/M, var/obj/item/mecha_parts/mecha_equipment/ME)
+	src.linked_mech = M
+	if(ME)
+		src.linked_equipment = ME
+		name = ME.name
+		hud_state = ME.icon_state
+		override_icon = ME.icon
+	charge_counter = charge_max
+	desc = "[name]"
+
+/spell/mech/Destroy()
+	..()
+	linked_mech = null
+	linked_equipment = null
+
+/spell/mech/cast(list/targets, mob/user)
+	if(linked_mech.selected != linked_equipment)
+		linked_equipment.activate()
+	else
+		linked_equipment.alt_action()
+
+/spell/mech/cast_check(skipcharge = 0, mob/user = usr)
+	if((user!=linked_mech.occupant) || (linked_mech.get_charge() <= 0))
+		return FALSE
+	else
+		return ..()
+
+/spell/mech/choose_targets(mob/user = usr)
+	return list(user)
+
+/obj/mecha/proc/refresh_spells()
+	if(!occupant)
+		return
+	for(var/spell/mech/MS in intrinsic_spells)
+		occupant.add_spell(MS, "mech_spell_ready", /obj/abstract/screen/movable/spell_master/mech)
+	for(var/obj/item/mecha_parts/mecha_equipment/W in equipment)
+		var/spell/mech/MS
+		if(W.linked_spell)
+			MS = W.linked_spell
+			occupant.add_spell(MS, "mech_spell_ready", /obj/abstract/screen/movable/spell_master/mech)
+
+/obj/mecha/proc/remove_mech_spells()
+	for(var/spell/mech/MS in occupant.spell_list)
+		occupant.remove_spell(MS)
+
+/obj/mecha/proc/equip_module(var/obj/item/mecha_parts/mecha_equipment/ME)
+	if(ME)
+		src.selected = ME
+		src.occupant_message("You switch to [ME]")
+		src.visible_message("[src] raises [ME]")
+		send_byjax(src.occupant,"exosuit.browser","eq_list",src.get_equipment_list())
 
 ///////////////////////
 ///// Power stuff /////

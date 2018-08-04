@@ -32,6 +32,7 @@ var/global/list/ghdel_profiling = list()
 	var/event/on_destroyed
 	// When density is changed
 	var/event/on_density_change
+	var/event/on_z_transition
 
 
 	var/labeled //Stupid and ugly way to do it, but the alternative would probably require rewriting everywhere a name is read.
@@ -118,7 +119,7 @@ var/global/list/ghdel_profiling = list()
 			step(O, src.dir)
 		O.hitby(src,speed)
 
-	else if(isturf(hit_atom))
+	else if(isturf(hit_atom) && !istype(src,/obj/mecha))//heavy mechs don't just bounce off walls, also it can fuck up rocket dashes
 		var/turf/T = hit_atom
 		if(T.density)
 			spawn(2)
@@ -160,6 +161,10 @@ var/global/list/ghdel_profiling = list()
 	if (on_density_change)
 		on_density_change.holder = null
 		on_density_change = null
+	if(on_z_transition)
+		on_z_transition.holder = null
+		qdel(on_z_transition)
+		on_z_transition = null
 	if(istype(beams, /list) && beams.len)
 		beams.len = 0
 	/*if(istype(beams) && beams.len)
@@ -174,6 +179,7 @@ var/global/list/ghdel_profiling = list()
 /atom/New()
 	on_destroyed = new("owner"=src)
 	on_density_change = new("owner"=src)
+	on_z_transition = new("owner"=src)
 	. = ..()
 	AddToProfiler()
 
@@ -244,6 +250,7 @@ var/global/list/ghdel_profiling = list()
 	return
 
 /atom/proc/emp_act(var/severity)
+	set waitfor = FALSE
 	return
 
 /atom/proc/kick_act(mob/living/carbon/human/user) //Called when this atom is kicked. If returns 1, normal click action will be performed after calling this (so attack_hand() in most cases)
@@ -262,6 +269,14 @@ var/global/list/ghdel_profiling = list()
 	else if(src in container)
 		return 1
 	return
+
+/atom/proc/recursive_in_contents_of(var/atom/container, var/atom/searching_for = src)
+	if(isturf(searching_for))
+		return FALSE
+	if(loc == container)
+		return TRUE
+	return recursive_in_contents_of(container, src.loc)
+
 
 /atom/proc/projectile_check()
 	return
@@ -472,9 +487,6 @@ its easier to just keep the beam vertical.
 			bug.removed(null, null, FALSE)
 		if(ishuman(usr) && !usr.incapacitated() && Adjacent(usr) && usr.dexterity_check())
 			bug.removed(usr)
-
-// /atom/proc/MouseDrop_T()
-// 	return
 
 /atom/proc/relaymove()
 	return

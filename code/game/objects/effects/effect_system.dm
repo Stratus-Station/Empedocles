@@ -340,7 +340,7 @@ steam.start() -- spawns the effect
 	R.burn_skin(0.75)
 	if (R.coughedtime != 1)
 		R.coughedtime = 1
-		R.emote("gasp")
+		R.emote("gasp", null, null, TRUE)
 		spawn (20)
 			R.coughedtime = 0
 	R.updatehealth()
@@ -981,6 +981,7 @@ steam.start() -- spawns the effect
 	icon_regular_floor = "foamedmetal"
 	icon_plating = "foamedmetal"
 	can_exist_under_lattice = 1
+	plane = PLATING_PLANE
 
 /turf/simulated/floor/foamedmetal/attack_hand(mob/living/user as mob)
 	user.delayNextAttack(10)

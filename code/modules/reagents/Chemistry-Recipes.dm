@@ -79,7 +79,11 @@
 		if(L.stat != DEAD)
 			e.amount *= 0.5
 	e.start()
-	holder.clear_reagents()
+	if(!holder.my_atom.is_open_container() || ismob(holder.my_atom))
+		holder.del_reagent(POTASSIUM)
+		holder.del_reagent(WATER)
+	else
+		holder.clear_reagents()
 
 /datum/chemical_reaction/creatine
 	name = "Creatine"
@@ -196,6 +200,13 @@
 	result_amount = 1
 */
 
+/datum/chemical_reaction/water
+	name = "Water"
+	id = WATER
+	result = WATER
+	required_reagents = list(HYDROGEN = 2, OXYGEN = 1)
+	result_amount = 1
+
 /datum/chemical_reaction/sacid
 	name = "Sulphuric Acid"
 	id = SACID
@@ -235,7 +246,7 @@
 	name = "Sodium Polyacrylate"
 	id = SODIUM_POLYACRYLATE
 	result = SODIUM_POLYACRYLATE
-	required_reagents = list(CARBON = 3, HYDROGEN = 3, SODIUM = 1, OXYGEN = 2)
+	required_reagents = list(CARBON = 3, SODIUM = 1, WATER = 2)
 	result_amount = 8
 
 /datum/chemical_reaction/spoly_absorb_water
@@ -254,8 +265,8 @@
 
 /datum/chemical_reaction/sludge
 	name = "Sludge"
-	id = TOXICWASTE
-	result = TOXICWASTE
+	id = CHEMICAL_WASTE
+	result = CHEMICAL_WASTE
 	required_reagents = list(LUBE = 1)
 	result_amount = 0.2
 	required_temp = 3500
@@ -266,7 +277,7 @@
 	name = "Degrease"
 	id = "degrease"
 	result = null
-	required_reagents = list(TOXICWASTE = 1, ETHANOL = 1) //Turns out it really WAS an engine degreaser
+	required_reagents = list(CHEMICAL_WASTE = 1, ETHANOL = 1) //Turns out it really WAS an engine degreaser
 	result_amount = 0
 
 /datum/chemical_reaction/pacid
@@ -465,7 +476,12 @@
 		if(L.stat!=DEAD)
 			e.amount *= 0.5
 	e.start()
-	holder.clear_reagents()
+	if(!holder.my_atom.is_open_container() || ismob(holder.my_atom))
+		holder.del_reagent(GLYCEROL)
+		holder.del_reagent(PACID)
+		holder.del_reagent(SACID)
+	else
+		holder.clear_reagents()
 
 /datum/chemical_reaction/sodiumchloride
 	name = "Sodium Chloride"
@@ -755,7 +771,11 @@
 
 /datum/chemical_reaction/explosion_bicarodyne/on_reaction(var/datum/reagents/holder, var/created_volume)
 	explosion(get_turf(holder.my_atom),1,2,4)
-	holder.clear_reagents()
+	if(!holder.my_atom.is_open_container() || ismob(holder.my_atom))
+		holder.del_reagent(BICARODYNE)
+		holder.del_reagent(PARACETAMOL)
+	else
+		holder.clear_reagents()
 
 /datum/chemical_reaction/nanobots
 	name = "Nanobots"
@@ -1180,18 +1200,17 @@
 		holder.my_atom.visible_message("<span class='warning'>The slime extract begins to vibrate violently!</span>")
 		sleep(50)
 
-	var/blocked = existing_typesof(
+	var/list/blocked = existing_typesof(
 		/mob/living/simple_animal/hostile/faithless/cult,
 		/mob/living/simple_animal/hostile/scarybat/cult,
 		/mob/living/simple_animal/hostile/creature/cult,
 		/mob/living/simple_animal/hostile/retaliate/clown,
 		/mob/living/simple_animal/hostile/mushroom,
-		/mob/living/simple_animal/hostile/carp/holocarp,
 		/mob/living/simple_animal/hostile/slime,
 		/mob/living/simple_animal/hostile/mimic,
-		) + existing_typesof(boss_mobs) + existing_typesof(blacklisted_mobs)//Exclusion list for things you don't want the reaction to create.
+		) + boss_mobs + blacklisted_mobs//Exclusion list for things you don't want the reaction to create.
 
-	var/list/critters = existing_typesof(/mob/living/simple_animal/hostile) - blocked //List of possible hostile mobs
+	var/list/critters = existing_typesof(/mob/living/simple_animal/hostile) - existing_typesof_list(blocked) //List of possible hostile mobs
 
 	playsound(holder.my_atom, 'sound/effects/phasein.ogg', 100, 1)
 
@@ -1230,17 +1249,16 @@
 		holder.my_atom.visible_message("<span class='warning'>The slime extract begins to vibrate violently !</span>")
 		sleep(50)
 
-	var/blocked = existing_typesof(
+	var/list/blocked = list(
 		/mob/living/simple_animal/hostile/retaliate/clown,
 		/mob/living/simple_animal/hostile/mushroom,
-		/mob/living/simple_animal/hostile/carp/holocarp,
 		/mob/living/simple_animal/hostile/faithless/cult,
 		/mob/living/simple_animal/hostile/scarybat/cult,
 		/mob/living/simple_animal/hostile/creature/cult,
 		/mob/living/simple_animal/hostile/slime,
-		) + existing_typesof(boss_mobs) + existing_typesof(blacklisted_mobs)//Exclusion list for things you don't want the reaction to create.
+		) + boss_mobs + blacklisted_mobs//Exclusion list for things you don't want the reaction to create.
 
-	var/list/critters = existing_typesof(/mob/living/simple_animal/hostile) - blocked //List of possible hostile mobs
+	var/list/critters = existing_typesof(/mob/living/simple_animal/hostile) - existing_typesof_list(blocked)//List of possible hostile mobs
 
 	playsound(holder.my_atom, 'sound/effects/phasein.ogg', 100, 1)
 
@@ -3030,11 +3048,28 @@
 	required_temp = T0C + 450
 	result_amount = 1
 
+/datum/chemical_reaction/vomit_all
+	name = "Vomit induction"
+	id = CHARCOAL
+	result = null
+	required_reagents = list(FLUORINE = 5, CARBON = 5, CHARCOAL = 5)
+	required_container = /mob/living/carbon/human
+	result_amount = 5
+
+/datum/chemical_reaction/vomit_all/on_reaction(var/datum/reagents/holder, var/created_volume)
+	var/mob/living/carbon/human/H = holder.my_atom
+	var/datum/organ/internal/stomach/S = H.get_stomach()
+	if(!S)
+		return
+	H.vomit()
+	S.take_damage(created_volume/10)
+	holder.remove_reagents(created_volume*25)
+
 /datum/chemical_reaction/albuterol
 	name = "Albuterol"
 	id = ALBUTEROL
 	result = ALBUTEROL
-	required_reagents = list(HYPERZINE = 1, INAPROVALINE = 1)
+	required_reagents = list(TRAMADOL = 1, HYPERZINE = 1)
 	result_amount = 2
 
 /datum/chemical_reaction/saltwater
@@ -3067,6 +3102,20 @@
 	required_reagents = list(SODIUM = 2, SILICON = 1, OXYGEN = 3)
 	result_amount = 5
 
+
+/datum/chemical_reaction/untable
+	name = "Untable Mutagen"
+	id = UNTABLE_MUTAGEN
+	result = UNTABLE_MUTAGEN
+	required_reagents = list(FORMIC_ACID = 1, PHENOL = 1, RADIUM = 1)
+	result_amount = 3
+
+/datum/chemical_reaction/colorful_reagent
+	name = "Colorful Reagent"
+	id = COLORFUL_REAGENT
+	result = COLORFUL_REAGENT
+	required_reagents = list(MESCALINE = 1, PSILOCYBIN = 1, AMATOXIN = 1)
+	result_amount = 3
 
 #undef ALERT_AMOUNT_ONLY
 #undef ALERT_ALL_REAGENTS

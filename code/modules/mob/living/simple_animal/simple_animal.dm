@@ -14,6 +14,10 @@ var/global/list/animal_count = list() //Stores types, and amount of animals of t
 	var/icon_living = ""
 	var/icon_dead = ""
 	var/icon_gib = null	//We only try to show a gibbing animation if this exists.
+	var/icon_attack = null //We only try to show an attacking animation if it exists
+	var/icon_attack_time //How long the ahove animation runs, in deciseconds
+	var/icon_dying = null //We only try to show a dying animation if it exists.
+	var/icon_dying_time //How long the above animation runs in deciseconds
 
 	var/list/speak = list()
 	//var/list/speak_emote = list()//	Emotes while speaking IE: Ian [emote], [text] -- Ian barks, "WOOF!". Spoken text is generated from the speak variable.
@@ -115,6 +119,8 @@ var/global/list/animal_count = list() //Stores types, and amount of animals of t
 	return 1
 /mob/living/simple_animal/New()
 	..()
+	if(!(mob_property_flags & (MOB_UNDEAD|MOB_CONSTRUCT|MOB_ROBOTIC|MOB_HOLOGRAPHIC)))
+		create_reagents(100)
 	verbs -= /mob/verb/observe
 	if(!real_name)
 		real_name = name
@@ -280,6 +286,9 @@ var/global/list/animal_count = list() //Stores types, and amount of animals of t
 	if(can_breed)
 		make_babies()
 
+	if(reagents)
+		reagents.metabolize(src)
+
 	return 1
 
 /mob/living/simple_animal/gib(var/animation = 0, var/meat = 1)
@@ -325,11 +334,11 @@ var/global/list/animal_count = list() //Stores types, and amount of animals of t
 
 /mob/living/simple_animal/proc/handle_automated_speech()
 
-	if(!(speak.len || emote_hear.len || emote_see.len))
+	if(!speak_chance || !(speak.len || emote_hear.len || emote_see.len))
 		return
 
 	var/someone_in_earshot=0
-	if(!client && speak_chance && ckey == null) // Remove this if earshot is used elsewhere.
+	if(!client && ckey == null) // Remove this if earshot is used elsewhere.
 		// All we're doing here is seeing if there's any CLIENTS nearby.
 		for(var/mob/M in get_hearers_in_view(7, src))
 			if(M.client)
@@ -388,9 +397,9 @@ var/global/list/animal_count = list() //Stores types, and amount of animals of t
 
 	return
 
-/mob/living/simple_animal/MouseDrop(mob/living/carbon/M)
+/mob/living/simple_animal/MouseDropFrom(mob/living/carbon/M)
 	if(M != usr || !istype(M) || !Adjacent(M) || M.incapacitated())
-		return
+		return ..()
 
 	if(locked_to) //Atom locking
 		return
@@ -500,13 +509,15 @@ var/global/list/animal_count = list() //Stores types, and amount of animals of t
 		return
 
 	if(!gibbed)
-		visible_message("<span class='danger'>\the [src] stops moving...</span>")
+		emote("deathgasp")
 
 	health = 0 // so /mob/living/simple_animal/Life() doesn't magically revive them
 	living_mob_list -= src
 	dead_mob_list += src
-	icon_state = icon_dead
 	stat = DEAD
+	if(icon_dying && !gibbed)
+		do_flick(src, icon_dying, icon_dying_time)
+	icon_state = icon_dead
 	setDensity(FALSE)
 
 	animal_count[src.type]--
@@ -753,3 +764,9 @@ var/global/list/animal_count = list() //Stores types, and amount of animals of t
 
 
 /datum/locking_category/simple_animal
+
+
+/mob/living/simple_animal/resetVariables()
+	..("emote_hear", "emote_see", args)
+	emote_hear = list()
+	emote_see = list()

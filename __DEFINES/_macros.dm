@@ -22,6 +22,8 @@
 
 #define isskellington(A) (ishuman(A) && istype(A:species, /datum/species/skellington))
 
+#define isskelevox(A) (ishuman(A) && istype(A:species, /datum/species/skellington/skelevox))
+
 #define iscatbeast(A) (ishuman(A) && istype(A:species, /datum/species/tajaran))
 
 #define isunathi(A) (ishuman(A) && istype(A:species, /datum/species/unathi))
@@ -39,6 +41,12 @@
 #define isgrue(A) (ishuman(A) && istype(A:species, /datum/species/grue))
 
 #define ismushroom(A) ((ishuman(A) && istype(A:species, /datum/species/mushroom)) || (istype(A, /mob/living/carbon/monkey/mushroom)))
+
+#define islich(A)  (ishuman(A) && istype(A:species, /datum/species/lich))
+
+#define istruelich(A) ((islich(A) && (iswizard(A) || iswearinglichcrown(A))
+
+#define iswearinglichcrown(A) (ishuman(A) && (istype(A:head, /obj/item/clothing/head/wizard/skelelich)) //|| istype(A:head, /obj/item/clothing
 
 #define ishologram(A) (istype(A, /mob/living/simple_animal/hologram/advanced))
 
@@ -190,7 +198,7 @@
 
 #define isfloor(A) (istype(A, /turf/simulated/floor) || istype(A, /turf/unsimulated/floor) || istype(A, /turf/simulated/shuttle/floor))
 
-#define issilent(A) (A.silent || (ishuman(A) && (A:miming || A:species:flags & IS_SPECIES_MUTE))) //Remember that silent is not the same as miming. Miming you can emote, silent you can't gesticulate at all
+#define issilent(A) (A.silent || (ishuman(A) && (A:mind.miming || A:species:flags & IS_SPECIES_MUTE))) //Remember that silent is not the same as miming. Miming you can emote, silent you can't gesticulate at all
 //Macros for antags
 
 #define isvampire(H) ((H.mind in ticker.mode.vampires) || H.mind && H.mind.vampire)
@@ -261,6 +269,9 @@ proc/get_space_area()
 //Yes, this is the fastest known way to do it.
 #define get_turf(A) (get_step(A, 0))
 
+//Helper to check if two things are in the same z-level
+#define	atoms_share_level(A, B) (A && B && A.z == B.z)
+
 //HARDCORE MODE STUFF (mainly hunger)
 
 #define hardcore_mode_on (hardcore_mode)//((ticker) && (ticker.hardcore_mode))
@@ -280,3 +291,7 @@ proc/get_space_area()
 #define SNOW_THEME (map.snow_theme || Holiday == XMAS || Holiday == XMAS_EVE)
 
 #define get_conductivity(A) (A ? A.siemens_coefficient : 1)
+
+//Swaps the contents of the variables A and B. The if(TRUE) is there simply to restrict the scope of _.
+//Yes, _ is a shitty variable name. Hopefully so shitty it won't ever be used anywhere it could conflict with this.
+#define swap_vars(A, B) if(TRUE){var/_ = A; A = B; B = _}

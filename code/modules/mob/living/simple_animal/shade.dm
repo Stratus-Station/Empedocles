@@ -70,7 +70,8 @@
 			if(istype(O,/obj/item/weapon/nullrod))
 				damage *= 2
 				purge = 3
-			health -= damage
+			adjustBruteLoss(damage)
+			O.on_attack(src, user)
 			for(var/mob/M in viewers(src, null))
 				if ((M.client && !( M.blinded )))
 					M.show_message("<span class='warning'> <B>[src] has been attacked with [O] by [user].</span></B>")
@@ -85,6 +86,11 @@
 	if(!(src.flags & INVULNERABLE))
 		health -= rand(5,45) //These guys are like ghosts, a collision with a shuttle wouldn't destroy one outright
 	return
+
+/mob/living/simple_animal/shade/examine(mob/user)
+	..()
+	if(!client)
+		to_chat(user, "<span class='warning'>It appears to be dormant.</span>")
 
 ////////////////HUD//////////////////////
 
