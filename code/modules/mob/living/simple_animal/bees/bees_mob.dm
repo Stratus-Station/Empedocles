@@ -25,7 +25,7 @@
 	name = "dead bee"
 	desc = "This one stung for the last time."
 	gender = PLURAL
-	icon = 'icons/obj/insects_etc.dmi'
+	icon = 'icons/obj/apiary_bees_etc.dmi'
 	icon_state = "bee_dead"
 	anchored = 0
 	mouse_opacity = 1
@@ -57,7 +57,7 @@
 
 /mob/living/simple_animal/bee
 	name = "swarm of bees"
-	icon = 'icons/obj/insects_etc.dmi'
+	icon = 'icons/obj/apiary_bees_etc.dmi'
 	icon_state = "bees1"
 	icon_dead = "bee_dead"
 
@@ -770,9 +770,9 @@
 	if (state == BEE_OUT_FOR_ENEMIES)
 		icon_state += "-feral"
 		if (queen)
-			overlays += image('icons/obj/insects_etc.dmi', icon_state="[bee_species.prefix]queen_bee-feral")
+			overlays += image('icons/obj/apiary_bees_etc.dmi', icon_state="[bee_species.prefix]queen_bee-feral")
 	else if (queen)
-		overlays += image('icons/obj/insects_etc.dmi', icon_state="[bee_species.prefix]queen_bee")
+		overlays += image('icons/obj/apiary_bees_etc.dmi', icon_state="[bee_species.prefix]queen_bee")
 
 
 	animate(src, pixel_x = rand(-12,12) * PIXEL_MULTIPLIER, pixel_y = rand(-12,12) * PIXEL_MULTIPLIER, time = 10, easing = SINE_EASING)

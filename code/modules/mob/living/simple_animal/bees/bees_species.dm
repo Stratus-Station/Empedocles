@@ -126,7 +126,7 @@
 /obj/item/queen_bee/chill
 	name = "chill bug queen packet"
 	desc = "Place her into an apiary so she can get busy. This species is particularly non-violent. Produces wax with calming properties."
-	icon = 'icons/obj/insects_etc.dmi'
+	icon = 'icons/obj/apiary_bees_etc.dmi'
 	icon_state = "chill_queen_larvae"
 	w_class = W_CLASS_TINY
 	species = null
