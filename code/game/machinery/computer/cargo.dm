@@ -15,6 +15,9 @@ For vending packs, see vending_packs.dm*/
 			return 0
 		acc_info["idname"] = usr_id.registered_name
 		acc_info["idrank"] = usr_id.GetJobName()
+	else if(isAdminGhost(user))
+		acc_info["idname"] = "Commander Green"
+		acc_info["idrank"] = "Central Commander"
 	else if(isAI(user))
 		acc_info["idname"] = user.real_name
 		acc_info["idrank"] = "AI"
@@ -321,6 +324,7 @@ For vending packs, see vending_packs.dm*/
 			if(SO.ordernum == ordernum)
 				O = SO
 				supply_shuttle.confirm_order(O,usr,i)
+				O.OnConfirmed(usr)
 				break
 		return 1
 	else if (href_list["rreq"])

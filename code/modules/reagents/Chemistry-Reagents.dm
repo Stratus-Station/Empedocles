@@ -465,7 +465,7 @@
 							if(head_organ.take_damage(25, 0))
 								H.UpdateDamageIcon(1)
 							head_organ.disfigure("burn")
-							H.emote("scream", , , 1)
+							H.audible_scream()
 					else
 						M.take_organ_damage(min(15, volume * 2)) //Uses min() and volume to make sure they aren't being sprayed in trace amounts (1 unit != insta rape) -- Doohl
 			else
@@ -527,6 +527,10 @@
 	if(istype(M,/mob/living/simple_animal/hostile/slime))
 		var/mob/living/simple_animal/hostile/slime/S = M
 		S.calm()
+
+	if(istype(M,/mob/living/simple_animal/bee))
+		var/mob/living/simple_animal/bee/B = M
+		B.calming()
 
 /datum/reagent/lube
 	name = "Space Lube"
@@ -601,7 +605,8 @@
 		holder.remove_reagent(ZOMBIEPOWDER, 0.5 * REM)
 	if(holder.has_reagent(MINDBREAKER))
 		holder.remove_reagent(MINDBREAKER, 2 * REM)
-	M.hallucination = max(0, M.hallucination - 5 * REM)
+	var/lucidmod = M.sleeping ? 3 : M.lying + 1 //3x as effective if they're sleeping, 2x if they're lying down
+	M.hallucination = max(0, M.hallucination - 5 * REM * lucidmod)
 	M.adjustToxLoss(-2 * REM)
 
 /datum/reagent/phalanximine
@@ -735,6 +740,7 @@
 			to_chat(M, "<span class='warning'>Your flesh rapidly mutates!</span>")
 			human.set_species("Evolved Slime")
 			human.regenerate_icons()
+			M.setCloneLoss(0)
 
 /datum/reagent/aslimetoxin
 	name = "Advanced Mutation Toxin"
@@ -892,7 +898,7 @@
 				step(M, pick(cardinal))
 
 	if(prob(7))
-		M.emote(pick("twitch", "drool", "moan", "giggle"))
+		M.emote(pick("twitch", "drool", "moan", "giggle"), null, null, TRUE)
 
 /datum/reagent/holywater
 	name = "Holy Water"
@@ -969,7 +975,7 @@
 									if(head_organ.take_damage(30, 0))
 										H.UpdateDamageIcon(1)
 									head_organ.disfigure("burn")
-									H.emote("scream",,, 1)
+									H.audible_scream()
 								else
 									to_chat(H, "<span class='warning'>A freezing liquid covers your face. Your vampiric powers protect you!</span>")
 									H.mind.vampire.smitecounter += 12 //Ditto above
@@ -1011,7 +1017,7 @@
 		return 1
 
 	if(prob(7))
-		M.emote(pick("twitch", "drool", "moan", "gasp"))
+		M.emote(pick("twitch", "drool", "moan", "gasp"), null, null, TRUE)
 
 	M.druggy = max(M.druggy, 50)
 
@@ -1114,7 +1120,7 @@
 		step(M, pick(cardinal))
 
 	if(prob(5))
-		M.emote(pick("twitch","drool","moan"))
+		M.emote(pick("twitch","drool","moan"), null, null, TRUE)
 
 	M.adjustBrainLoss(2)
 
@@ -1242,7 +1248,7 @@
 	if(M.canmove && !M.restrained() && istype(M.loc, /turf/space))
 		step(M, pick(cardinal))
 	if(prob(5))
-		M.emote(pick("twitch","drool","moan"))
+		M.emote(pick("twitch","drool","moan"), null, null, TRUE)
 
 /datum/reagent/sugar
 	name = "Sugar"
@@ -1393,7 +1399,7 @@
 					if(head_organ.take_damage(25, 0))
 						H.UpdateDamageIcon(1)
 					head_organ.disfigure("burn")
-					H.emote("scream", , , 1)
+					H.audible_scream()
 			else
 				M.take_organ_damage(min(15, volume * 2)) //uses min() and volume to make sure they aren't being sprayed in trace amounts (1 unit != insta rape) -- Doohl
 	else
@@ -1470,7 +1476,7 @@
 				var/datum/organ/external/head/head_organ = H.get_organ(LIMB_HEAD)
 				if(head_organ.take_damage(15, 0))
 					H.UpdateDamageIcon(1)
-				H.emote("scream", , , 1)
+				H.audible_scream()
 
 		else if(ismonkey(M))
 			var/mob/living/carbon/monkey/MK = M
@@ -1493,7 +1499,7 @@
 				var/datum/organ/external/head/head_organ = H.get_organ(LIMB_HEAD)
 				if(head_organ.take_damage(15, 0))
 					H.UpdateDamageIcon(1)
-				H.emote("scream", , , 1)
+				H.audible_scream()
 				head_organ.disfigure("burn")
 			else
 				M.take_organ_damage(min(15, volume * 4))
@@ -2041,6 +2047,13 @@
 	for(var/obj/item/I in T)
 		I.decontaminate()
 
+	T.color = ""
+
+/datum/reagent/space_cleaner/bleach/reaction_obj(obj/O, var/volume)
+	if(O)
+		O.color = ""
+	..()
+
 /datum/reagent/space_cleaner/bleach/on_mob_life(var/mob/living/M)
 
 	if(..())
@@ -2066,6 +2079,8 @@
 	if(..())
 		return 1
 
+	M.color = ""
+
 	if(method == TOUCH)
 		if(ishuman(M))
 			var/mob/living/carbon/human/H = M
@@ -2074,7 +2089,7 @@
 				to_chat(H,"<span class='warning'>Your [eyes_covered] protects your eyes from the bleach!</span>")
 				return
 			else //This stuff is a little more corrosive but less irritative than pepperspray
-				H.emote("scream", , , 1)
+				H.audible_scream()
 				to_chat(H,"<span class='danger'>You are sprayed directly in the eyes with bleach!</span>")
 				H.eye_blurry = max(M.eye_blurry, 15)
 				H.eye_blind = max(M.eye_blind, 5)
@@ -2162,10 +2177,10 @@
 		for(var/obj/effect/plantsegment/KV in orange(O,1))
 			KV.health -= dmg*0.4
 			KV.check_health()
-			plant_controller.add_plant(KV)
+			SSplant.add_plant(KV)
 		K.health -= dmg
 		K.check_health()
-		plant_controller.add_plant(K)
+		SSplant.add_plant(K)
 	else if(istype(O,/obj/machinery/portable_atmospherics/hydroponics))
 		var/obj/machinery/portable_atmospherics/hydroponics/tray = O
 		if(tray.seed)
@@ -2287,7 +2302,7 @@
 		M.take_organ_damage(REM, 0, ignore_inorganics = TRUE)
 	M.adjustOxyLoss(3)
 	if(prob(20))
-		M.emote("gasp")
+		M.emote("gasp", null, null, TRUE)
 
 /datum/reagent/kelotane
 	name = "Kelotane"
@@ -2427,6 +2442,8 @@
 		holder.remove_reagent("zombiepowder", 5)
 	if(holder.has_reagent("mindbreaker"))
 		holder.remove_reagent("mindbreaker", 5)
+	if(holder.has_reagent("spiritbreaker"))
+		holder.remove_reagent("spiritbreaker", 5)
 	M.hallucination = 0
 	M.setBrainLoss(0)
 	M.disabilities = 0
@@ -2472,7 +2489,8 @@
 	M.AdjustKnockdown(-1)
 	if(holder.has_reagent("mindbreaker"))
 		holder.remove_reagent("mindbreaker", 5)
-	M.hallucination = max(0, M.hallucination - 10)
+	var/lucidmod = M.sleeping ? 3 : M.lying + 1
+	M.hallucination = max(0, M.hallucination - 10 * lucidmod)
 	if(prob(60))
 		M.adjustToxLoss(1)
 
@@ -2497,7 +2515,7 @@
 	if(prob(50))
 		M.drowsyness = max(M.drowsyness, 3)
 	if(prob(10))
-		M.emote("drool")
+		M.emote("drool", null, null, TRUE)
 
 /datum/reagent/hyronalin
 	name = "Hyronalin"
@@ -2636,6 +2654,8 @@
 
 	if(istype(O, /obj/item/organ/internal))
 		var/obj/item/organ/internal/I = O
+		if(I.health <= 0)
+			I.revive()
 		if(I.health < initial(I.health))
 			I.health = min(I.health+rand(1,3), initial(I.health))
 		if(I.organ_data)
@@ -2689,7 +2709,7 @@
 	if(..())
 		return 1
 
-	if(prob(5))
+	if(prob(5) && M.stat == CONSCIOUS)
 		M.emote(pick("twitch","blink_r","shiver"))
 
 /datum/reagent/hypozine //syndie hyperzine
@@ -3147,72 +3167,75 @@
 			if(ishuman(M))
 				var/mob/living/carbon/human/H = M
 				if(H.species.name != "Diona")
-					if(H.getOxyLoss()>0 || H.getBruteLoss(ignore_inorganic = TRUE)>0 || H.getToxLoss()>0 || H.getFireLoss(ignore_inorganic = TRUE)>0 || H.getCloneLoss()>0)
-						if(holder.has_reagent("mednanobots"))
-							H.adjustOxyLoss(-5)
-							H.heal_organ_damage(5, 5)
-							H.adjustToxLoss(-5)
-							H.adjustCloneLoss(-5)
-							holder.remove_reagent("mednanobots", 10/40)  //The number/40 means that every time it heals, it uses up number/40ths of a unit, meaning each unit heals 40 damage
-					if(percent_machine>5)
-						if(holder.has_reagent("mednanobots"))
-							percent_machine-=1
-							if(prob(20))
-								to_chat(H, pick("You feel more like yourself again."))
-					if(H.dizziness != 0)
-						H.dizziness = max(0, H.dizziness - 15)
-					if(H.confused != 0)
-						H.confused = max(0, H.confused - 5)
-					for(var/datum/disease/D in M.viruses)
-						D.spread = "Remissive"
-						D.stage--
-						if(D.stage < 1)
-							D.cure()
+					return
+			if(M.getOxyLoss()>0 || M.getBruteLoss(ignore_inorganic = TRUE)>0 || M.getToxLoss()>0 || M.getFireLoss(ignore_inorganic = TRUE)>0 || M.getCloneLoss()>0)
+				if(holder.has_reagent("mednanobots"))
+					M.adjustOxyLoss(-5)
+					M.heal_organ_damage(5, 5)
+					M.adjustToxLoss(-5)
+					M.adjustCloneLoss(-5)
+					holder.remove_reagent("mednanobots", 10/40)  //The number/40 means that every time it heals, it uses up number/40ths of a unit, meaning each unit heals 40 damage
+			if(percent_machine>5)
+				if(holder.has_reagent("mednanobots"))
+					percent_machine-=1
+					if(prob(20))
+						to_chat(M, pick("You feel more like yourself again."))
+			if(M.dizziness != 0)
+				M.dizziness = max(0, M.dizziness - 15)
+			if(M.confused != 0)
+				M.confused = max(0, M.confused - 5)
+			for(var/datum/disease/D in M.viruses)
+				D.spread = "Remissive"
+				D.stage--
+				if(D.stage < 1)
+					D.cure()
 		if(5 to 20)		//Danger zone healing. Adds to a human mob's "percent machine" var, which is directly translated into the chance that it will turn horror each tick that the reagent is above 5u.
 			if(ishuman(M))
 				var/mob/living/carbon/human/H = M
 				if(H.species.name != "Diona")
-					if(H.getOxyLoss()>0 || H.getBruteLoss()>0 || H.getToxLoss()>0 || H.getFireLoss()>0 || H.getCloneLoss()>0)
-						if(holder.has_reagent("mednanobots"))
-							H.adjustOxyLoss(-5)
-							H.heal_organ_damage(5, 5)
-							H.adjustToxLoss(-5)
-							H.adjustCloneLoss(-5)
-							holder.remove_reagent("mednanobots", 10/40)  //The number/40 means that every time it heals, it uses up number/40ths of a unit, meaning each unit heals 40 damage
-							percent_machine +=1/2
-							if(prob(20))
-								to_chat(H, pick("<span class='warning'>Something shifts inside you...</span>", "<span class='warning'>You feel different, somehow...</span>"))
-							else
-					if(H.dizziness != 0)
-						H.dizziness = max(0, H.dizziness - 15)
-					if(H.confused != 0)
-						H.confused = max(0, H.confused - 5)
-					for(var/datum/disease/D in M.viruses)
-						D.spread = "Remissive"
-						D.stage--
-						if(D.stage < 1)
-							D.cure()
-					if(prob(percent_machine))
-						holder.add_reagent("mednanobots", 20)
-						to_chat(H, pick("<b><span class='warning'>Your body lurches!</b></span>"))
+					return
+			if(M.getOxyLoss()>0 || M.getBruteLoss()>0 || M.getToxLoss()>0 || M.getFireLoss()>0 || M.getCloneLoss()>0)
+				if(holder.has_reagent("mednanobots"))
+					M.adjustOxyLoss(-5)
+					M.heal_organ_damage(5, 5)
+					M.adjustToxLoss(-5)
+					M.adjustCloneLoss(-5)
+					holder.remove_reagent("mednanobots", 10/40)  //The number/40 means that every time it heals, it uses up number/40ths of a unit, meaning each unit heals 40 damage
+					percent_machine +=1/2
+					if(prob(20))
+						to_chat(M, pick("<span class='warning'>Something shifts inside you...</span>", "<span class='warning'>You feel different, somehow...</span>"))
+					else
+			if(M.dizziness != 0)
+				M.dizziness = max(0, M.dizziness - 15)
+			if(M.confused != 0)
+				M.confused = max(0, M.confused - 5)
+			for(var/datum/disease/D in M.viruses)
+				D.spread = "Remissive"
+				D.stage--
+				if(D.stage < 1)
+					D.cure()
+			if(prob(percent_machine))
+				holder.add_reagent("mednanobots", 20)
+				to_chat(M, pick("<b><span class='warning'>Your body lurches!</b></span>"))
 		if(20 to INFINITY)
-			if(ishuman(M))
-				spawning_horror = 1
-				var/mob/living/carbon/human/H = M
-				to_chat(H, pick("<b><span class='warning'>Something doesn't feel right...</span></b>", "<b><span class='warning'>Something is growing inside you!</span></b>", "<b><span class='warning'>You feel your insides rearrange!</span></b>"))
-				spawn(60)
-					if(spawning_horror == 1)
-						to_chat(H, "<b><span class='warning'>Something bursts out from inside you!</span></b>")
-						message_admins("[key_name(H)] has gibbed and spawned a new cyber horror due to nanobots. ([formatJumpTo(H)])")
-						var/typepath = text2path("/mob/living/simple_animal/hostile/monster/cyber_horror/[H.species.name]")
+			spawning_horror = 1
+			to_chat(M, pick("<b><span class='warning'>Something doesn't feel right...</span></b>", "<b><span class='warning'>Something is growing inside you!</span></b>", "<b><span class='warning'>You feel your insides rearrange!</span></b>"))
+			spawn(60)
+				if(spawning_horror == 1)
+					to_chat(M, "<b><span class='warning'>Something bursts out from inside you!</span></b>")
+					message_admins("[key_name(M)] has gibbed and spawned a new cyber horror due to nanobots. ([formatJumpTo(M)])")
+					if(ishuman(M))
+						var/mob/living/carbon/human/H = M
+						var/typepath
+						typepath = text2path("/mob/living/simple_animal/hostile/monster/cyber_horror/[H.species.name]")
 						if(ispath(typepath))
-							new typepath(H.loc)
-							spawning_horror = 0
-							H.gib()
+							new typepath(M.loc)
 						else
-							new /mob/living/simple_animal/hostile/monster/cyber_horror(H.loc)
-							spawning_horror = 0
-							H.gib()
+							new /mob/living/simple_animal/hostile/monster/cyber_horror(M.loc)
+					else
+						new /mob/living/simple_animal/hostile/monster/cyber_horror/monster(M.loc,M)
+					spawning_horror = 0
+					M.gib()
 
 /datum/reagent/comnanobots
 	name = "Combat Nanobots"
@@ -3488,6 +3511,22 @@
 	nutriment_factor = 5 * REAGENTS_METABOLISM
 	color = "#731008" //rgb: 115, 16, 8
 
+/datum/reagent/mustard
+	name = "Mustard"
+	id = MUSTARD
+	description = "A spicy yellow paste."
+	reagent_state = LIQUID
+	nutriment_factor = 3 * REAGENTS_METABOLISM
+	color = "#cccc33" //rgb: 204, 204, 51
+
+/datum/reagent/relish
+	name = "Relish"
+	id = RELISH
+	description = "A pickled cucumber jam. Tasty!"
+	reagent_state = LIQUID
+	nutriment_factor = 4 * REAGENTS_METABOLISM
+	color = "#336600" //rgb: 51, 102, 0
+
 /datum/reagent/dipping_sauce
 	name = "Dipping Sauce"
 	id = DIPPING_SAUCE
@@ -3569,11 +3608,11 @@
 				return
 			else if(eyes_covered) //Eye cover is better than mouth cover
 				H << "<span class='warning'>Your [eyes_covered] protects your eyes from the pepperspray!</span>"
-				H.emote("scream", , , 1)
+				H.audible_scream()
 				H.eye_blurry = max(M.eye_blurry, 5)
 				return
 			else //Oh dear
-				H.emote("scream", , , 1)
+				H.audible_scream()
 				H << "<span class='danger'>You are sprayed directly in the eyes with pepperspray!</span>"
 				H.eye_blurry = max(M.eye_blurry, 25)
 				H.eye_blind = max(M.eye_blind, 10)
@@ -4178,7 +4217,7 @@
 /datum/reagent/toxicwaste
 	name = "Toxic Waste"
 	id = TOXICWASTE
-	description = "A type of sludge created by heating space lubricant to extreme temperatures."
+	description = "A type of sludge."
 	reagent_state = LIQUID
 	color = "#6F884F" //rgb: 255,255,255 //to-do
 	density = 5.59
@@ -4271,7 +4310,8 @@
 	M.drowsyness = max(M.drowsyness - 2 * REM, 0)
 	if(holder.has_reagent("discount"))
 		holder.remove_reagent("discount", 2 * REM)
-	M.hallucination = max(0, M.hallucination - 5 * REM)
+	var/lucidmod = M.sleeping ? 3 : M.lying + 1
+	M.hallucination = max(0, M.hallucination - 5 * REM * lucidmod)
 	M.adjustToxLoss(-2 * REM)
 
 /datum/reagent/clottingagent
@@ -5847,12 +5887,6 @@ var/global/list/chifir_doesnt_remove = list("chifir", "blood")
 
 	if(prob(30))
 		M.emote("spin")
-	var/prev_dir = M.dir
-	M.confused++
-	for(var/i in list(1, 4, 2, 8, 1, 4, 2, 8, 1, 4, 2, 8, 1, 4, 2, 8))
-		M.dir = i
-		sleep(1)
-	M.dir = prev_dir
 	if(ishuman(M))
 		var/mob/living/carbon/human/H = M
 		for(var/zone in list(LIMB_LEFT_LEG, LIMB_RIGHT_LEG, LIMB_LEFT_FOOT, LIMB_RIGHT_FOOT))
@@ -6453,7 +6487,7 @@ var/global/list/tonio_doesnt_remove=list("tonio", "blood")
 		if(M_ASTHMA in H.mutations)
 			H.adjustOxyLoss(2)
 			if(prob(30))
-				H.emote("gasp")
+				H.emote("gasp", null, null, TRUE)
 
 /datum/reagent/albuterol
 	name = "Albuterol"
@@ -6554,3 +6588,54 @@ var/global/list/tonio_doesnt_remove=list("tonio", "blood")
 	color = "#E5E5E5"
 	density = 2.61
 	specheatcap = 111.8
+
+/datum/reagent/untable
+	name = "Untable Mutagen"
+	id = UNTABLE_MUTAGEN
+	description = "Untable Mutagen is a substance that is inert to most materials and objects, but highly corrosive to tables."
+	reagent_state = LIQUID
+	color = "#84121D" //rgb: 132, 18, 29
+	overdose_am = REAGENTS_OVERDOSE
+
+/datum/reagent/untable/reaction_obj(var/obj/O, var/volume)
+
+	if(..())
+		return 1
+
+	if(!O.acidable())
+		return
+
+	if(istype(O,/obj/structure/table))
+		var/obj/effect/decal/cleanable/molten_item/I = new/obj/effect/decal/cleanable/molten_item(O.loc)
+		I.desc = "Looks like this was \an [O] some time ago."
+		O.visible_message("<span class='warning'>\The [O] melts.</span>")
+		qdel(O)
+
+/datum/reagent/colorful_reagent
+	name = "Colorful Reagent"
+	id = COLORFUL_REAGENT
+	description = "Thoroughly sample the rainbow."
+	reagent_state = LIQUID
+	color = "#C8A5DC"
+	var/list/random_color_list = list("#00aedb","#a200ff","#f47835","#d41243","#d11141","#00b159","#00aedb","#f37735","#ffc425","#008744","#0057e7","#d62d20","#ffa700")
+
+
+/datum/reagent/colorful_reagent/on_mob_life(mob/living/M)
+	if(M && isliving(M))
+		M.color = pick(random_color_list)
+	..()
+
+/datum/reagent/colorful_reagent/reaction_mob(mob/living/M, reac_volume)
+	if(M && isliving(M))
+		M.color = pick(random_color_list)
+	..()
+
+/datum/reagent/colorful_reagent/reaction_obj(obj/O, reac_volume)
+	if(O)
+		O.color = pick(random_color_list)
+	..()
+
+/datum/reagent/colorful_reagent/reaction_turf(turf/T, reac_volume)
+	if(T)
+		T.color = pick(random_color_list)
+	..()

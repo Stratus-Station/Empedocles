@@ -17,6 +17,9 @@ var/datum/controller/supply_shuttle/supply_shuttle = new
 	var/orderedby = null
 	var/comment = null
 
+/datum/supply_order/proc/OnConfirmed(var/mob/user)
+	object.OnConfirmed(user)
+
 /datum/controller/supply_shuttle
 	var/processing = 1
 	var/processing_interval = 300
@@ -256,6 +259,8 @@ var/datum/controller/supply_shuttle/supply_shuttle = new
 			if(SP.amount && B2:amount)
 				B2:amount = SP.amount
 			slip.info += "<li>[B2.name]</li>" //add the item to the manifest
+
+		SP.post_creation(A)
 
 		//manifest finalisation
 
