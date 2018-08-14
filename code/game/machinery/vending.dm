@@ -5,50 +5,12 @@
 
 var/global/num_vending_terminals = 1
 
-/datum/data/vending_product
-	var/product_name = "generic"
-	var/product_path = null
-	var/original_amount = 0
-	var/amount = 0
-	var/stack_amount = 0 //only used when we're dealing with /obj/item/stack
-	var/price = 0
-	var/display_color = "blue"
-	var/category = CAT_NORMAL//available by default, contraband, or premium (requires a coin)
-	var/subcategory = null
-	var/mini_icon = null
-
-//this proc is only used when an item is inserted into a custom vending machine.
-/datum/data/vending_product/proc/custom_entry(var/obj/item/item)
-	if(istype(item, /obj/item/stack))
-		var/obj/item/stack/S = item
-		stack_amount = S.amount
-		product_name = "A stack of [stack_amount] [item.name]"
-	else
-		product_name = item.name
-	mini_icon = costly_bicon(item)
-	display_color = pick("red", "blue", "green")
-	product_path = item
-	amount += 1
-
-/* TODO: Add this to deconstruction for vending machines
-/obj/item/compressed_vend
-	name = "compressed sale cartridge"
-	desc = "A compressed matter variant used to load vending machines."
-	icon = 'icons/obj/ammo.dmi'
-	icon_state = "rcd"
-	item_state = "rcdammo"
-	var/list/products
-	var/list/contraband
-	var/list/premium
-*/
-
 /obj/machinery/vending
 	name = "empty vending machine"
 	desc = "Just add capitalism!"
 	icon = 'icons/obj/vending.dmi'
 	icon_state = "empty"
 	var/obj/structure/vendomatpack/pack = null
-	layer = BELOW_OBJ_LAYER
 	anchored = 1
 	density = 1
 	var/health = 100
@@ -60,13 +22,18 @@ var/global/num_vending_terminals = 1
 	var/ads_chance = 50 // Chance of an ad appearing on screen
 	var/datum/data/vending_product/currently_vending = null // A /datum/data/vending_product instance of what we're paying for right now.
 	// To be filled out at compile time
-	var/list/accepted_coins	= list()	// Accepted coins by the machine.
+	var/list/accepted_coins = list(
+			/obj/item/weapon/coin,
+			/obj/item/weapon/reagent_containers/food/snacks/chococoin
+			)	// Accepted coins by the machine.
 
 	var/list/products	= list()	// For each, use the following pattern:
 	var/list/contraband	= list()	// list(/type/path = amount,/type/path2 = amount2)
 	var/list/premium 	= list()	// No specified amount = only one in stock
 	var/list/prices     = list()	// Prices for each item, list(/type/path = price), items not in the list don't have a price.
 	var/list/vouched     = list()	//For voucher-only items. These aren't available in any way without the appropriate voucher.
+
+	var/list/custom_stock = list() 	//Custom items are stored inside our contents, but we keep track of them here so we don't vend our component parts or anything.
 
 	var/list/product_slogans = list()	// List of slogans the machine will yell at random intervals, optional
 	var/list/product_ads = list()		// List of small ad messages displayed in the vending screen, random chance, optional
@@ -95,17 +62,44 @@ var/global/num_vending_terminals = 1
 	var/cardboard = 0 //1 if sheets of cardboard are added
 
 	var/list/categories = list()
-	var/list/allowed_inputs = list()	//items that we can directly slot into the vending machine
 
 	var/machine_id = "#"
 
 	machine_flags = SCREWTOGGLE | WRENCHMOVE | FIXED2WORK | CROWDESTROY | EJECTNOTDEL | PURCHASER | WIREJACK
 
 	var/account_first_linked = 1
-	var/inserting_mode = FALSE // insert items directly into the machine (used for custom vending machines)
 	var/is_custom_machine = FALSE // true if this vendor supports editing the prices
-	var/edit_mode = FALSE // Used for editing prices
+	var/edit_mode = FALSE // Used for editing machine stock and information
 	var/is_being_filled = FALSE // `in_use` from /obj is already used for tracking users of this machine's UI
+
+/atom/movable/proc/product_name()
+	return name
+/obj/item/stack/product_name()
+	return "A stack of [amount] [name]"
+
+/datum/data/vending_product
+	var/custom = FALSE
+	var/product_name = "generic"
+	var/product_path = null //NON-CUSTOM ONLY - Path to spawn when creating a new one of this product
+	var/original_amount = 0 //NON-CUSTOM ONLY - How many items of this product the recharge pack starts with
+	var/amount = 0
+	var/price = 0
+	var/display_color = "blue"
+	var/category = CAT_NORMAL //available by default, contraband, or premium (requires a coin)
+	var/subcategory = null
+	var/mini_icon = null
+
+/* TODO: Add this to deconstruction for vending machines
+/obj/item/compressed_vend
+	name = "compressed sale cartridge"
+	desc = "A compressed matter variant used to load vending machines."
+	icon = 'icons/obj/ammo.dmi'
+	icon_state = "rcd"
+	item_state = "rcdammo"
+	var/list/products
+	var/list/contraband
+	var/list/premium
+*/
 
 /obj/machinery/vending/cultify()
 	new /obj/structure/cult/forge(loc)
@@ -117,11 +111,6 @@ var/global/num_vending_terminals = 1
 	num_vending_machines++
 
 	overlays_vending[1] = "[icon_state]-panel"
-
-	accepted_coins = list(
-			/obj/item/weapon/coin,
-			/obj/item/weapon/reagent_containers/food/snacks/chococoin
-			)
 
 	component_parts = newlist(\
 		/obj/item/weapon/circuitboard/vendomat,\
@@ -145,8 +134,6 @@ var/global/num_vending_terminals = 1
 
 	if(ticker)
 		initialize()
-
-	return
 
 /obj/machinery/vending/initialize()
 	build_inventories()
@@ -175,15 +162,21 @@ var/global/num_vending_terminals = 1
 		qdel(wires)
 		wires = null
 
-	if(product_records.len&&cardboard) //Only spit out if we have slotted cardboard
-		var/obj/structure/vendomatpack/partial/newpack = new(src.loc)
-		newpack.stock = products
-		newpack.secretstock = contraband
-		newpack.preciousstock = premium
-		newpack.targetvendomat = src.type
-		newpack.product_records = product_records
-		newpack.hidden_records = hidden_records
-		newpack.coin_records = coin_records
+	if(product_records.len && cardboard) //Only spit out if we have slotted cardboard
+		if(is_custom_machine)
+			var/obj/structure/vendomatpack/custom/newpack = new(src.loc)
+			for(var/obj/item/I in custom_stock)
+				I.forceMove(newpack)
+				custom_stock.Remove(I)
+		else
+			var/obj/structure/vendomatpack/partial/newpack = new(src.loc)
+			newpack.stock = products
+			newpack.secretstock = contraband
+			newpack.preciousstock = premium
+			newpack.targetvendomat = src.type
+			newpack.product_records = product_records
+			newpack.hidden_records = hidden_records
+			newpack.coin_records = coin_records
 
 	if(coinbox)
 		coinbox.forceMove(get_turf(src))
@@ -194,8 +187,13 @@ var/global/num_vending_terminals = 1
 		return 1
 	return ..()
 
-/obj/machinery/vending/MouseDrop_T(atom/movable/O as mob|obj, mob/user as mob)
+/obj/machinery/vending/MouseDropTo(atom/movable/O as mob|obj, mob/user as mob)
 	if(stat & (BROKEN|NOPOWER))
+		return
+
+	if(user.incapacitated() || user.lying)
+		return
+	if(!Adjacent(user) || !user.Adjacent(src) || !user.Adjacent(O))
 		return
 
 	if(istype(O,/obj/structure/vendomatpack))
@@ -219,18 +217,16 @@ var/global/num_vending_terminals = 1
 				playsound(newmachine, 'sound/machines/hiss.ogg', 50, 0, 0)
 				newmachine.pack = P.type
 				getFromPool(/obj/item/stack/sheet/cardboard, P.loc, 4)
-				if(P.stock.len) //this is true when we're dealing with a CUSTOM fill
-					for(var/v_item in P.stock)
-						if(istype(v_item, /obj/item))
-							var/obj/item/I = v_item
-							I.forceMove(src)
+				if(istype(P, /obj/structure/vendomatpack/custom))
+					for(var/obj/item/I in P.contents)
+						newmachine.loadCustomItem(I)
+				else if(P.stock.len) //This is true if the vendopack is a used recharge pack. "Stock" packs have nada.
 					newmachine.products = P.stock
 					newmachine.contraband = P.secretstock
 					newmachine.premium = P.preciousstock
 					newmachine.product_records = P.product_records
 					newmachine.hidden_records = P.hidden_records
 					newmachine.coin_records = P.coin_records
-					newmachine.build_inventories()
 				qdel(P)
 				if(user.machine==src)
 					newmachine.attack_hand(user)
@@ -265,7 +261,7 @@ var/global/num_vending_terminals = 1
 			else
 				to_chat(user, "<span class='warning'>This recharge pack isn't meant for this kind of vending machines.</span>")
 
-/obj/machinery/vending/proc/normal_refill(obj/structure/vendomatpack/P, mob/user)
+/obj/machinery/vending/proc/normal_refill(obj/structure/vendomatpack/P, mob/user) //TODO: This is totally fucking broken
 	for (var/datum/data/vending_product/D in product_records)
 		D.amount = D.original_amount
 	for (var/datum/data/vending_product/D in hidden_records)
@@ -276,20 +272,8 @@ var/global/num_vending_terminals = 1
 		src.attack_hand(user)
 
 /obj/machinery/vending/proc/custom_refill(obj/structure/vendomatpack/P, mob/user)
-	for (var/datum/data/vending_product/D in product_records)
-		if (!D.amount)
-			products.Remove(D.product_path)
-			product_records.Remove(D)
-			qdel(D)
-
-	if(P.stock.len)
-		for(var/v_item in P.stock)
-			if(istype(v_item, /obj/item))
-				var/obj/item/I = v_item
-				I.forceMove(src)
-		products += P.stock
-		product_records += P.product_records
-		build_inventories()
+	for(var/obj/item/I in P.contents)
+		loadCustomItem(I)
 	getFromPool(/obj/item/stack/sheet/cardboard, P.loc, 4)
 	qdel(P)
 
@@ -326,6 +310,7 @@ var/global/num_vending_terminals = 1
 			if(prob(25))
 				malfunction()
 
+//This proc is not used by custom vending machines.
 /obj/machinery/vending/proc/build_inventory(var/list/productlist,hidden=0,req_coin=0,voucher_only=0)
 	for(var/typepath in productlist)
 		var/amount = productlist[typepath]
@@ -340,11 +325,6 @@ var/global/num_vending_terminals = 1
 		R.original_amount = amount
 		R.price = price
 		R.display_color = pick("red", "blue", "green")
-		if(is_custom_machine)
-			var/obj/O = R.product_path
-			R.price = O.price
-			R.product_name = "[O.name]"
-			R.mini_icon = costly_bicon(O)
 		if (hidden)
 			R.category=CAT_HIDDEN
 			hidden_records  += R
@@ -460,9 +440,11 @@ var/global/num_vending_terminals = 1
 		else
 			to_chat(user, "<SPAN CLASS='notice'>There's already a coin in [src].</SPAN>")
 		return
+
 	else if(istype(W, /obj/item/weapon/reagent_containers/food/snacks/customizable/candy/coin))
 		to_chat(user, "<span class='rose'>That coin is smudgy and oddly soft, you don't think that would work.</span>")
 		return
+
 	else if(istype(W, /obj/item/voucher))
 		if(can_accept_voucher(W, user))
 			if(user.drop_item(W, src))
@@ -472,28 +454,11 @@ var/global/num_vending_terminals = 1
 		else
 			to_chat(user, "<span class='notice'>\The [src] refuses to take [W].</span>")
 			return 1
-	else if(istype(W, /obj/item/weapon/storage/bag))
-		var/obj/item/weapon/storage/bag/bag = W
-		var/objects_loaded = 0
-		for(var/obj/G in bag.contents)
-			if(is_type_in_list(G, allowed_inputs))
-				bag.remove_from_storage(G,src)
-				add_item(G)
-				objects_loaded++
-		if(objects_loaded)
-			user.visible_message("<span class='notice'>[user] loads \the [src] with \the [bag].</span>", \
-								 "<span class='notice'>You load \the [src] with \the [bag].</span>")
-			if(bag.contents.len > 0)
-				to_chat(user, "<span class='notice'>Some items are refused.</span>")
-			src.updateUsrDialog()
 
 	else if(istype(W, /obj/item/weapon/spacecash))
 		var/obj/item/weapon/spacecash/C = W
 		pay_with_cash(C, user)
-	else if(is_type_in_list(W, allowed_inputs))
-		if(user.drop_item(W, src))
-			add_item(W)
-			src.updateUsrDialog()
+
 	else if(istype(W, /obj/item/weapon/card/emag))
 		visible_message("<span class='info'>[usr] swipes a card through [src].</span>")
 		to_chat(user, "<span class='notice'>You swipe \the [W] through [src]</span>")
@@ -507,28 +472,51 @@ var/global/num_vending_terminals = 1
 			connect_account(user, W)
 			src.updateUsrDialog()
 			return
-		//attempt to connect to a new db, and if that doesn't work then fail
-		if(!linked_account)
-			connect_to_user_account(user)
-			return
 
-		if(account_first_linked)
+		if(account_first_linked && linked_account) // Account check
 			if(!user.Adjacent(src))
 				return 0
-			var/account_try = input(user,"Please enter the already connected account number","Security measure") as num
 			if(!user.Adjacent(src))
 				return 0
-			if(account_try != linked_account.account_number)
-				to_chat(user, "[bicon(src)]<span class='warning'>Access denied. Your input doesn't match the vending machine's connected account.</span>")
+			if(W.get_owner_name_from_ID() != linked_account.owner_name)
+				to_chat(user, "[bicon(src)]<span class='warning'>Access denied. Your ID doesn't match the vending machine's connected account.</span>")
 				return 0
+			visible_message("<span class='info'>[user] swipes a card through [src].</span>")
+			edit_mode = !edit_mode
+			src.updateUsrDialog()
+			return
 		if(!user.Adjacent(src))
 			return 0
-		connect_to_user_account(user)
-		return
 
-	else if(istype(W, /obj/item/) && inserting_mode)
+		connect_to_user_account(user)
+
+	else if(istype(W, /obj/item/) && edit_mode)
+		if(istype(W, /obj/item/weapon/disk/nuclear))
+			to_chat(user, "<span class='notice'>Suddenly your hand stops responding. You can't do it.</span>")
+			return
 		if(user.drop_item(W, src))
-			insert_item(W)
+			loadCustomItem(W)
+			src.updateUsrDialog()
+
+/obj/machinery/vending/proc/loadCustomItem(var/obj/item/item)
+	for(var/datum/data/vending_product/VP in product_records)
+		if(VP.custom && VP.product_name == item.product_name())
+			VP.amount += 1
+			custom_stock += item
+			if(item.loc != src)
+				item.forceMove(src)
+			return
+	//If this code block is reached, no existing vending_product exists, so we must create one
+	var/datum/data/vending_product/R = new()
+	R.custom = TRUE
+	R.product_name = item.product_name()
+	R.mini_icon = costly_bicon(item)
+	R.display_color = pick("red", "blue", "green")
+	R.amount = 1
+	if(item.loc != src)
+		item.forceMove(src)
+	product_records += R
+	custom_stock += item
 
 /obj/machinery/vending/proc/connect_to_user_account(mob/user)
 	var/new_account = input(user,"Please enter the account to connect to.","New account link") as num
@@ -541,24 +529,11 @@ var/global/num_vending_terminals = 1
 				account_first_linked = 1
 			playsound(src, 'sound/machines/twobeep.ogg', 50, 0)
 			to_chat(user, "[bicon(src)]<span class='notice'>New connection established: [D.owner_name].</span>")
+			edit_mode = !edit_mode
+			src.updateUsrDialog()
 			return TRUE
 	to_chat(user, "[bicon(src)]<span class='warning'>The specified account doesn't exist.</span>")
 	return FALSE
-
-/obj/machinery/vending/proc/insert_item(var/obj/item/item)
-	for(var/datum/data/vending_product/VP in product_records)
-		if(VP.product_path == item)
-			VP.amount += 1
-			if(istype(item, /obj/item/stack))
-				var/obj/item/stack/S = item
-				VP.product_name = "A stack of [S.amount] [S.name]"
-			return
-	var/datum/data/vending_product/R = new()
-	R.custom_entry(item)
-	product_records += R
-	products += item
-//H.wear_id
-
 /**
  *  Receive payment with cashmoney.
  *
@@ -587,6 +562,7 @@ var/global/num_vending_terminals = 1
 
 	src.vend(src.currently_vending, usr)
 	currently_vending = null
+	src.updateUsrDialog()
 	return 1
 
 /obj/machinery/vending/scan_card(var/obj/item/weapon/card/I)
@@ -596,6 +572,12 @@ var/global/num_vending_terminals = 1
 		var/obj/item/weapon/card/id/C = I
 		visible_message("<span class='info'>[usr] swipes a card through [src].</span>")
 		if(linked_account)
+			if(I.get_owner_name_from_ID() == linked_account.owner_name) //owner is the one buying things so he gets them for free
+				src.vend(src.currently_vending, usr)
+				currently_vending = null
+				src.updateUsrDialog()
+				return
+
 			//we start by checking the ID card's virtual wallet
 			var/datum/money_account/D = C.virtual_wallet
 			var/using_account = "Virtual Wallet"
@@ -652,6 +634,7 @@ var/global/num_vending_terminals = 1
 			// Vend the item
 			src.vend(src.currently_vending, usr)
 			currently_vending = null
+			src.updateUsrDialog()
 		else
 			to_chat(usr, "[bicon(src)]<span class='warning'>EFTPOS is not connected to an account.</span>")
 
@@ -675,6 +658,9 @@ var/global/num_vending_terminals = 1
 			dat += " <a href='byond://?src=\ref[src];set_price=[idx];cat=[P.category]'>(Set Price)</A>"
 	else
 		dat += " <span class='warning'>SOLD OUT</span>"
+		if(edit_mode)
+			var/idx=GetProductIndex(P)
+			dat += " <a href='byond://?src=\ref[src];delete_entry=[idx];cat=[P.category]'>(Delete Entry)</A>"
 	dat += "<br>"
 
 	return dat
@@ -754,7 +740,7 @@ var/global/num_vending_terminals = 1
 		to_chat(user, "<span class='notice'>\The [src] is dark and unresponsive.</span>")
 		return
 
-	if(user.lying || user.incapacitated())
+	if(!isAdminGhost(usr) && (user.lying || user.incapacitated()))
 		return 0
 
 	if(M_TK in user.mutations && user.a_intent == "hurt" && iscarbon(user))
@@ -794,7 +780,7 @@ var/global/num_vending_terminals = 1
 		dat += "<b>Coin slot:</b> [coin ? coin : "No coin inserted"] (<a href='byond://?src=\ref[src];remove_coin=1'>Remove</A>)<br><br>"
 
 	if (src.product_records.len == 0)
-		dat += "<font color = 'red'>No products loaded!</font>"
+		dat += "<font color = 'red'>No products loaded!</font><br><br></TT>"
 	else
 		var/list/display_records = src.product_records.Copy()
 
@@ -817,8 +803,14 @@ var/global/num_vending_terminals = 1
 			else
 				categories["default"] += R
 
-		for (var/datum/data/vending_product/R in categories["default"])
-			dat += GetProductLine(R)
+		if(is_custom_machine)
+			for(var/datum/data/vending_product/VP in product_records)
+				if(!istype(VP))
+					continue
+				dat += GetProductLine(VP)
+		else
+			for (var/datum/data/vending_product/R in categories["default"])
+				dat += GetProductLine(R)
 		dat += "<br>"
 
 		for(var/cat_name in category_names)
@@ -845,19 +837,20 @@ var/global/num_vending_terminals = 1
 		dat += wires()
 
 		if(product_slogans != "")
-			dat += "The speaker switch is [shut_up ? "off" : "on"]. <a href='?src=\ref[src];togglevoice=[1]'>Toggle</a>"
-			dat += "<br>"
+			dat += "The speaker switch is [shut_up ? "off" : "on"]. <a href='?src=\ref[src];togglevoice=[1]'>(Toggle)</a><br>"
 
-		if(is_custom_machine)
-			dat += "Insert items mode is [inserting_mode ? "on" : "off"]. <a href='?src=\ref[src];toggle_insert_mode=[1]'>Toggle</a>"
-			dat += "<br>"
-			dat += "The prices edit mode is [edit_mode ? "on" : "off"]. <a href='?src=\ref[src];toggle_edit_mode=[1]'>Toggle</a>"
-			dat += "<br><br>"
-			dat += "<i>Note: Remember to slide your ID on this machine if you don't want random people to change your prices.</i>"
+	if(is_custom_machine)
+		if(edit_mode)
+			dat += "Machine name: [src.name] <a href='?src=\ref[src];rename=1'>(Rename)</a><br>"
+			dat += "Current slogans: " + (product_slogans.len >= CUSTOM_VENDING_MAX_SLOGANS ? "" : "<a href='?src=\ref[src];add_slogan=1'>(Add a Slogan)</a>") + "<br>"
+			for(var/i = 1, i <= product_slogans.len, i++) // list slogans
+				dat += "[product_slogans[i]] <a href='?src=\ref[src];delete_slogan_line=[i]'>(Delete)</a><br>"
+			dat += "Edit mode is on."
+		if(!account_first_linked)
+			dat += "<br><br><i>Note: Remember to slide your ID on this machine to link your account. Once this is done, sliding your ID will enable editing and loading.</i>"
 
 	user << browse(dat, "window=vending;size=400x[vertical]")
 	onclose(user, "vending")
-	return
 
 // returns the wire panel text
 /obj/machinery/vending/proc/wires()
@@ -869,8 +862,9 @@ var/global/num_vending_terminals = 1
 		return 1
 
 	//testing("..(): [href]")
-
 	var/free_vend = 0
+	if(isAdminGhost(usr))
+		free_vend = 1
 	if(istype(usr,/mob/living/silicon))
 		var/can_vend = 1
 		if (href_list["vend"] && src.vend_ready && !currently_vending)
@@ -881,9 +875,9 @@ var/global/num_vending_terminals = 1
 				can_vend = FALSE //all borgs can buy free items from vending machines
 		if(istype(usr,/mob/living/silicon/robot))
 			var/mob/living/silicon/robot/R = usr
-			if((R.module && (R.module.quirk_flags & MODULE_CAN_BUY)))
+			if(HAS_MODULE_QUIRK(R, MODULE_CAN_BUY))
 				can_vend = TRUE //But if their module allows it..
-		if(!can_vend)
+		if(!can_vend || is_custom_machine) //currently made it so that silicon cannot buy from custom machine. Could make it so that selling to silicon is a toggleable option that bills the station.
 			to_chat(usr, "<span class='warning'>The vending machine refuses to interface with you, as you are not in its target demographic!</span>")
 			return
 		else
@@ -915,8 +909,7 @@ var/global/num_vending_terminals = 1
 		var/cat=text2num(href_list["cat"])
 
 		var/datum/data/vending_product/R = GetProductByID(idx,cat)
-		if (!R || !istype(R) || !R.product_path || R.amount <= 0)
-			message_admins("Invalid vend request by [formatJumpTo(src.loc)]: [href]")
+		if (!R || !istype(R) || R.amount <= 0)
 			return
 
 		if(R.price == null || !R.price)
@@ -929,7 +922,7 @@ var/global/num_vending_terminals = 1
 
 		return
 
-	else if (href_list["set_price"] && src.vend_ready && !currently_vending)
+	else if (href_list["set_price"] && src.vend_ready && !currently_vending && edit_mode)
 		//testing("vend: [href]")
 
 		if (!allowed(usr) && !emagged && scan_id) //For SECURE VENDING MACHINES YEAH
@@ -942,14 +935,28 @@ var/global/num_vending_terminals = 1
 		var/cat=text2num(href_list["cat"])
 
 		var/datum/data/vending_product/R = GetProductByID(idx,cat)
-		if (!R || !istype(R) || !R.product_path || R.amount <= 0)
-			message_admins("Invalid vend request by [formatJumpTo(src.loc)]: [href]")
+		if (!R || !istype(R) || R.amount <= 0)
 			return
 
 		var/new_price = input("Enter a price", "Change price", R.price) as null|num
 		if(new_price == null || new_price < 0)
 			new_price = R.price
 		R.price = new_price
+
+	else if (href_list["delete_entry"] && src.vend_ready && !currently_vending && edit_mode)
+		if (!allowed(usr) && !emagged && scan_id) //For SECURE VENDING MACHINES YEAH
+			to_chat(usr, "<span class='warning'>Access denied.</span>")//Unless emagged of course
+
+			flick(src.icon_deny,src)
+			return
+
+		var/idx=text2num(href_list["delete_entry"])
+		var/cat=text2num(href_list["cat"])
+
+		var/datum/data/vending_product/R = GetProductByID(idx,cat)
+		if(!R || !istype(R) || R.amount > 0)
+			return
+		deleteEntry(R)
 
 	else if (href_list["cancel_buying"])
 		src.currently_vending = null
@@ -964,42 +971,34 @@ var/global/num_vending_terminals = 1
 	else if ((href_list["togglevoice"]) && (src.panel_open))
 		src.shut_up = !src.shut_up
 
-	else if ((href_list["toggle_edit_mode"]))
-		if(is_custom_machine)
-			edit_mode = !edit_mode
+	else if (href_list["rename"] && edit_mode)
+		var/newname = input(usr,"Please enter a new name for the vending machine.","Rename Machine") as text
+		if(length(newname) > 0 && length(newname) <= CUSTOM_VENDING_MAX_NAME_LENGTH)
+			src.name = html_encode(newname)
 
-	else if ((href_list["toggle_insert_mode"]))
-		if(is_custom_machine)
-			inserting_mode = !inserting_mode
+	else if (href_list["add_slogan"] && edit_mode)
+		var/newslogan = input(usr,"Please enter a new slogan that is between 1 and [CUSTOM_VENDING_MAX_SLOGAN_LENGTH] characters long.","Add a New Slogan") as text
+		if(length(newslogan) > 0 && length(newslogan) <= CUSTOM_VENDING_MAX_SLOGAN_LENGTH)
+			product_slogans += html_encode(newslogan)
+
+	else if (href_list["delete_slogan_line"] && edit_mode && product_slogans.len > 0)
+		product_slogans -= product_slogans[text2num(href_list["delete_slogan_line"])]
 
 	src.add_fingerprint(usr)
 	src.updateUsrDialog()
 
-	return
-
-/obj/machinery/vending/proc/add_item(var/obj/item/I)
-	var/found = FALSE
-
-	for (var/datum/data/vending_product/D in product_records)
-		if (D.product_path == I.type)
-			D.amount++
-			found = TRUE
-			break
-
-	if (!found)
-		var/datum/data/vending_product/R = new()
-		R.product_path = I.type
-		R.amount = 1
-		R.original_amount = 0
-		R.price = 0
-		R.display_color = pick("red", "blue", "green")
-		R.product_name = I.name
-		R.category = CAT_NORMAL
-		R.subcategory = I.vending_cat
-
-		product_records.Add(R)
-
-	qdel(I)
+/obj/machinery/vending/proc/deleteEntry(datum/data/vending_product/R)
+	if(R.custom)
+		for(var/obj/item/I in custom_stock)
+			if(I.product_name() == R.product_name)
+				custom_stock -= I
+	else
+		for(var/obj/item/I in products)
+			if(I.type == R.product_path)
+				products -= I
+				break
+	product_records -= R
+	qdel(R)
 
 /obj/machinery/vending/proc/vend(datum/data/vending_product/R, mob/user, by_voucher = 0)
 	if (!allowed(user) && !emagged && wires.IsIndexCut(VENDING_WIRE_IDSCAN)) //For SECURE VENDING MACHINES YEAH
@@ -1033,8 +1032,6 @@ var/global/num_vending_terminals = 1
 
 		coin = null
 
-	R.amount--
-
 	if(((src.last_reply + (src.vend_delay + 200)) <= world.time) && src.vend_reply)
 		spawn(0)
 			src.speak(src.vend_reply)
@@ -1043,18 +1040,19 @@ var/global/num_vending_terminals = 1
 	use_power(5)
 	if (src.icon_vend) //Show the vending animation if needed
 		flick(src.icon_vend,src)
+	R.amount--
+	src.updateUsrDialog()
 	spawn(vend_delay)
-
-		if(ispath(R.product_path)) //this if else clause is a little hack to detect if the item is a typepath or an in-game object with references and shit
+		if(!R.custom)
 			new R.product_path(get_turf(src))
 		else
-			if(istype(R.product_path, /obj))
-				var/obj/A = R.product_path
-				A.forceMove(get_turf(src))
+			for(var/obj/O in custom_stock)
+				if(O.product_name() == R.product_name)
+					O.forceMove(src.loc)
+					custom_stock.Remove(O)
+					break
 		src.vend_ready = 1
-		return
-
-	src.updateUsrDialog()
+		src.updateUsrDialog()
 
 /obj/machinery/vending/process()
 	if(stat & (BROKEN|NOPOWER))
@@ -1074,8 +1072,6 @@ var/global/num_vending_terminals = 1
 
 	if(src.shoot_inventory && prob(shoot_chance))
 		src.throw_item()
-
-	return
 
 /obj/machinery/vending/proc/speak(var/message)
 	if(stat & NOPOWER)
@@ -1108,7 +1104,6 @@ var/global/num_vending_terminals = 1
 		lost_inventory--
 	stat |= BROKEN
 	src.icon_state = "[initial(icon_state)]-broken"
-	return
 
 //Somebody cut an important wire and now we're following a new definition of "pitch."
 /obj/machinery/vending/proc/throw_item()
@@ -1118,42 +1113,44 @@ var/global/num_vending_terminals = 1
 	if (!target)
 		return 0
 
-	var/obj/throw_item
-	var/list/throwable = product_records.Copy()
+	var/list/throwables = product_records.Copy()
 	var/tries = 10 //Give up eventually
-	var/datum/data/vending_product/R
-	var/dump_path
 
-	if (extended_inventory)
-		throwable += hidden_records
 
-	if(!throwable.len)
+	if(extended_inventory)
+		throwables += hidden_records
+
+	if(!throwables.len)
 		return 0
 
-	while (tries)
-		R = pick(throwable)
-		dump_path = R.product_path
+	while(tries)
+		var/obj/throw_item
+		var/datum/data/vending_product/R = pick(throwables)
 
-		if (R.amount <= 0 || !dump_path)
+		if(R.amount <= 0)
 			tries--
 			continue
 
 		R.amount--
-
-		if(is_custom_machine)
-			products.Remove(throw_item)
-			throw_item = dump_path
-			throw_item.forceMove(get_turf(src))
+		if(!R.custom)
+			throw_item = new R.product_path(get_turf(src))
 		else
-			throw_item = new dump_path(src.loc)
+			for(var/obj/O in custom_stock)
+				if(O.product_name() == R.product_name)
+					O.forceMove(src.loc)
+					custom_stock.Remove(O)
+					throw_item = O
+					break
 
-		if (!throw_item)
-			return 0
+		if(!throw_item)
+			tries--
+			continue
 
 		spawn(0)
 			throw_item.throw_at(target, 16, 3)
 
 		src.visible_message("<span class='danger'>[src] launches [throw_item.name] at [target.name]!</span>")
+		src.updateUsrDialog()
 		return 1
 
 	return 0
@@ -1365,6 +1362,8 @@ var/global/num_vending_terminals = 1
 		"Try our new jerky!"
 	)
 	icon_state = "snack"
+	icon_vend = "snack-vend"
+	vend_delay = 25
 	products = list(
 		/obj/item/weapon/reagent_containers/food/snacks/candy = 6,
 		/obj/item/weapon/reagent_containers/food/drinks/dry_ramen/heating = 6,
@@ -1402,6 +1401,8 @@ var/global/num_vending_terminals = 1
 	name = "\improper Robust Softdrinks"
 	desc = "A softdrink vendor provided by Robust Industries, LLC."
 	icon_state = "Cola_Machine"
+	icon_vend = "Cola_Machine-vend"
+	vend_delay = 11
 	product_slogans = list(
 		"Robust Softdrinks: More robust than a toolbox to the head!",
 		"At least we aren't Dan!"
@@ -1482,6 +1483,7 @@ var/global/num_vending_terminals = 1
 	product_slogans = list("Carts to go!")
 	icon_state = "cart"
 	icon_deny = "cart-deny"
+	icon_vend = "cart-vend"
 	products = list(
 		/obj/item/weapon/cartridge/captain = 3,
 		/obj/item/weapon/cartridge/hop = 3,
@@ -1528,6 +1530,8 @@ var/global/num_vending_terminals = 1
 		"Award-winning cigs."
 	)
 	icon_state = "cigs"
+	icon_vend = "cigs-vend"
+	vend_delay = 21
 	products = list(
 		/obj/item/weapon/storage/fancy/cigarettes = 10,
 		/obj/item/weapon/storage/fancy/matchbox = 10,
@@ -1554,6 +1558,8 @@ var/global/num_vending_terminals = 1
 	req_access = list(access_medical)
 	icon_state = "med"
 	icon_deny = "med-deny"
+	icon_vend = "med-vend"
+	vend_delay = 18
 	product_ads = list(
 		"Go save some lives!",
 		"The best stuff for your medbay.",
@@ -1823,7 +1829,11 @@ var/global/num_vending_terminals = 1
 				return 1
 	..()
 
-/obj/machinery/wallmed_frame/MouseDrop_T(atom/movable/O as mob|obj, mob/user as mob)
+/obj/machinery/wallmed_frame/MouseDropTo(atom/movable/O as mob|obj, mob/user as mob)
+	if(user.incapacitated() || user.lying)
+		return
+	if(!Adjacent(user) || !user.Adjacent(O))
+		return
 	if(build==3)
 		if(istype(O,/obj/structure/vendomatpack))
 			if(istype(O,/obj/structure/vendomatpack/medical))
@@ -1869,6 +1879,8 @@ var/global/num_vending_terminals = 1
 	)
 	icon_state = "sec"
 	icon_deny = "sec-deny"
+	icon_vend = "sec-vend"
+	vend_delay = 14
 	products = list(
 		/obj/item/weapon/handcuffs = 8,
 		/obj/item/weapon/grenade/flashbang = 4,
@@ -1926,6 +1938,8 @@ var/global/num_vending_terminals = 1
 	)
 	icon_state = "nutri"
 	icon_deny = "nutri-deny"
+	icon_vend = "nutri-vend"
+	vend_delay = 26
 	products = list(
 		/obj/item/weapon/reagent_containers/food/snacks/beezeez = 20,
 		/obj/item/weapon/reagent_containers/glass/fertilizer/ez = 35,
@@ -1958,6 +1972,8 @@ var/global/num_vending_terminals = 1
 		"Aw h'yeah son!"
 	)
 	icon_state = "seeds"
+	icon_vend = "seeds-vend"
+	vend_delay = 13
 	products = list(
 		/obj/item/seeds/bananaseed = 3,
 		/obj/item/seeds/berryseed = 3,
@@ -2114,6 +2130,7 @@ var/global/num_vending_terminals = 1
 		"You don't really need these..."
 	)
 	icon_state = "dinnerware"
+	icon_vend = "dinnerware-vend"
 	products = list(
 		/obj/item/weapon/tray = 8,
 		/obj/item/weapon/kitchen/utensil/fork = 6,
@@ -2142,6 +2159,7 @@ var/global/num_vending_terminals = 1
 	name = "\improper BODA"
 	desc = "An old vending machine containing sweet water."
 	icon_state = "sovietsoda"
+	icon_vend = "sovietsoda-vend"
 	product_slogans = list(
 		"BODA: We sell drink.",
 		"BODA: Drink today.",
@@ -2176,7 +2194,8 @@ var/global/num_vending_terminals = 1
 	//req_access = list(access_maint_tunnels)
 	icon_state = "tool"
 	icon_deny = "tool-deny"
-
+	icon_vend = "tool-vend"
+	vend_delay = 11
 	products = list(
 		/obj/item/stack/cable_coil/random = 10,
 		/obj/item/weapon/crowbar = 5,
@@ -2205,6 +2224,8 @@ var/global/num_vending_terminals = 1
 	req_access = list(access_engine_equip)//Engineering Equipment access
 	icon_state = "engivend"
 	icon_deny = "engivend-deny"
+	icon_vend = "engivend-vend"
+	vend_delay = 21
 	products = list(
 		/obj/item/clothing/glasses/scanner/meson = 2,
 		/obj/item/clothing/glasses/scanner/material = 2,
@@ -3136,10 +3157,13 @@ var/global/num_vending_terminals = 1
 	return
 
 /obj/machinery/vending/toggleSecuredPanelOpen(var/obj/toggleitem, var/mob/user)
-	if(!account_first_linked)
+	if(!is_custom_machine)
+		return ..()
+	if(!account_first_linked || (user.get_visible_id() && user.get_visible_id().get_owner_name_from_ID() == linked_account.owner_name))
 		togglePanelOpen(toggleitem, user)
 		return 1
-	return ..()
+	to_chat(user, "<span class='warning'>The machine requires an ID to unlock it.</span>")
+	return 0
 
 /obj/machinery/vending/mining
 	name = "\improper Dwarven Mining Equipment"
@@ -3182,6 +3206,7 @@ var/global/num_vending_terminals = 1
 		/obj/item/weapon/pickaxe/silver = 1,
 		/obj/item/weapon/pickaxe/gold = 1,
 		/obj/item/weapon/pickaxe/diamond = 1,
+		/obj/item/borg/upgrade/hook = 1,
 		)
 	prices = list(
 		/obj/item/toy/canary = 100,
@@ -3206,6 +3231,7 @@ var/global/num_vending_terminals = 1
 		/obj/item/weapon/gun/hookshot = 3000,
 		/obj/item/weapon/lazarus_injector/advanced = 3000,
 		/obj/item/weapon/pickaxe/diamond = 3000,
+		/obj/item/borg/upgrade/hook = 3000,
 		)
 
 	pack = /obj/structure/vendomatpack/mining

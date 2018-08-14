@@ -19,7 +19,7 @@
 	name = "dead fly"
 	desc = "The remains of a dead fly."
 	gender = PLURAL
-	icon = 'icons/obj/insects_etc.dmi'
+	icon = 'icons/obj/apiary_bees_etc.dmi'
 	icon_state = "fly_dead"
 	anchored = 0
 	mouse_opacity = 1
@@ -35,7 +35,7 @@
 /obj/item/weapon/reagent_containers/food/snacks/fly_eggs
 	name = "fly eggs"
 	desc = "Small, disgusting fly eggs. You have a strong premonition not to eat these."
-	icon = 'icons/obj/insects_etc.dmi'
+	icon = 'icons/obj/apiary_bees_etc.dmi'
 	icon_state = "fly_eggs"
 	bitesize = 3
 	var/time_left_to_hatch = 0
@@ -64,7 +64,7 @@
 
 /mob/living/simple_animal/fly
 	name = "swarm of flies"
-	icon = 'icons/obj/insects_etc.dmi'
+	icon = 'icons/obj/apiary_bees_etc.dmi'
 	icon_state = "flies1"
 	icon_dead = "bee_dead"
 

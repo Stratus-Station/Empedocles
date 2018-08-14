@@ -10,6 +10,8 @@
 
 #define GREY_SHAPED "Grey"
 
+#define UNDEAD_SHAPED "Skellington","Undead","Plasmaman"
+
 //Content of the Round End Information window
 var/round_end_info = ""
 
@@ -301,7 +303,6 @@ var/global/list/minesweeper_best_players = list()
 var/nanocoins_rates = 1
 var/nanocoins_lastchange = 0
 
-var/speciesinit = 0
 var/minimapinit = 0
 
 var/bees_species = list()
@@ -369,9 +370,12 @@ var/list/blacklisted_mobs = list(
 		/mob/living/simple_animal/hostile/giant_spider/hunter/dead, // They are dead.
 		/mob/living/simple_animal/hostile/asteroid/hivelordbrood, // They aren't supposed to be playable.
 		/mob/living/simple_animal/hologram, // Can't live outside the holodeck.
+		/mob/living/simple_animal/hostile/carp/holocarp, //These can but they're just a retarded hologram carp reskin for the love of god.
 		/mob/living/slime_pile, // They are dead.
 		/mob/living/adamantine_dust, // Ditto
-		/mob/living/simple_animal/hostile/mining_drone //This thing is super broken in the hands of a player and it was never meant to be summoned out of actual mining drone cubes.
+		/mob/living/simple_animal/hostile/viscerator, //Nope.
+		/mob/living/simple_animal/hostile/mining_drone, //This thing is super broken in the hands of a player and it was never meant to be summoned out of actual mining drone cubes.
+		/mob/living/simple_animal/bee //Aren't set up to be playable
 		)
 
 //Boss monster list
@@ -381,5 +385,10 @@ var/list/boss_mobs = list(
 	/mob/living/simple_animal/hostile/wendigo,				// Stupid strong evolving creature things that scream for help
 	/mob/living/simple_animal/hostile/mechahitler,			// Sieg heil!
 	/mob/living/simple_animal/hostile/alien/queen/large,	// The bigger and beefier version of queens.
+	/mob/living/simple_animal/hostile/asteroid/rockernaut/boss, //Angie
+	/mob/living/simple_animal/hostile/humanoid/surgeon/boss, //first stage of Doctor Placeholder
+	/mob/living/simple_animal/hostile/humanoid/surgeon/skeleton, //second stage of Doctor Placeholder
 	)
 
+// Set by traitor item, affects cargo supplies
+var/station_does_not_tip = FALSE

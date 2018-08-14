@@ -188,7 +188,7 @@ var/list/camera_messages = list()
 	else if(panel_open && iswiretool(W))
 		wires.Interact(user)
 
-	else if(istype(W, /obj/item/weapon/weldingtool) && wires.CanDeconstruct())
+	else if(iswelder(W) && wires.CanDeconstruct())
 		if(weld(W, user))
 			if(assembly)
 				assembly.state = 1
@@ -328,15 +328,17 @@ var/list/camera_messages = list()
 
 /obj/machinery/camera/proc/triggerCameraAlarm()
 	alarm_on = 1
+	var/area/this_area = get_area(src)
 	for(var/mob/living/silicon/S in mob_list)
-		S.triggerAlarm("Camera", areaMaster, list(src), src)
+		S.triggerAlarm("Camera", this_area, list(src), src)
 	adv_camera.update(z, TRUE, list(src))
 
 
 /obj/machinery/camera/proc/cancelCameraAlarm()
 	alarm_on = 0
+	var/area/this_area = get_area(src)
 	for(var/mob/living/silicon/S in mob_list)
-		S.cancelAlarm("Camera", areaMaster, src)
+		S.cancelAlarm("Camera", this_area, src)
 	adv_camera.update(z, TRUE, list(src))
 
 /obj/machinery/camera/proc/can_use()
@@ -390,18 +392,12 @@ var/list/camera_messages = list()
 
 	if(busy)
 		return 0
-	if(!WT.isOn())
-		return 0
 
 	// Do after stuff here
 	to_chat(user, "<span class='notice'>You start to weld the [src].</span>")
-	playsound(src, 'sound/items/Welder.ogg', 50, 1)
-	WT.eyecheck(user)
 	busy = 1
-	if(do_after(user, src, 100))
+	if(WT.do_weld(user, src, 100, 0))
 		busy = 0
-		if(!WT.isOn())
-			return 0
 		return 1
 	busy = 0
 	return 0

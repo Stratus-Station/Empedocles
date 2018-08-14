@@ -1170,6 +1170,14 @@
 		)
 	result = /obj/item/weapon/reagent_containers/food/snacks/sandwich
 
+/datum/recipe/breadsandwich
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/breadslice,
+		/obj/item/weapon/reagent_containers/food/snacks/breadslice,
+		/obj/item/weapon/reagent_containers/food/snacks/breadslice,
+		)
+	result = /obj/item/weapon/reagent_containers/food/snacks/breadsandwich
+
 /datum/recipe/toastedsandwich
 	items = list(/obj/item/weapon/reagent_containers/food/snacks/sandwich)
 	result = /obj/item/weapon/reagent_containers/food/snacks/toastedsandwich
