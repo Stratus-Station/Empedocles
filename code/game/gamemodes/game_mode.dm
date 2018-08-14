@@ -241,8 +241,8 @@
 /*	for(var/mob/M in player_list)
 		if(!istype(M,/mob/new_player))
 			M << sound('sound/AI/intercept.ogg')
-	if(security_level < SEC_LEVEL_BLUE)
-		set_security_level(SEC_LEVEL_BLUE)*/
+	if(security_level < SEC_LEVEL_SUNSET)
+		set_security_level(SEC_LEVEL_SUNSET)*/
 
 
 /datum/game_mode/proc/get_players_for_role(var/role, override_jobbans=1, poll=0)
