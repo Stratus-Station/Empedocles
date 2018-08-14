@@ -362,7 +362,7 @@ var/global/ports_open = TRUE
 						ports_open = TRUE
 						return
 				else
-					to_chat(usr, "<span class='warning'>This action requires either a red alert or head of security authorization.</span>")
+					to_chat(usr, "<span class='warning'>This action requires either a Nightfall Protocol active or head of security authorization.</span>")
 			else
 				to_chat(usr, "<span class='warning'>You must wear an ID for this function.</span>")
 
@@ -411,7 +411,7 @@ var/global/ports_open = TRUE
 		),
 		"alerts"=list(
 			list("alert"="default",   "label"="Nanotrasen",  "desc"="Oh god."),
-			list("alert"="redalert",  "label"="Red Alert",   "desc"="Nothing to do with communists."),
+			list("alert"="nightfall",  "label"="Nightfall protocol",   "desc"="Nothing to do with communists."),
 			list("alert"="lockdown",  "label"="Lockdown",    "desc"="Let everyone know they're on lockdown."),
 			list("alert"="biohazard", "label"="Biohazard",   "desc"="Great for virus outbreaks and parties."),
 		)
@@ -419,8 +419,8 @@ var/global/ports_open = TRUE
 	data["security_level"] = security_level
 	data["str_security_level"] = get_security_level()
 	data["levels"] = list(
-		list("id"=SEC_LEVEL_DAYBREAK, "name"="Green"),
-		list("id"=SEC_LEVEL_SUNSET,  "name"="Blue"),
+		list("id"=SEC_LEVEL_DAYBREAK, "name"="Daybreak Protocol"),
+		list("id"=SEC_LEVEL_SUNSET,  "name"="Sunset Protocol"),
 		//SEC_LEVEL_NIGHTFALL = list("name"="Red"),
 	)
 	data["ert_sent"] = sentStrikeTeams(TEAM_ERT)

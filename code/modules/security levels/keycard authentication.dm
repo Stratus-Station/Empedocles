@@ -80,11 +80,11 @@ var/global/list/obj/machinery/keycard_auth/authenticators = list()
 	if(screen == 1)
 
 		dat += {"Select an event to trigger:<ul>
-			<li><A href='?src=\ref[src];triggerevent=Red alert'>Red alert</A></li>"}
-		if((get_security_level() in list("red", "delta")))
+			<li><A href='?src=\ref[src];triggerevent=Nightfall Protocol'>Nightfall Protocol</A></li>"}
+		if((get_security_level() in list("nightfall", "supernova")))
 			dat += "<li><A href='?src=\ref[src];triggerevent=Emergency Response Team'>Emergency Response Team</A></li>"
 		else
-			dat += "<li>Emergency Response Team (Disabled while below Code Red)</li>"
+			dat += "<li>Emergency Response Team (Disabled while below Nightfall Protocol)</li>"
 		dat += {"<li><A href='?src=\ref[src];triggerevent=Grant Emergency Maintenance Access'>Grant Emergency Maintenance Access</A></li>
 			<li><A href='?src=\ref[src];triggerevent=Revoke Emergency Maintenance Access'>Revoke Emergency Maintenance Access</A></li>
 			</ul>"}
