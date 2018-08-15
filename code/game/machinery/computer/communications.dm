@@ -362,7 +362,7 @@ var/global/ports_open = TRUE
 						ports_open = TRUE
 						return
 				else
-					to_chat(usr, "<span class='warning'>This action requires either a Nightfall Protocol active or head of security authorization.</span>")
+					to_chat(usr, "<span class='warning'>This action requires either a nightfall protocol active or head of security authorization.</span>")
 			else
 				to_chat(usr, "<span class='warning'>You must wear an ID for this function.</span>")
 
@@ -411,7 +411,7 @@ var/global/ports_open = TRUE
 		),
 		"alerts"=list(
 			list("alert"="default",   "label"="Nanotrasen",  "desc"="Oh god."),
-			list("alert"="nightfall",  "label"="Nightfall protocol",   "desc"="Nothing to do with communists."),
+			list("alert"="nightfall",  "label"="Nightfall Protocol",   "desc"="Pray for daybreak."),
 			list("alert"="lockdown",  "label"="Lockdown",    "desc"="Let everyone know they're on lockdown."),
 			list("alert"="biohazard", "label"="Biohazard",   "desc"="Great for virus outbreaks and parties."),
 		)

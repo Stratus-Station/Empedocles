@@ -2,15 +2,15 @@
 # SERVERNAME Derelict 12
 
 ## Alert levels
-ALERT_GREEN All Daybreak protocol reassigned. No immediate threats detected, crew may continue to carry out regular work. Sunset Division are to return to standard posts and await further instruction.
-ALERT_BLUE_UPTO Sunset protocol initiated. Possible or minimal threat detected, Any and all suspicious activity should be reported to security. Crew may carry out regular work with maximum sensors activated, Extra vehicular activity is prohibited.
-ALERT_BLUE_DOWNTO Sunset has returned. Nightfall protocols are rescinded. Please continue your shift with caution, and comply with Asset Protection's requests.
-ALERT_RED_UPTO Nightfall protocol initiated, immediate threat confirmed. Crew rights have been limited, all personnel are to be secluded to their respective departments. Failure to comply will result in jail sentence and immediate relief of duty! This is not a drill.
-ALERT_RED_DOWNTO Supernova procedure has been averted; standard law protocol has been reinstated. All crew are to return to their departments or proceed with evacuation in an orderly manner..
-ALERT_DELTA The station's self-destruct mechanism has been engaged. All crew are instructed to obey all instructions given by heads of staff. Any violations of these orders can be punished by death. This is not a drill.
+ALERT_DAYBREAK Daybreak protocol reassigned. No immediate threats detected, crew may continue to carry out regular work. Sunset Division are to return to standard posts and await further instruction.
+ALERT_SUNSET_UPTO Sunset protocol initiated. Possible or minimal threat detected, Any and all suspicious activity should be reported to security. Crew may carry out regular work with maximum sensors activated, Extra vehicular activity is prohibited.
+ALERT_SUNSET_DOWNTO Sunset has returned. Nightfall protocols are rescinded. Please continue your shift with caution, and comply with Asset Protection's requests.
+ALERT_NIGHTFALL_UPTO Nightfall protocol initiated, immediate threat confirmed. Crew rights have been limited, all personnel are to be secluded to their respective departments. Failure to comply will result in jail sentence and immediate relief of duty! This is not a drill.
+ALERT_NIGHTFALL_DOWNTO Supernova procedure has been averted; standard law protocol has been reinstated. All crew are to return to their departments or proceed with evacuation in an orderly manner..
+ALERT_SUPERNOVA Supernova procedure active. Utter destruction of the station is imminent. Immediate evacuation in progress, martial law is in effect. Failure to comply to members of security will result in immediate execution. THIS IS NOT A DRILL!
 
 ## Add a # infront of this if you want to use the SQL based admin system, the legacy system uses admins.txt. You need to set up your database to use the SQL based system.
-ADMIN_LEGACY_SYSTEMS
+ADMIN_LEGACY_SYSTEM
 
 ## Add a # infront of this if you want to use the SQL based banning system. The legacy systems use the files in the data folder. You need to set up your database to use the SQL based system.
 BAN_LEGACY_SYSTEM
