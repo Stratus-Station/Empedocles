@@ -87,11 +87,14 @@ obj/item/clothing/head/helmet/tactical/attack_self(mob/user)
 	item_state = "dermal"
 	siemens_coefficient = 0.6
 
-/obj/item/clothing/head/helmet/tactical/warden
-	name = "warden's hat"
-	desc = "It's a special helmet issued to the Warden of a security force. Protects the head from impacts."
-	icon_state = "policehelm"
-	body_parts_covered = HEAD
+/obj/item/clothing/head/helmet/tactical/hadeswarden
+	name = "Hades Carapace Helmet"
+	desc = "An intimidating helmet that features a piercing singlular glowing eye. This helmet is commonly worn by the Warden. Equipped with Blunt Trauma Plates."
+	icon_state = "ap_warden_helm"
+	armor = list(melee = 50, bullet = 10, laser = 5,energy = 5, bomb = 5, bio = 2, rad = 0)
+	siemens_coefficient = 0.7
+	body_parts_covered = FULL_HEAD
+	eyeprot = 1
 
 /obj/item/clothing/head/helmet/tactical/riot
 	name = "riot helmet"

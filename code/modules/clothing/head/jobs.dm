@@ -65,9 +65,9 @@
 
 //Security
 /obj/item/clothing/head/beret/sec
-	name = "security beret"
-	desc = "A beret with the security insignia emblazoned on it. For officers that are more inclined towards style than safety."
-	icon_state = "beret_badge"
+	name = "asset protection beret"
+	desc = "A blue beret with the asset protection insignia emblazoned on it. Perfect for style over safety."
+	icon_state = "ap_beret"
 	flags = FPRINT
 
 //Medical

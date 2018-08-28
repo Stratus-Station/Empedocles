@@ -110,10 +110,32 @@
 
 
 //Mining rig
-/obj/item/clothing/head/helmet/space/rig/mining
-	name = "mining hardsuit helmet"
-	desc = "A special helmet designed for work in a hazardous, low pressure environment. Has reinforced plating."
-	icon_state = "rig0-mining"
+/obj/item/clothing/head/helmet/space/rig/miningape
+	name = "A.P.E Hood Uplink"
+	desc = "Advanced Polymerized Elastomer, or 'A.P.E' is a special helmet designed for mining crewmembers to work safely in a hazardous, low pressure environment focusing on mobility over survivability."
+	icon_state = "mining-rig-both-helm"
+	item_state = "rig0-mining"
+	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/mining_suit.dmi', "right_hand" = 'icons/mob/in-hand/right/mining_suit.dmi')
+	_color = "mining"
+	species_fit = list(GREY_SHAPED)
+	species_restricted = list("exclude",VOX_SHAPED)
+	pressure_resistance = 40 * ONE_ATMOSPHERE
+	goliath_reinforce = FALSE
+
+/obj/item/clothing/suit/space/rig/miningape
+	icon_state = "mining-rig-ape-suit"
+	name = "A.P.E Suit"
+	desc = "Advanced Polymerized Elastomer, or 'A.P.E' is a special helmet designed for mining crewmembers to work safely in a hazardous, low pressure environment."
+	item_state = "rig-mining"
+	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/mining_suit.dmi', "right_hand" = 'icons/mob/in-hand/right/mining_suit.dmi')
+	species_restricted = list("exclude",VOX_SHAPED)
+	pressure_resistance = 40 * ONE_ATMOSPHERE
+	goliath_reinforce = FALSE
+
+/obj/item/clothing/head/helmet/space/rig/miningapex
+	name = "A.P.E.X Hood Uplink"
+	desc = "Advanced Polymerized Elastomer eXtended, or 'A.P.E.X' is a suit designed for survivability over mobility, it has slots that allow for additional reinforcements."
+	icon_state = "mining-rig-both-helm"
 	item_state = "rig0-mining"
 	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/mining_suit.dmi', "right_hand" = 'icons/mob/in-hand/right/mining_suit.dmi')
 	_color = "mining"
@@ -121,16 +143,20 @@
 	species_restricted = list("exclude",VOX_SHAPED)
 	pressure_resistance = 40 * ONE_ATMOSPHERE
 	goliath_reinforce = TRUE
+	armor = list(melee = 15, bullet = 5, laser = 10,energy = 5, bomb = 5, bio = 10, rad = 0)
+	slowdown = HARDSUIT_SLOWDOWN_LOW
 
-/obj/item/clothing/suit/space/rig/mining
-	icon_state = "rig-mining"
-	name = "mining hardsuit"
-	desc = "A special suit that protects against hazardous, low pressure environments. Has reinforced plating."
+/obj/item/clothing/suit/space/rig/miningapex
+	icon_state = "mining-rig-apex-suit"
+	name = "A.P.E.X Suit"
+	desc = "Advanced Polymerized Elastomer eXtended, or 'A.P.E.X' is a suit designed for survivability over mobility, it has slots that allow for additional reinforcements."
 	item_state = "rig-mining"
 	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/mining_suit.dmi', "right_hand" = 'icons/mob/in-hand/right/mining_suit.dmi')
 	species_restricted = list("exclude",VOX_SHAPED)
 	pressure_resistance = 40 * ONE_ATMOSPHERE
 	goliath_reinforce = TRUE
+	armor = list(melee = 10, bullet = 5, laser = 10,energy = 5, bomb = 5, bio = 30, rad = 0)
+	slowdown = HARDSUIT_SLOWDOWN_LOW
 
 //Syndicate rig
 /obj/item/clothing/head/helmet/space/rig/syndi
@@ -284,21 +310,20 @@
 
 
 	//Security
-/obj/item/clothing/head/helmet/space/rig/security
-	name = "security hardsuit helmet"
-	desc = "A special helmet designed for work in a hazardous low pressure environment. Has an additional layer of armor."
-	icon_state = "rig0-sec"
+/obj/item/clothing/head/helmet/space/rig/securityrig
+	name = "Daedalus Heavy Ceramic Plate Armour Helmet"
+	desc = "A specialized helmet designed for work in a hazardous low pressure environment. Has an additional layer of  thick armor."
+	icon_state = "ap_rig_0"
 	item_state = "sec_helm"
-	_color = "sec"
 	species_fit = list(GREY_SHAPED)
 	species_restricted = list("exclude",VOX_SHAPED)
-	armor = list(melee = 60, bullet = 10, laser = 30, energy = 5, bomb = 45, bio = 100, rad = 10)
+	armor = list(melee = 30, bullet = 20, laser = 30, energy = 5, bomb = 10, bio = 100, rad = 10)
 	siemens_coefficient = 0.7
 	pressure_resistance = 40 * ONE_ATMOSPHERE
 
-/obj/item/clothing/suit/space/rig/security
-	icon_state = "rig-sec"
-	name = "security hardsuit"
+/obj/item/clothing/suit/space/rig/securityrig
+	icon_state = "ap_rig_1"
+	name = "Daedalus Heavy Ceramic Plate Armour Suit"
 	desc = "A special suit that protects against hazardous low pressure environments. Has an additional layer of armor."
 	item_state = "sec_hardsuit"
 	species_fit = list(GREY_SHAPED)

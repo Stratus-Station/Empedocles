@@ -37,10 +37,17 @@
 	item_state = "armor"
 
 /obj/item/clothing/suit/armor/vest/warden
-	name = "Warden's jacket"
-	desc = "An armoured jacket with silver rank pips and livery."
-	icon_state = "warden_jacket"
+	name = "Hades Carapace Suit"
+	desc = "An intimidating bulky reinforced suit. This suit is commonly worn by the Warden. Equipped with Blunt Tramau Plates."
+	icon_state = "ap_warden_suit"
 	item_state = "armor"
+	blood_overlay_type = "armor"
+	body_parts_covered = ARMS|LEGS|FULL_TORSO|FEET|HANDS|IGNORE_INV
+	slowdown = HARDSUIT_SLOWDOWN_LOW
+	clothing_flags = ONESIZEFITSALL
+	flags = FPRINT
+	armor = list(melee = 65, bullet = 10, laser = 10, energy = 10, bomb = 5, bio = 0, rad = 0)
+	siemens_coefficient = 0.7
 
 /obj/item/clothing/suit/armor/vest/neorussian
 	name = "neo-Russian vest"
