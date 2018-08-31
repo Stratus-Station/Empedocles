@@ -23,28 +23,28 @@
 			if(SEC_LEVEL_DAYBREAK)
 				world << sound('sound/misc/notice2.ogg')
 				to_chat(world, "<font size=4 color='red'>Attention Crew! Sunset Protocol has been lowered to Daybreak Protocol.</font>")
-				to_chat(world, "<font color='red'>[config.alert_desc_green]</font>")
+				to_chat(world, "<font color='red'>[config.alert_desc_daybreak]</font>")
 				security_level = SEC_LEVEL_DAYBREAK
 			if(SEC_LEVEL_SUNSET)
 				if(security_level < SEC_LEVEL_SUNSET)
 					world << sound('sound/misc/notice1.ogg')
 					to_chat(world, "<font size=4 color='red'>Attention Crew! Daybreak Protocol has been elevated to Sunset Protocol!</font>")
-					to_chat(world, "<font color='red'>[config.alert_desc_blue_upto]</font>")
+					to_chat(world, "<font color='red'>[config.alert_desc_sunset_upto]</font>")
 				else
 					world << sound('sound/misc/notice2.ogg')
 					to_chat(world, "<font size=4 color='red'>Attention Crew! Nightfall Protocol has been lowered to Sunset Protocol.</font>")
-					to_chat(world, "<font color='red'>[config.alert_desc_blue_downto]</font>")
+					to_chat(world, "<font color='red'>[config.alert_desc_sunset_downto]</font>")
 				security_level = SEC_LEVEL_SUNSET
 
 			if(SEC_LEVEL_NIGHTFALL)
 				if(security_level < SEC_LEVEL_NIGHTFALL)
 					world << sound('sound/misc/redalert1.ogg')
 					to_chat(world, "<font size=4 color='red'>Warning! Nightfall Protocol has been Initiated!</font>")
-					to_chat(world, "<font color='red'>[config.alert_desc_red_upto]</font>")
+					to_chat(world, "<font color='red'>[config.alert_desc_nightfall_upto]</font>")
 				else
 					world << sound('sound/misc/notice2.ogg')
 					to_chat(world, "<font size=4 color='red'>Warning! Nightfall Protocol has been Initiated!</font>")
-					to_chat(world, "<font color='red'>[config.alert_desc_red_downto]</font>")
+					to_chat(world, "<font color='red'>[config.alert_desc_nightfall_downto]</font>")
 				security_level = SEC_LEVEL_NIGHTFALL
 
 				/*	- At the time of commit, setting status displays didn't work properly
@@ -54,7 +54,7 @@
 
 			if(SEC_LEVEL_SUPERNOVA)
 				to_chat(world, "<font size=4 color='red'>Danger! Supernova Protocol is now in effect!</font>")
-				to_chat(world, "<font color='red'>[config.alert_desc_delta]</font>")
+				to_chat(world, "<font color='red'>[config.alert_desc_supernova]</font>")
 				security_level = SEC_LEVEL_SUPERNOVA
 
 		for(var/obj/machinery/firealarm/FA in firealarms)
