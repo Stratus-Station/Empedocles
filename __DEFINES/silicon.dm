@@ -50,7 +50,7 @@ var/global/list/all_robot_modules = default_nanotrasen_robot_modules + emergency
 
 /proc/getAvailableRobotModules()
 	var/list/pickable_modules = default_nanotrasen_robot_modules.Copy()
-	if(security_level == SEC_LEVEL_RED)
+	if(security_level == SEC_LEVEL_NIGHTFALL)
 		pickable_modules += emergency_nanotrasen_robot_modules
 	return pickable_modules
 

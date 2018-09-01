@@ -118,20 +118,20 @@ var/global/ports_open = TRUE
 				if(isAdminGhost(usr) || (access_heads in I.access)) //Let heads change the alert level.
 					var/old_level = security_level
 					if(!tmp_alertlevel)
-						tmp_alertlevel = SEC_LEVEL_GREEN
-					if(tmp_alertlevel < SEC_LEVEL_GREEN)
-						tmp_alertlevel = SEC_LEVEL_GREEN
-					if(tmp_alertlevel > SEC_LEVEL_BLUE)
-						tmp_alertlevel = SEC_LEVEL_BLUE //Cannot engage delta with this
+						tmp_alertlevel = SEC_LEVEL_DAYBREAK
+					if(tmp_alertlevel < SEC_LEVEL_DAYBREAK)
+						tmp_alertlevel = SEC_LEVEL_DAYBREAK
+					if(tmp_alertlevel > SEC_LEVEL_SUNSET)
+						tmp_alertlevel = SEC_LEVEL_SUNSET //Cannot engage delta with this
 					set_security_level(tmp_alertlevel)
 					if(security_level != old_level)
 						//Only notify the admins if an actual change happened
 						log_game("[key_name(usr)] has changed the security level to [get_security_level()].")
 						message_admins("[key_name_admin(usr)] has changed the security level to [get_security_level()].")
 						switch(security_level)
-							if(SEC_LEVEL_GREEN)
+							if(SEC_LEVEL_DAYBREAK)
 								feedback_inc("alert_comms_green",1)
-							if(SEC_LEVEL_BLUE)
+							if(SEC_LEVEL_SUNSET)
 								feedback_inc("alert_comms_blue",1)
 					tmp_alertlevel = 0
 				else
@@ -336,7 +336,7 @@ var/global/ports_open = TRUE
 			var/mob/M = usr
 			var/obj/item/weapon/card/id/I = M.get_id_card()
 			if (I || isAdminGhost(usr))
-				if(isAdminGhost(usr) || (access_hos in I.access) || (access_heads in I.access && security_level >= SEC_LEVEL_RED))
+				if(isAdminGhost(usr) || (access_hos in I.access) || (access_heads in I.access && security_level >= SEC_LEVEL_NIGHTFALL))
 					if(ports_open)
 						var/reason = stripped_input(usr, "Please input a concise justification for port closure. This reason will be transmitted to the trader shuttle.", "Nanotrasen Anti-Comdom Systems") as null|text
 						if(!reason || !(usr in view(1,src)))
@@ -362,7 +362,7 @@ var/global/ports_open = TRUE
 						ports_open = TRUE
 						return
 				else
-					to_chat(usr, "<span class='warning'>This action requires either a red alert or head of security authorization.</span>")
+					to_chat(usr, "<span class='warning'>This action requires either a nightfall protocol active or head of security authorization.</span>")
 			else
 				to_chat(usr, "<span class='warning'>You must wear an ID for this function.</span>")
 
@@ -411,7 +411,7 @@ var/global/ports_open = TRUE
 		),
 		"alerts"=list(
 			list("alert"="default",   "label"="Nanotrasen",  "desc"="Oh god."),
-			list("alert"="redalert",  "label"="Red Alert",   "desc"="Nothing to do with communists."),
+			list("alert"="nightfall",  "label"="Nightfall Protocol",   "desc"="Pray for daybreak."),
 			list("alert"="lockdown",  "label"="Lockdown",    "desc"="Let everyone know they're on lockdown."),
 			list("alert"="biohazard", "label"="Biohazard",   "desc"="Great for virus outbreaks and parties."),
 		)
@@ -419,9 +419,9 @@ var/global/ports_open = TRUE
 	data["security_level"] = security_level
 	data["str_security_level"] = get_security_level()
 	data["levels"] = list(
-		list("id"=SEC_LEVEL_GREEN, "name"="Green"),
-		list("id"=SEC_LEVEL_BLUE,  "name"="Blue"),
-		//SEC_LEVEL_RED = list("name"="Red"),
+		list("id"=SEC_LEVEL_DAYBREAK, "name"="Daybreak Protocol"),
+		list("id"=SEC_LEVEL_SUNSET,  "name"="Sunset Protocol"),
+		//SEC_LEVEL_NIGHTFALL = list("name"="Red"),
 	)
 	data["ert_sent"] = sentStrikeTeams(TEAM_ERT)
 
@@ -691,5 +691,5 @@ var/global/ports_open = TRUE
 		return ..()
 
 	shuttle_autocall()
-	
+
 	..()

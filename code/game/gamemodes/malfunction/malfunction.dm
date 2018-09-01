@@ -206,7 +206,7 @@ You should now be able to use your Explode spell to interface with the nuclear f
 
 /spell/aoe_turf/takeover/cast(var/list/targets, mob/user)
 	command_alert(/datum/command_alert/malf_announce)
-	set_security_level("delta")
+	set_security_level("supernova")
 
 	ticker.mode:malf_mode_declared = 1
 	for(var/datum/mind/AI_mind in ticker.mode:malf_ai)

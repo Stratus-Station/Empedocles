@@ -99,12 +99,12 @@
 	var/media_secret_key = "" // Random string
 
 	//Alert level description
-	var/alert_desc_green = "All threats to the station have passed. Security may not have weapons visible, privacy laws are once again fully enforced."
-	var/alert_desc_blue_upto = "The station has received reliable information about possible hostile activity on the station. Security staff may have weapons visible, random searches are permitted."
-	var/alert_desc_blue_downto = "The immediate threat has passed. Security may no longer have weapons drawn at all times, but may continue to have them visible. Random searches are still allowed."
-	var/alert_desc_red_upto = "There is an immediate serious threat to the station. Security may have weapons unholstered at all times. Random searches are allowed and advised."
-	var/alert_desc_red_downto = "The self-destruct mechanism has been deactivated, there is still however an immediate serious threat to the station. Security may have weapons unholstered at all times, random searches are allowed and advised."
-	var/alert_desc_delta = "The station's self-destruct mechanism has been engaged. All crew are instructed to obey all instructions given by heads of staff. Any violations of these orders can be punished by death. This is not a drill."
+	var/alert_desc_daybreak = "Daybreak protocol reassigned. No immediate threats detected; crew may continue to carry out regular work. Sunset Division are to return to standard posts and await further instruction."
+	var/alert_desc_sunset_upto = "Sunset protocol initiated. A possible or minimal threat has been detected. Any and all suspicious activity should be reported to the security forces. Crew may carry out regular work with maximum sensors activated; however extravehicular activity is prohibited."
+	var/alert_desc_sunset_downto = "Sunset has returned. As such, Nightfall protocols rescinded. Please continue the shift with caution, and comply with Asset Protection where necessary"
+	var/alert_desc_nightfall_upto = "Nightfall protocol initiated. Immediate threat confirmed. Crew rights have been limited; all personnel are to be secluded to their respective departments. Failure to comply will result in jail sentence and immediate relief of duty!"
+	var/alert_desc_nightfall_downto = "Supernova procedure has been averted; standard Nightfall protocol has been reinstated. All crew are to return to their departments or proceed with evacuation in an orderly manner."
+	var/alert_desc_supernova = "Supernova procedure active. Utter destruction of the station is imminent. Immediate evacuation in progress and martial law is in effect. Failure to comply to members of security will result in immediate execution. THIS IS NOT A DRILL!"
 
 	var/forbid_singulo_possession = 0
 
@@ -429,23 +429,23 @@
 				if("load_jobs_from_txt")
 					load_jobs_from_txt = 1
 
-				if("alert_red_upto")
-					config.alert_desc_red_upto = value
+				if("alert_nightfall_upto")
+					config.alert_desc_nightfall_upto = value
 
-				if("alert_red_downto")
-					config.alert_desc_red_downto = value
+				if("alert_nightfall_downto")
+					config.alert_desc_nightfall_downto = value
 
-				if("alert_blue_downto")
-					config.alert_desc_blue_downto = value
+				if("alert_sunset_downto")
+					config.alert_desc_sunset_downto = value
 
-				if("alert_blue_upto")
-					config.alert_desc_blue_upto = value
+				if("alert_sunset_upto")
+					config.alert_desc_sunset_upto = value
 
-				if("alert_green")
-					config.alert_desc_green = value
+				if("alert_daybreak")
+					config.alert_desc_daybreak = value
 
-				if("alert_delta")
-					config.alert_desc_delta = value
+				if("alert_supernova")
+					config.alert_desc_supernova = value
 
 				if("forbid_singulo_possession")
 					forbid_singulo_possession = 1
