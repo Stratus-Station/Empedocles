@@ -1020,6 +1020,25 @@ var/list/slot_equipment_priority = list( \
 	if(istype(A, /obj/effect/decal/point))
 		return 0
 
+	get_active_hand() //use this if you want to live
+
+	var/obj/item/held_item = get_active_hand()
+	if(held_item && istype(held_item, /obj/item/weapon/gun))
+		//works on non-mobs, because you could threaten someone by aiming at a welding tank, right?
+		playsound(src, 'sound/weapons/TargetOn.ogg', 75, 1)
+		A.visible_message("<span class='warning'>[src.name] points [held_item] at [A]!</span>", "<span class='userdanger'>[src.name] points [held_item] at you!</span>")
+		var/icon/crosshair = new('icons/effects/Targeted.dmi', "locked")
+		A.overlays += crosshair
+		spawn(20)
+			if(crosshair)
+				spawn(5)
+					if(crosshair)
+						if(A)
+							A.overlays -= crosshair
+						qdel(crosshair)	
+
+		return 0
+
 	if(istype(A, /mob/living/simple_animal))
 		var/mob/living/simple_animal/pointed_at_mob = A
 		pointed_at_mob.pointed_at(src)
@@ -1037,7 +1056,10 @@ var/list/slot_equipment_priority = list( \
 	point.pixel_y = A.pixel_y
 	spawn(20)
 		if(point)
-			qdel(point)
+			animate(point, alpha = 0, time = 5)
+			spawn(5)
+				if(point)
+					qdel(point)
 
 	return 1
 
