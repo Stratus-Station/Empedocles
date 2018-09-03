@@ -235,12 +235,12 @@ mob/living/carbon/proc/handle_hallucinations()
 					to_chat(src, "<i>You feel a sudden urge to [txt_verb] [location][pick("...","!",".")]</i>")
 			if(77) //Sillycone
 				if(prob(5))
-					to_chat(src, "<font size=4 color='red'>Attention! Delta security level reached!</font>")
-					to_chat(src, "<font color='red'>[config.alert_desc_delta]</font>")
+					to_chat(src, "<font size=4 color='red'>Attention! Supernova Protocol reached!</font>")
+					to_chat(src, "<font color='red'>[config.alert_desc_supernova]</font>")
 					src << sound('sound/AI/aimalf.ogg')
 
 					if(src.client)
-						message_admins("[key_name(src)] just got a fake delta AI message from hallucinating! [formatJumpTo(get_turf(src))]")
+						message_admins("[key_name(src)] just got a fake supernova protocol AI message from hallucinating! [formatJumpTo(get_turf(src))]")
 				else
 					switch(rand(1,10)) //Copied from nanites disease
 						if(1)
