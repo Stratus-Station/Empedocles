@@ -270,6 +270,7 @@ var/list/special_fruits = list()
 	filling_color = "#FF0000"
 	gender = PLURAL
 	plantname = "cherry"
+	food_flags = FOOD_NEEDS_COLD
 	slot_flags = SLOT_EARS
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/cinnamon
@@ -310,6 +311,7 @@ var/list/special_fruits = list()
 	icon_state = "potato"
 	potency = 25
 	filling_color = "#E6E8DA"
+	food_flags = FOOD_NEEDS_COLD
 	plantname = "potato"
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/potato/attackby(obj/item/weapon/W as obj, mob/user as mob)
@@ -332,6 +334,7 @@ var/list/special_fruits = list()
 	icon_state = "grapes"
 	filling_color = "#A332AD"
 	plantname = "grapes"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/greengrapes
 	name = "bunch of green grapes"
@@ -340,6 +343,7 @@ var/list/special_fruits = list()
 	potency = 25
 	filling_color = "#A6FFA3"
 	plantname = "greengrapes"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/peanut
 	name = "peanut"
@@ -356,6 +360,7 @@ var/list/special_fruits = list()
 	potency = 25
 	filling_color = "#A2B5A1"
 	plantname = "cabbage"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/berries
 	name = "bunch of berries"
@@ -363,6 +368,7 @@ var/list/special_fruits = list()
 	icon_state = "berrypile"
 	filling_color = "#C2C9FF"
 	plantname = "berries"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/plastellium
 	name = "clump of plastellium"
@@ -469,6 +475,7 @@ var/list/special_fruits = list()
 	potency = 15
 	filling_color = "#DFE88B"
 	plantname = "apple"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/apple/poisoned
 	filling_color = "#B3BD5E"
@@ -492,6 +499,7 @@ var/list/special_fruits = list()
 	slices_num = 5
 	storage_slots = 3
 	plantname = "watermelon"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/pumpkin
 	name = "pumpkin"
@@ -500,6 +508,7 @@ var/list/special_fruits = list()
 	potency = 10
 	filling_color = "#FAB728"
 	plantname = "pumpkin"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/pumpkin/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	..()
@@ -516,6 +525,7 @@ var/list/special_fruits = list()
 	potency = 20
 	filling_color = "#28FA59"
 	plantname = "lime"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/lemon
 	name = "lemon"
@@ -524,6 +534,7 @@ var/list/special_fruits = list()
 	potency = 20
 	filling_color = "#FAF328"
 	plantname = "lemon"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/orange
 	name = "orange"
@@ -532,6 +543,7 @@ var/list/special_fruits = list()
 	potency = 20
 	filling_color = "#FAAD28"
 	plantname = "orange"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/whitebeet
 	name = "white-beet"
@@ -572,6 +584,7 @@ var/list/special_fruits = list()
 	icon_state = "chilipepper"
 	filling_color = "#FF0000"
 	plantname = "chili"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/eggplant
 	name = "eggplant"
@@ -579,6 +592,7 @@ var/list/special_fruits = list()
 	icon_state = "eggplant"
 	filling_color = "#550F5C"
 	plantname = "eggplant"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/soybeans
 	name = "soybeans"
@@ -603,6 +617,7 @@ var/list/special_fruits = list()
 	filling_color = "#FF0000"
 	potency = 10
 	plantname = "tomato"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/bluespacetomato
 	name = "tomato" //"blue-space" is applied on new(), provided it's teleporting trait hasn't been removed
@@ -699,6 +714,7 @@ var/list/special_fruits = list()
 	potency = 10
 	filling_color = "#FFC400"
 	plantname = "carrot"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/mushroom/reishi
 	name = "reishi"
@@ -738,6 +754,7 @@ var/list/special_fruits = list()
 	icon_state = "plumphelmet"
 	filling_color = "#F714BE"
 	plantname = "plumphelmet"
+	food_flags = FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/mushroom/walkingmushroom
 	name = "walking mushroom"
@@ -953,6 +970,7 @@ var/list/special_fruits = list()
 	icon_state = "avocado"
 	filling_color = "#EAE791"
 	plantname = "avocado"
+	food_flags = FOOD_NEEDS_COLD
 	var/cant_eat_msg = "'s skin is much too tough to chew."
 	var/cut = FALSE
 

@@ -5235,7 +5235,7 @@ var/global/list/bomb_like_items = list(/obj/item/device/transfer_valve, /obj/ite
 	icon = 'icons/obj/seafood.dmi'
 	icon_state = "fishfillet"
 	filling_color = "#FFDEFE"
-	food_flags = FOOD_MEAT
+	food_flags = FOOD_MEAT | FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/salmonmeat/New()
 	..()
@@ -5262,7 +5262,7 @@ var/global/list/bomb_like_items = list(/obj/item/device/transfer_valve, /obj/ite
 	icon = 'icons/obj/seafood.dmi'
 	icon_state = "fishfillet"
 	filling_color = "#FFDEFE"
-	food_flags = FOOD_MEAT
+	food_flags = FOOD_MEAT | FOOD_NEEDS_COLD
 
 
 /obj/item/weapon/reagent_containers/food/snacks/catfishmeat/New()
@@ -5276,7 +5276,7 @@ var/global/list/bomb_like_items = list(/obj/item/device/transfer_valve, /obj/ite
 	icon = 'icons/obj/seafood.dmi'
 	icon_state = "fishfillet"
 	filling_color = "#FFDEFE"
-	food_flags = FOOD_MEAT
+	food_flags = FOOD_MEAT | FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/glofishmeat/New()
 	..()
@@ -5289,7 +5289,7 @@ var/global/list/bomb_like_items = list(/obj/item/device/transfer_valve, /obj/ite
 	icon = 'icons/obj/seafood.dmi'
 	icon_state = "fishfillet"
 	filling_color = "#FFDEFE"
-	food_flags = FOOD_MEAT
+	food_flags = FOOD_MEAT | FOOD_NEEDS_COLD
 
 /obj/item/weapon/reagent_containers/food/snacks/goldfishmeat/New()
 	..()
