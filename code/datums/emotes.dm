@@ -33,7 +33,7 @@
 
 /datum/emote/proc/run_emote(mob/user, params, type_override, ignore_status = FALSE)
 	. = TRUE
-	if(!can_run_emote(user, !ignore_status)) // ignore_status == TRUE means that status_check should be FALSE and vise-versa
+	if(!(type_override) && !(can_run_emote(user, !ignore_status))) // ignore_status == TRUE means that status_check should be FALSE and vise-versa
 		return FALSE
 	var/msg = select_message_type(user)
 	if(params && message_param)
@@ -55,23 +55,16 @@
 		if(!M.client || isnewplayer(M))
 			continue
 		var/T = get_turf(user)
-		if(M.stat == DEAD && M.client && (M.client.prefs.toggles & CHAT_GHOSTSIGHT) && !(M in viewers(T, null)))
-			M.show_message(msg)
-
-	var/turf/T = get_turf(user) // for pAIs
-	var/broadcast = T ? T : user
+		if(isobserver(M) && M.client && (M.client.prefs.toggles & CHAT_GHOSTSIGHT) && !(M in viewers(T)))
+			M.show_message("<a href='?src=\ref[M];follow=\ref[user]'>(Follow)</a> " + msg)
 
 	if (emote_type == EMOTE_VISIBLE)
-		for(var/mob/O in viewers(broadcast))
-			O.show_message(msg, emote_type)
-		if (!(user in viewers(broadcast)))
-			user.show_message(msg, emote_type)
+		user.visible_message(msg)
 	else
-		for(var/mob/O in hearers(broadcast))
-			O.show_message(msg, emote_type)
-		if (!(user in hearers(broadcast)))
-			user.show_message(msg, emote_type)
+		for(var/mob/O in get_hearers_in_view(world.view, user))
+			O.show_message(msg)
 
+	var/turf/T = get_turf(user)
 	var/location = T ? "[T.x],[T.y],[T.z]" : "nullspace"
 	log_emote("[user.name]/[user.key] (@[location]): [message]")
 
@@ -166,7 +159,7 @@
 		playsound(user.loc, sound, 50, vary)
 
 /mob/proc/audible_cough()
-	emote("coughs")
+	emote("coughs", message = TRUE, ignore_status = TRUE)
 
 /mob/proc/audible_scream()
-	emote("screams", message = TRUE) // So it's forced
+	emote("screams", message = TRUE, ignore_status = TRUE) // So it's forced

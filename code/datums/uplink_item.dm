@@ -360,6 +360,13 @@ var/list/uplink_items = list()
 	cost = 4
 	job = list("Chemist", "Medical Doctor", "Chief Medical Officer")
 
+/datum/uplink_item/jobspecific/organ_remover
+	name = "Modified Organics Extractor"
+	desc = "A tool used by vox raiders to extract organs from unconscious victims has been reverse-engineered by syndicate scientists to be used by anyone, but it cannot extract hearts. It works twice as fast as the vox-only variant. Click on it to select the type of organ to extract, and then select the appropiate body zone."
+	item = /obj/item/weapon/organ_remover/traitor
+	cost = 6
+	job = list("Medical Doctor", "Chief Medical Officer")
+
 //Engineer
 /datum/uplink_item/jobspecific/powergloves
 	name = "Power Gloves"
@@ -563,6 +570,12 @@ var/list/uplink_items = list()
 	item = /obj/item/clothing/under/chameleon
 	cost = 2
 	excludefrom = list("nuclear emergency")
+
+/datum/uplink_item/stealthy_tools/cold_jumpsuit
+	name = "Quick Vent Jumpsuit"
+	desc = "A variant of the Chameleon Jumpsuit that quickly vents the wearer's body heat, causing them to suffer latent hypothermia"
+	item = /obj/item/clothing/under/chameleon/cold
+	cost = 2
 
 /datum/uplink_item/stealthy_tools/syndigaloshes
 	name = "No-Slip Syndicate Shoes"

@@ -171,6 +171,25 @@
 	icon = 'icons/obj/weaponsmithing.dmi'
 	icon_state = "rail_assembly"
 	var/durability = 100 //After a certain number of shots, the rails will degrade and will need to be replaced.
+	var/stage = 0
+
+/obj/item/weapon/rail_assembly/attackby(obj/item/weapon/W, mob/user)
+	if(istype(W, /obj/item/weapon/newspaper))
+		to_chat(user, "You add \the [W] to \the [src] as padding.")
+		stage = 1
+		desc = "A set of metal rails with some newspaper stuck on it. With some extra cables, this could work as a splint."
+		icon = 'icons/obj/items.dmi'
+		icon_state = "ghettosplint"
+		qdel(W)
+	if(istype(W,/obj/item/weapon/handcuffs/cable) && stage == 1)
+		to_chat(user,"<span class='notice'>You tie up \the [src] with \the [W], creating a ghetto splint!</span>")
+		if(src.loc == user)
+			user.drop_item(src, force_drop = 1)
+			var/obj/item/stack/medical/splint/ghetto/I = new (get_turf(user))
+			user.put_in_hands(I)
+		else
+			new /obj/item/stack/medical/splint/ghetto(get_turf(src.loc))
+		qdel(src)
 
 /obj/item/weapon/cylinder
 	name = "beaker"
@@ -730,6 +749,7 @@
 	icon_state = "secured_capacitor"
 	density = 0
 	state = 1
+	ghost_read = FALSE
 	var/charge = 0
 	var/charging = 0
 	var/list/power_states = list()
@@ -751,11 +771,14 @@
 	maxcharge = 1000000000
 
 /obj/machinery/power/secured_capacitor/attack_hand(mob/user as mob)
+	if(user.lying)
+		return
 	if(!charging)
 		attempt_connect(user)
 	else
 		disconnect_capacitor()
 		to_chat(user, "<span class='notice'>You halt \the [src.name]'s charging process.</span>")
+	add_fingerprint(user)
 
 /obj/machinery/power/secured_capacitor/examine(mob/user)
 	..()

@@ -125,7 +125,13 @@ var/list/response_team_members = list()
 	if(!(M.mind in ticker.minds))
 		ticker.minds += M.mind//Adds them to regular mind list.
 
-	ticker.mode.ert |= M.mind
+	var/datum/faction/ert = find_active_faction_by_type(/datum/faction/strike_team/ert)
+	if(ert)
+		ert.HandleRecruitedMind(M.mind)
+	else
+		ert = ticker.mode.CreateFaction(/datum/faction/strike_team/ert)
+		if(ert)
+			ert.HandleNewMind(M.mind) //First come, first served
 	M.equip_response_team(leader_selected)
 
 	if(spawner)
@@ -163,7 +169,7 @@ var/list/response_team_members = list()
 	equip_to_slot_or_del(new /obj/item/weapon/storage/firstaid/regular(src), slot_in_backpack)
 
 	if(leader_selected)
-		equip_to_slot_or_del(new /obj/item/weapon/card/shuttle_pass/ERT(src), slot_in_backpack)
+		equip_to_slot_or_del(new /obj/item/weapon/card/shuttle_pass/ert(src), slot_in_backpack)
 
 	var/obj/item/weapon/card/id/W = new(src)
 	W.assignment = "Emergency Responder[leader_selected ? " Leader" : ""]"

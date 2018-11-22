@@ -210,13 +210,14 @@
 			var/obj/item/stack/S = O
 			S.update_materials()
 		else
-			O = new R.result_type( usr.loc )
+			for(var/i = 1 to (R.max_res_amount>1 ? R.res_amount*multiplier : 1))
+				O = new R.result_type( usr.loc )
 
 		O.dir = usr.dir
 		if(R.start_unanchored)
 			var/obj/A = O
 			A.anchored = 0
-		R.finish_building(usr, src, O)
+		var/put_in_hand = R.finish_building(usr, src, O)
 
 		//if (R.max_res_amount>1)
 		//	var/obj/item/stack/new_item = O
@@ -231,7 +232,7 @@
 			//src = null //dont kill proc after del()
 			usr.before_take_item(oldsrc)
 			returnToPool(oldsrc)
-			if (istype(O,/obj/item))
+			if (put_in_hand && istype(O,/obj/item))
 				usr.put_in_hands(O)
 		O.add_fingerprint(usr)
 		//BubbleWrap - so newly formed boxes are empty //This is pretty shitcode but I'm not fixing it because even if sloth is a sin I am already going to hell anyways
@@ -395,8 +396,8 @@
 		if(S.can_stack_with(new_stack_type))
 			if(S.max_amount >= S.amount + add_amount)
 				S.add(add_amount)
-
-				to_chat(user, "<span class='info'>You add [add_amount] item\s to the stack. It now contains [S.amount] [CORRECT_STACK_NAME(S)].</span>")
+				if(user)
+					to_chat(user, "<span class='info'>You add [add_amount] item\s to the stack. It now contains [S.amount] [CORRECT_STACK_NAME(S)].</span>")
 				return S
 
 	var/obj/item/stack/S = new new_stack_type(loc)

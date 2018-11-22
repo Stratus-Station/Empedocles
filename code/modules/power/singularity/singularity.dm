@@ -37,10 +37,10 @@
 	var/consume_range = 0 //How many tiles out do we eat.
 	var/event_chance = 15 //Prob for event each tick.
 	var/target = null //Its target. Moves towards the target if it has one.
-	var:last_movement_dir = 0 //Log the singularity's last movement to produce biased movement (singularity prefers constant movement due to inertia)
+	var/last_movement_dir = 0 //Log the singularity's last movement to produce biased movement (singularity prefers constant movement due to inertia)
 	var/last_failed_movement = 0 //Will not move in the same dir if it couldnt before, will help with the getting stuck on fields thing.
 	var/last_warning
-	appearance_flags = 0
+	appearance_flags = LONG_GLIDE
 	var/chained = 0 //Adminbus chain-grab
 
 /obj/machinery/singularity/New(loc, var/starting_energy = 50, var/temp = 0)
@@ -409,14 +409,16 @@
 	last_movement_dir = movement_dir //We have chosen our direction, log it
 
 	if(current_size >= 9) //The superlarge one does not care about things in its way
+		set_glide_size(DELAY2GLIDESIZE(SS_WAIT_MACHINERY/2), min = 0)
 		spawn(0)
 			step(src, movement_dir)
-		spawn(1)
+		spawn(SS_WAIT_MACHINERY/2)
 			step(src, movement_dir)
 		return 1
 	else if(check_turfs_in(movement_dir))
 		last_failed_movement = 0 //Reset this because we moved
 		spawn(0)
+			set_glide_size(DELAY2GLIDESIZE(SS_WAIT_MACHINERY), min = 0)
 			step(src, movement_dir)
 		return 1
 	else

@@ -33,6 +33,9 @@
 /obj/structure/table/cultify()
 	new /obj/structure/table/woodentable(loc) //See New() for qdel
 
+/obj/structure/table/clockworkify()
+	GENERIC_CLOCKWORK_CONVERSION(src, /obj/structure/table/reinforced/clockwork, CLOCKWORK_GENERIC_GLOW)
+
 /obj/structure/table/New()
 	..()
 	for(var/obj/structure/table/T in src.loc)
@@ -564,7 +567,8 @@
 	desc = "A version of the four legged table. It is stronger."
 	icon_state = "reinftable"
 	parts = /obj/item/weapon/table_parts/reinforced
-	var/status = 2
+	var/status = 2 //DARE YOU ENTER MY MAGICAL NUMBER REALM?
+	var/can_optable = TRUE
 
 /obj/structure/table/reinforced/can_disassemble()
 	return status != 2
@@ -576,7 +580,7 @@
 		return ..()
 
 /obj/structure/table/reinforced/attackby(obj/item/weapon/W as obj, mob/user as mob, params)
-	if(istype(W,/obj/item/weapon/stock_parts/scanning_module))
+	if(istype(W,/obj/item/weapon/stock_parts/scanning_module) && can_optable)
 		playsound(src, 'sound/items/Deconstruct.ogg', 50, 1)
 		if(do_after(user, src, 40))
 			if(user.drop_item(W))
@@ -659,9 +663,22 @@
 		..()
 
 
+/*
+ * Brass
+ */
 
+/obj/structure/table/reinforced/clockwork
+	name = "brass table"
+	desc = "A solid, slightly beveled brass table."
+	icon_state = "clock_table"
+	parts = /obj/item/weapon/table_parts/clockwork
+	can_optable = FALSE
 
+/obj/structure/table/reinforced/clockwork/cultify()
+	return
 
+/obj/structure/table/reinforced/clockwork/clockworkify()
+	return
 
 /*
  * Racks
@@ -675,6 +692,7 @@
 	flags = FPRINT
 	anchored = 1.0
 	throwpass = 1	//You can throw objects over this, despite its density.
+	layer = TABLE_LAYER //So items are always layered over it
 	var/parts = /obj/item/weapon/rack_parts
 	var/offset_step = 0
 	var/health = 20

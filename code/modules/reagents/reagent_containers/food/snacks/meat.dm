@@ -232,7 +232,7 @@ var/global/list/valid_random_food_types = existing_typesof(/obj/item/weapon/reag
 
 	return ..()
 
-/obj/item/weapon/reagent_containers/food/snacks/meat/mimic/forceMove(atom/destination)
+/obj/item/weapon/reagent_containers/food/snacks/meat/mimic/forceMove(atom/destination, no_tp=0, harderforce = FALSE, glide_size_override = 0)
 	if(transformed && istype(destination, /obj/machinery/cooking))
 		revert()
 

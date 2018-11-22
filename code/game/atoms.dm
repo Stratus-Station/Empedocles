@@ -44,7 +44,7 @@ var/global/list/ghdel_profiling = list()
 	var/ignoreinvert = 0
 	var/timestopped
 
-	appearance_flags = TILE_BOUND
+	appearance_flags = TILE_BOUND|LONG_GLIDE
 
 /atom/proc/beam_connect(var/obj/effect/beam/B)
 	if(!last_beamchecks)
@@ -105,7 +105,7 @@ var/global/list/ghdel_profiling = list()
 
 // NOTE FROM AMATEUR CODER WHO STRUGGLED WITH RUNTIMES
 // throw_impact is called multiple times when an item is thrown: see /atom/movable/proc/hit_check at atoms_movable.dm
-// Do NOT delete an item as part of it's throw_impact unless you've checked the hit_atom is a turf, as that's effectively the last time throw_impact is called in a single throw.
+// Do NOT delete an item as part of its throw_impact unless you've checked the hit_atom is a turf, as that's effectively the last time throw_impact is called in a single throw.
 // Otherwise, shit will runtime in the subsequent throw_impact calls.
 /atom/proc/throw_impact(atom/hit_atom, var/speed, mob/user)
 	if(istype(hit_atom,/mob/living))
@@ -116,6 +116,7 @@ var/global/list/ghdel_profiling = list()
 	else if(isobj(hit_atom))
 		var/obj/O = hit_atom
 		if(!O.anchored)
+			O.set_glide_size(0)
 			step(O, src.dir)
 		O.hitby(src,speed)
 
@@ -511,11 +512,14 @@ its easier to just keep the beam vertical.
 /atom/proc/can_mech_drill()
 	return acidable()
 
-/atom/proc/blob_act(destroy = 0)
+/atom/proc/blob_act(destroy = 0,var/obj/effect/blob/source = null)
 	//DEBUG to_chat(pick(player_list),"blob_act() on [src] ([src.type])")
 	if(flags & INVULNERABLE)
 		return
-	anim(target = loc, a_icon = 'icons/mob/blob/blob.dmi', flick_anim = "blob_act", sleeptime = 15, lay = 12)
+	if (source)
+		anim(target = loc, a_icon = source.icon, flick_anim = "blob_act", sleeptime = 15, direction = get_dir(source, src), lay = BLOB_SPORE_LAYER, plane = BLOB_PLANE)
+	else
+		anim(target = loc, a_icon = 'icons/mob/blob/blob.dmi', flick_anim = "blob_act", sleeptime = 15, lay = BLOB_SPORE_LAYER, plane = BLOB_PLANE)
 	return
 
 /*
@@ -595,7 +599,7 @@ its easier to just keep the beam vertical.
 /atom/proc/shuttle_rotate(var/angle)
 	src.dir = turn(src.dir, -angle)
 
-	if(canSmoothWith) //Smooth the smoothable
+	if(canSmoothWith()) //Smooth the smoothable
 		spawn //Usually when this is called right after an atom is moved. Not having this "spawn" here will cause this atom to look for its neighbours BEFORE they have finished moving, causing bad stuff.
 			relativewall()
 			relativewall_neighbours()
@@ -924,9 +928,19 @@ its easier to just keep the beam vertical.
 /atom/proc/initialize()
 	return
 
-/atom/proc/isinspace()
-	if(istype(get_turf(src), /turf/space))
-		return 1
-	else
-		return 0
+/atom/proc/get_cell()
+	return
 
+/atom/proc/on_syringe_injection(var/mob/user, var/obj/item/weapon/reagent_containers/syringe/tool)
+	if(!reagents)
+		return INJECTION_RESULT_FAIL
+	if(reagents.is_full())
+		to_chat(user, "<span class='warning'>\The [src] is full.</span>")
+		return INJECTION_RESULT_FAIL
+	return INJECTION_RESULT_SUCCESS
+
+/atom/proc/is_hot()
+	return
+
+/atom/proc/thermal_energy_transfer()
+	return

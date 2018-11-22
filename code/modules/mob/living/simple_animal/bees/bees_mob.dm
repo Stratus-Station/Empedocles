@@ -8,7 +8,6 @@
 #define BOREDOM_TO_RETURN	30//once reached, the bee will head back to its hive
 
 #define EXHAUSTION_TO_DIE	300//once reached, the bee will begin to die
-
 #define MAX_BEES_PER_SWARM	20//explicit
 
 /*
@@ -566,7 +565,7 @@
 				if (bee_species.slow)
 					step_to(src, target_turf)//1 step per Life()
 				else
-					walk_to(src, target, 0, 2)
+					start_walk_to(target, 0, 2)
 
 				if(src.loc == target_turf)
 					wander = 1

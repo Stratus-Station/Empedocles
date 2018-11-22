@@ -20,7 +20,7 @@
 	anchored = 1 //no pulling around.
 	layer = MOB_LAYER //icon draw layer
 	plane = MOB_PLANE
-	infra_luminosity = 15 //byond implementation is bugged.
+	infra_luminosity = 15 //byond implementation is bugged. This is supposedly infrared brightness. Lower for combat mechs.
 	var/list/hud_list = list()
 	var/initial_icon = null //Mech type for resetting icon. Only used for reskinning kits (see custom items)
 	var/can_move = 1
@@ -41,7 +41,10 @@
 	var/dna	//dna-locking the mech
 	var/list/proc_res = list() //stores proc owners, like proc_res["functionname"] = owner reference
 	var/lights = 0
-	var/lights_power = 6
+	var/light_range_on = 8 //the distance in tiles the light radiates.
+	var/light_brightness_on = 2 //the brightness of the light. does not affect distance, but intensity.
+	var/light_range_off = 2 //the amount of light passively produced by the mech when lights are off (cockpit glow)
+	var/light_brightness_off = 1 //the brightness of the passively produced light
 	var/rad_protection = 50 	//How much the mech shields its pilot from radiation.
 	var/lock_dir = FALSE
 	//inner atmos
@@ -50,9 +53,9 @@
 	var/obj/machinery/portable_atmospherics/canister/internal_tank
 	var/datum/gas_mixture/cabin_air
 	var/obj/machinery/atmospherics/unary/portables_connector/connected_port = null
-	
-	var/cursor_enabled = 0 //whether to display the mecha cursor	
-	
+
+	var/cursor_enabled = 0 //whether to display the mecha cursor
+
 	var/obj/item/device/radio/radio = null
 	var/obj/item/device/radio/electropack/electropack = null
 	var/obj/item/mecha_parts/mecha_tracking/tracking = null
@@ -89,6 +92,9 @@
 
 	var/lock_controls = 0
 	var/list/intrinsic_spells = null
+
+/obj/mecha/get_cell()
+	return cell
 
 /obj/mecha/New()
 	hud_list[DIAG_HEALTH_HUD] = image('icons/mob/hud.dmi', src, "huddiagmax")
@@ -183,8 +189,9 @@
 	cabin_air = new
 	cabin_air.temperature = T20C
 	cabin_air.volume = 200
-	cabin_air.oxygen = O2STANDARD*cabin_air.volume/(R_IDEAL_GAS_EQUATION*cabin_air.temperature)
-	cabin_air.nitrogen = N2STANDARD*cabin_air.volume/(R_IDEAL_GAS_EQUATION*cabin_air.temperature)
+	cabin_air.adjust_multi(
+		GAS_OXYGEN, O2STANDARD*cabin_air.volume/(R_IDEAL_GAS_EQUATION*cabin_air.temperature),
+		GAS_NITROGEN, N2STANDARD*cabin_air.volume/(R_IDEAL_GAS_EQUATION*cabin_air.temperature))
 	return cabin_air
 
 /obj/mecha/proc/add_radio()
@@ -425,10 +432,7 @@
 		else if(istype(obstacle, /obj/structure/grille/))
 			var/obj/structure/grille/G = obstacle
 			G.health = (0.25*initial(G.health))
-			G.broken = 1
-			G.icon_state = "[initial(G.icon_state)]-b"
-			G.setDensity(FALSE)
-			getFromPool(/obj/item/stack/rods, get_turf(G.loc))
+			G.healthcheck()
 			breakthrough = 1
 
 		else if(istype(obstacle, /obj/structure/table))
@@ -568,8 +572,11 @@
 		src.destroy()
 	return
 
-/obj/mecha/attack_hand(mob/living/user as mob)
-	src.log_message("Attack by hand/paw. Attacker - [user].",1)
+/obj/mecha/attack_hand(mob/living/user as mob, monkey = FALSE)
+	if(monkey)
+		src.log_message("Attack by paw. Attacker - [user].",1)
+	else
+		src.log_message("Attack by hand. Attacker - [user].",1)
 	user.do_attack_animation(src, user)
 	if ((M_HULK in user.mutations) && !prob(src.deflect_chance))
 		src.take_damage(15)
@@ -582,7 +589,7 @@
 	user.delayNextAttack(10)
 
 /obj/mecha/attack_paw(mob/user as mob)
-	return src.attack_hand(user)
+	return src.attack_hand(user, TRUE)
 
 
 /obj/mecha/attack_alien(mob/living/user as mob)
@@ -1109,13 +1116,15 @@
 		return
 	lights = !lights
 	if(lights)
-		set_light(luminosity + lights_power)
+		light_power = light_brightness_on
+		set_light(light_range_on)
 	else
-		set_light(luminosity - lights_power)
+		light_power = light_brightness_off
+		set_light(light_range_off)
 	src.occupant_message("Toggled lights [lights?"on":"off"].")
 	log_message("Toggled lights [lights?"on":"off"].")
 	return
-	
+
 /obj/mecha/verb/toggle_cursor()
 	set name = "Toggle Cursor"
 	set category = "Exosuit Interface"
@@ -1204,10 +1213,6 @@
 /obj/mecha/proc/moved_inside(var/mob/living/carbon/human/H as mob)
 	if(!isnull(src.loc) && H && H.client && H in range(1))
 		H.reset_view(src)
-		/*
-		H.client.perspective = EYE_PERSPECTIVE
-		H.client.eye = src
-		*/
 		H.stop_pulling()
 		H.forceMove(src)
 		src.occupant = H
@@ -1216,6 +1221,9 @@
 		src.log_append_to_last("[H] moved in as pilot.")
 		src.icon_state = src.reset_icon()
 		dir = dir_in
+		if(!lights) //if the main lights are off, turn on cabin lights
+			light_power = light_brightness_off
+			set_light(light_range_off)
 		playsound(src, 'sound/mecha/mechentry.ogg', 50, 1)
 		if(!hasInternalDamage())
 			src.occupant << sound('sound/mecha/nominalsyndi.ogg',volume=50)
@@ -1223,8 +1231,7 @@
 		//change the cursor
 		if(H.client && cursor_enabled)
 			H.client.mouse_pointer_icon = file("icons/mouse/mecha_mouse.dmi")
-			
-		// -- Mode/mind specific stuff goes here
+		/* -- Mode/mind specific stuff goes here
 		if(H.mind)
 			if(isrev(H) || isrevhead(H))
 				ticker.mode.update_all_rev_icons()
@@ -1235,6 +1242,7 @@
 			if(iswizard(H) || isapprentice(H))
 				ticker.mode.update_all_wizard_icons()
 		// -- End mode specific stuff
+		*/
 
 		return 1
 	else
@@ -1278,10 +1286,6 @@
 		user.drop_from_inventory(mmi_as_oc)
 		var/mob/brainmob = mmi_as_oc.brainmob
 		brainmob.reset_view(src)
-	/*
-		brainmob.client.eye = src
-		brainmob.client.perspective = EYE_PERSPECTIVE
-	*/
 		occupant = brainmob
 		brainmob.forceMove(src) //should allow relaymove
 		brainmob.canmove = 1
@@ -1291,15 +1295,18 @@
 		src.Entered(mmi_as_oc)
 		src.Move(src.loc)
 		src.icon_state = src.reset_icon()
+		if(!lights) //if the main lights are off, turn on cabin lights
+			light_power = light_brightness_off
+			set_light(light_range_off)
 		dir = dir_in
 		src.log_message("[mmi_as_oc] moved in as pilot.")
 		if(!hasInternalDamage())
 			src.occupant << sound('sound/mecha/nominalsyndi.ogg',volume=50)
-			
+
 		//change the cursor
 		if(occupant.client && cursor_enabled)
 			occupant.client.mouse_pointer_icon = file("icons/mouse/mecha_mouse.dmi")
-			
+
 		return 1
 	else
 		return 0
@@ -1346,6 +1353,8 @@
 
 /obj/mecha/MouseDropFrom(over_object, src_location, var/turf/over_location, src_control, over_control, params)
 	if(usr != src.occupant || usr.incapacitated())
+		return
+	if(istype(occupant, /mob/living/carbon/brain))
 		return
 	if(!istype(over_location) || over_location.density)
 		return
@@ -1428,12 +1437,12 @@
 			mmi.mecha = null
 			src.occupant.canmove = 0
 			src.verbs += /obj/mecha/verb/eject
-			
+
 		//change the cursor
 		if(src.occupant && src.occupant.client)
 			src.occupant.client.mouse_pointer_icon = initial(src.occupant.client.mouse_pointer_icon)
-			
-		// -- Mode/mind specific stuff goes here
+
+		/* -- Mode/mind specific stuff goes here
 		if(src.occupant.mind)
 			if(isrev(src.occupant) || isrevhead(src.occupant))
 				ticker.mode.update_all_rev_icons()
@@ -1444,9 +1453,12 @@
 			if(iswizard(src.occupant) || isapprentice(src.occupant))
 				ticker.mode.update_all_wizard_icons()
 		// -- End mode specific stuff
+		*/
 
 		src.occupant = null
 		src.icon_state = src.reset_icon()+"-open"
+		if(!lights) //if the lights are off, turn off the cabin lights
+			set_light(0)
 		src.dir = dir_in
 		if (G)
 			G.hud_off()
@@ -1475,17 +1487,19 @@
 /////////////////////////
 
 /obj/mecha/proc/operation_allowed(mob/living/carbon/human/H)
-	for(var/ID in list(H.get_active_hand(), H.wear_id, H.belt))
-		if(src.check_access(ID,src.operation_req_access))
-			return 1
-	return 0
+	if(istype(H))
+		for(var/ID in list(H.get_active_hand(), H.wear_id, H.belt))
+			if(src.check_access(ID,src.operation_req_access))
+				return 1
+		return 0
 
 
 /obj/mecha/proc/internals_access_allowed(mob/living/carbon/human/H)
-	for(var/atom/ID in list(H.get_active_hand(), H.wear_id, H.belt))
-		if(src.check_access(ID,src.internals_req_access))
-			return 1
-	return 0
+	if(istype(H))
+		for(var/atom/ID in list(H.get_active_hand(), H.wear_id, H.belt))
+			if(src.check_access(ID,src.internals_req_access))
+				return 1
+		return 0
 
 
 /obj/mecha/check_access(obj/item/weapon/card/id/I, list/access_list)
@@ -1845,7 +1859,7 @@
 	if (href_list["change_name"])
 		if(usr != src.occupant)
 			return
-		var/newname = strip_html_simple(input(occupant,"Choose new exosuit name","Rename exosuit",initial(name)) as text, MAX_NAME_LEN)
+		var/newname = stripped_input(occupant,"Choose new exosuit name","Rename exosuit",initial(name),MAX_NAME_LEN)
 		if(newname && trim(newname))
 			name = newname
 		else

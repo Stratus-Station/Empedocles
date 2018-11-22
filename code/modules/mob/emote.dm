@@ -19,6 +19,7 @@
 	key_third_person = "flips"
 	restraint_check = TRUE
 	mob_type_allowed_typelist = list(/mob/living, /mob/dead/observer)
+	mob_type_blacklist_typelist = list(/mob/living/silicon/ai, /mob/living/silicon/pai, /mob/living/carbon/brain)
 	mob_type_ignore_stat_typelist = list(/mob/dead/observer)
 
 /datum/emote/flip/run_emote(mob/user, params)
@@ -35,6 +36,7 @@
 	key_third_person = "spins"
 	restraint_check = TRUE
 	mob_type_allowed_typelist = list(/mob/living, /mob/dead/observer)
+	mob_type_blacklist_typelist = list(/mob/living/silicon/ai, /mob/living/silicon/pai, /mob/living/carbon/brain)
 	mob_type_ignore_stat_typelist = list(/mob/dead/observer)
 
 /datum/emote/spin/run_emote(mob/user)
@@ -55,23 +57,22 @@
 	if (user.stat)
 		return
 
-	var/msg = "<b>[user]</b> " + params
+	var/message = params
+	var/msg = "<b>[user]</b> " + message
 
 	var/turf/T = get_turf(user) // for pAIs
-	var/broadcast = T ? T : user
 
-	switch (m_type)
-		if (EMOTE_VISIBLE)
-			for(var/mob/O in viewers(broadcast))
-				O.show_message(msg, emote_type)
-			if (!(user in viewers(broadcast)))
-				user.show_message(msg, emote_type)
+	for(var/mob/M in dead_mob_list)
+		if (!M.client)
+			continue //skip leavers
+		if(isobserver(M) && M.client.prefs && (M.client.prefs.toggles & CHAT_GHOSTSIGHT) && !(M in viewers(user)))
+			M.show_message("<a href='?src=\ref[M];follow=\ref[user]'>(Follow)</a> " + msg)
 
-		if (EMOTE_AUDIBLE)
-			for(var/mob/O in hearers(broadcast))
-				O.show_message(msg, m_type)
-			if (!(user in viewers(broadcast)))
-				user.show_message(msg, emote_type)
+	if (emote_type == EMOTE_VISIBLE)
+		user.visible_message(msg)
+	else
+		for(var/mob/O in get_hearers_in_view(world.view, user))
+			O.show_message(msg)
 
 	var/location = T ? "[T.x],[T.y],[T.z]" : "nullspace"
 	log_emote("[user.name]/[user.key] (@[location]): [message]")

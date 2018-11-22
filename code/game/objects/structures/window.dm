@@ -22,6 +22,7 @@ var/list/one_way_windows
 	var/ini_dir = null //This really shouldn't exist, but it does and I don't want to risk deleting it because it's likely mapping-related
 	var/d_state = WINDOWLOOSEFRAME //Normal windows have one step (unanchor), reinforced windows have three
 	var/shardtype = /obj/item/weapon/shard
+	var/reinforcetype = /obj/item/stack/rods
 	sheet_type = /obj/item/stack/sheet/glass/glass //Used for deconstruction
 	var/sheetamount = 1 //Number of sheets needed to build this window (determines how much shit is spawned via Destroy())
 	var/reinforced = 0 //Used for deconstruction steps
@@ -48,15 +49,12 @@ var/list/one_way_windows
 	update_icon()
 	oneway_overlay = image('icons/obj/structures.dmi', src, "one_way_overlay")
 	if(one_way)
-		if(!one_way_windows)
-			one_way_windows = list()
-		one_way_windows.Add(src)
-		update_oneway_nearby_clients()
-		overlays += oneway_overlay
+		one_way = !one_way
+		toggle_one_way()
 
 /obj/structure/window/proc/update_oneway_nearby_clients()
 	for(var/client/C in clients)
-		if(!istype(C.mob, /mob/dead/observer))
+		if(!istype(C.mob, /mob/dead/observer) && !(M_XRAY in C.mob.mutations))
 			if(((x >= (C.mob.x - C.view)) && (x <= (C.mob.x + C.view))) && ((y >= (C.mob.y - C.view)) && (y <= (C.mob.y + C.view))))
 				C.update_one_way_windows(view(C.view,C.mob))
 
@@ -278,6 +276,20 @@ var/list/one_way_windows
 		return
 	attack_generic(user, rand(10, 15))
 
+/obj/structure/window/proc/toggle_one_way() //Toggle whether a window is a one-way window or not.
+	if(!one_way)
+		one_way = 1
+		if(!one_way_windows)
+			one_way_windows = list()
+		one_way_windows.Add(src)
+		update_oneway_nearby_clients()
+		overlays += oneway_overlay
+	else
+		one_way = 0
+		one_way_windows.Remove(src)
+		update_oneway_nearby_clients()
+		overlays -= oneway_overlay
+
 /obj/structure/window/proc/smart_toggle() //For "smart" windows
 	if(opacity)
 		animate(src, color="#FFFFFF", time=5)
@@ -324,11 +336,8 @@ var/list/one_way_windows
 			to_chat(user, "<span class='warning'>You can't pry the sheet of plastic off from this side of \the [src]!</span>")
 		else
 			to_chat(user, "<span class='notice'>You pry the sheet of plastic off \the [src].</span>")
-			one_way = 0
-			one_way_windows.Remove(src)
-			update_oneway_nearby_clients()
+			toggle_one_way()
 			drop_stack(/obj/item/stack/sheet/mineral/plastic, get_turf(user), 1, user)
-			overlays -= oneway_overlay
 			return
     /* One-way windows have serious performance issues - N3X
 	if(istype(W, /obj/item/stack/sheet/mineral/plastic))
@@ -346,14 +355,9 @@ var/list/one_way_windows
 			update_nearby_tiles()
 			ini_dir = dir
 		var/obj/item/stack/sheet/mineral/plastic/P = W
-		one_way = 1
-		if(!one_way_windows)
-			one_way_windows = list()
-		one_way_windows.Add(src)
-		update_oneway_nearby_clients()
+		toggle_one_way()
 		P.use(1)
 		to_chat(user, "<span class='notice'>You place a sheet of plastic over the window.</span>")
-		overlays += oneway_overlay
 		return
 	*/
 
@@ -566,9 +570,10 @@ var/list/one_way_windows
 	..()
 
 /obj/structure/window/proc/spawnBrokenPieces()
-	new shardtype(loc, sheetamount)
+	if(shardtype)
+		new shardtype(loc, sheetamount)
 	if(reinforced)
-		new /obj/item/stack/rods(loc, sheetamount)
+		new reinforcetype(loc, sheetamount)
 
 /obj/structure/window/Move(NewLoc, Dir = 0, step_x = 0, step_y = 0, glide_size_override = 0)
 
@@ -607,7 +612,7 @@ var/list/one_way_windows
 		for(var/obj/structure/window/W in get_step(T,direction))
 			W.update_icon()
 
-/obj/structure/window/forceMove()
+/obj/structure/window/forceMove(atom/destination, no_tp=0, harderforce = FALSE, glide_size_override = 0)
 	var/turf/T = loc
 	..()
 	update_nearby_icons(T)
@@ -625,6 +630,9 @@ var/list/one_way_windows
 		health -= round(exposed_volume/fire_volume_mod)
 		healthcheck(sound = 0)
 	..()
+
+/obj/structure/window/clockworkify()
+	GENERIC_CLOCKWORK_CONVERSION(src, /obj/structure/window/reinforced/clockwork, BRASS_WINDOW_GLOW)
 
 /obj/structure/window/reinforced
 	name = "reinforced window"
@@ -687,6 +695,22 @@ var/list/one_way_windows
 	icon_state = "fwindow"
 	health = 30
 	sheet_type = /obj/item/stack/sheet/glass/rglass //Ditto above
+
+/obj/structure/window/reinforced/clockwork
+	name = "brass window"
+	desc = "A paper-thin pane of translucent yet reinforced brass."
+	icon_state = "clockworkwindow"
+	shardtype = null
+	sheet_type = /obj/item/stack/sheet/brass
+	reinforcetype = /obj/item/stack/sheet/ralloy
+	sheetamount = 2
+	health = 80
+
+/obj/structure/window/reinforced/clockwork/cultify()
+	return
+
+/obj/structure/window/reinforced/clockwork/clockworkify()
+	return
 
 /obj/structure/window/send_to_past(var/duration)
 	..()

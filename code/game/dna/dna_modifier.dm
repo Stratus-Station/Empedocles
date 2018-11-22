@@ -488,10 +488,8 @@
 		qdel(src)
 
 /obj/machinery/computer/scan_consolenew/proc/findScanner()
-	for(dir in list(NORTH,EAST,SOUTH,WEST))
-		var/foundmachine = locate(/obj/machinery/dna_scannernew, get_step(src, dir))
-		if(foundmachine)
-			return foundmachine
+	for(var/obj/machinery/dna_scannernew/DN in oview(1, src)) // All 8 directions.
+		return DN
 
 /obj/machinery/computer/scan_consolenew/proc/all_dna_blocks(var/list/buffer)
 	var/list/arr = list()
@@ -972,7 +970,11 @@
 				databuf.types = DNA2_BUF_UI // DNA2_BUF_UE
 				databuf.dna = src.connected.occupant.dna.Clone()
 				if(ishuman(connected.occupant))
-					databuf.dna.real_name=connected.occupant.name
+					var/datum/data/record/med_record = data_core.find_medical_record_by_dna(connected.occupant.dna.unique_enzymes)
+					if(med_record)
+						databuf.dna.real_name = med_record.fields["name"]
+					else
+						databuf.dna.real_name=connected.occupant.name
 					databuf.dna.flavor_text=connected.occupant.flavor_text
 				databuf.name = "Unique Identifier"
 				src.buffers[bufferId] = databuf
@@ -987,7 +989,11 @@
 				databuf.types = DNA2_BUF_UI|DNA2_BUF_UE
 				databuf.dna = src.connected.occupant.dna.Clone()
 				if(ishuman(connected.occupant))
-					databuf.dna.real_name=connected.occupant.name
+					var/datum/data/record/med_record = data_core.find_medical_record_by_dna(connected.occupant.dna.unique_enzymes)
+					if(med_record)
+						databuf.dna.real_name = med_record.fields["name"]
+					else
+						databuf.dna.real_name=connected.occupant.name
 					databuf.dna.flavor_text=connected.occupant.flavor_text
 				databuf.name = "Unique Identifier + Unique Enzymes"
 				src.buffers[bufferId] = databuf
@@ -1002,7 +1008,11 @@
 				databuf.types = DNA2_BUF_SE
 				databuf.dna = src.connected.occupant.dna.Clone()
 				if(ishuman(connected.occupant))
-					databuf.dna.real_name=connected.occupant.name
+					var/datum/data/record/med_record = data_core.find_medical_record_by_dna(connected.occupant.dna.unique_enzymes)
+					if(med_record)
+						databuf.dna.real_name = med_record.fields["name"]
+					else
+						databuf.dna.real_name=connected.occupant.name
 				databuf.name = "Structural Enzymes"
 				src.buffers[bufferId] = databuf
 			return 1

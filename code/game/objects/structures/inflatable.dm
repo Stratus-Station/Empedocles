@@ -291,11 +291,12 @@
 
 /obj/structure/inflatable/shelter
 	name = "inflatable shelter"
-	desc = "A shelter designed to protect from extreme heat and pressure, but vulnerable to popping by other forms of trauma. Filled with soporific gasses that promote health."
+	desc = "A shelter designed to protect from extreme heat and pressure, but vulnerable to popping by other forms of trauma. The entrance is fitted with a medical autoinjector."
 	icon_state = "shelter_base"
 	anchored = 0
 	undeploy_path = /obj/item/inflatable/shelter
 	ctrl_deflate = FALSE
+	var/list/exiting = list()
 	var/datum/gas_mixture/cabin_air
 
 /obj/structure/inflatable/shelter/New()
@@ -303,19 +304,23 @@
 	cabin_air = new /datum/gas_mixture()
 	cabin_air.volume = CELL_VOLUME / 3
 	cabin_air.temperature = T20C+20 //Nice and toasty to avoid Celthermia
-	cabin_air.oxygen = MOLES_O2STANDARD
-	cabin_air.nitrogen = MOLES_N2STANDARD
-	cabin_air.update_values()
+	cabin_air.adjust_multi(
+		GAS_OXYGEN, MOLES_O2STANDARD,
+		GAS_NITROGEN, MOLES_N2STANDARD)
 
 /obj/structure/inflatable/shelter/examine(mob/user)
 	..()
+	if(!(user.loc == src))
+		to_chat(user, "<span class='notice'>Click to enter. Use grab on shelter to force target inside. Click-drag onto firealarm or right click to deflate.</span>")
+	else
+		to_chat(user, "<span class='notice'>Click to package contaminated clothes. Resist to exit/cancel exit.</span>")
 	var/list/living_contents = list()
 	for(var/mob/living/L in contents)
 		living_contents += L.name //Shelters can frequently end up with dropped items because people fall asleep.
 	if(living_contents.len)
 		to_chat(user,"<span class='info'>You can see [english_list(living_contents)] inside.</span>")
 
-/obj/structure/inflatable/shelter/forceMove() //Like an unanchored window, we can block if pushed into place.
+/obj/structure/inflatable/shelter/forceMove(atom/destination, no_tp=0, harderforce = FALSE, glide_size_override = 0) //Like an unanchored window, we can block if pushed into place.
 	..()
 	update_nearby_tiles()
 
@@ -350,8 +355,8 @@
 	if(istype(W,/obj/item/weapon/grab))
 		var/obj/item/weapon/grab/G = W
 		var/mob/living/target = G.affecting
-		visible_message(user,"<span class='danger'>[user] begins to drag [target] into the shelter!</span>")
-		if(do_after(target,src,20)) //Twice the normal time
+		user.visible_message("<span class='danger'>[user] begins to drag [target] into the shelter!</span>")
+		if(do_after_many(user,list(target,src),20)) //Twice the normal time
 			enter_shelter(target)
 	else
 		..()
@@ -373,12 +378,12 @@
 	user.forceMove(src)
 	update_icon()
 	user.reset_view()
-	user.reagents.add_reagent(STOXIN,3)
-	user.reagents.add_reagent(KELOTANE,4)
-	user.reagents.add_reagent(PEPTOBISMOL,4)
-	user.reagents.add_reagent(TRAMADOL,3)
-	user.reagents.add_reagent(LEPORAZINE,1)
-	to_chat(user,"<span class='warning'>You feel calmed by the anesthetizing gasses inside the shelter.</span>")
+	if(user.reagents && !user.reagents.has_reagent(PRESLOMITE))
+		user.reagents.add_reagent(PRESLOMITE,3)
+		user.reagents.add_reagent(LEPORAZINE,1)
+		to_chat(user,"<span class='warning'>You feel a prick upon entering \the [src].</span>")
+	else
+		to_chat(user,"<span class='notice'>You enter \the [src].</span>")
 
 /obj/structure/inflatable/shelter/proc/laundry(var/mob/living/carbon/human/user)
 	if(user.loc != src)
@@ -421,10 +426,52 @@
 	..()
 
 /obj/structure/inflatable/shelter/container_resist(mob/user)
-	user.delayNext(DELAY_ALL,10 SECONDS)
+	if(exiting.Find(user))
+		exiting -= user
+		to_chat(user,"<span class='warning'>You stop climbing free of \the [src].</span>")
+		return
 	visible_message("<span class='warning'>[user] begins to climb free of the \the [src]!</span>")
-	spawn(10 SECONDS)
-		if(loc)
+	exiting += user
+	spawn(6 SECONDS)
+		if(loc && exiting.Find(user)) //If not loc, it was probably deflated
 			user.forceMove(loc)
+			exiting -= user
 			update_icon()
-		//If not loc, it was probably deflated
+			to_chat(user,"<span class='notice'>You climb free of the shelter.</span>")
+
+/obj/structure/inflatable/shelter/MouseDropTo(atom/movable/O, mob/user) //copy pasted from cryo code
+	if(O.loc == user || !isturf(O.loc) || !isturf(user.loc) || !user.Adjacent(O)) //no you can't pull things out of your ass
+		return
+	if(user.incapacitated() || user.lying) //are you cuffed, dying, lying, stunned or other
+		return
+	if(!Adjacent(user) || !user.Adjacent(src)) // is the mob too far away from you, or are you too far away from the source
+		return
+	if(O.locked_to)
+		return
+	else if(O.anchored)
+		return
+	if(issilicon(O)) //robutts dont fit
+		return
+	if(!ishigherbeing(user) && !isrobot(user)) //No ghosts or mice putting people into the sleeper
+		return
+	if(isrobot(user))
+		var/mob/living/silicon/robot/robit = user
+		if(!HAS_MODULE_QUIRK(robit, MODULE_CAN_HANDLE_MEDICAL))
+			to_chat(user, "<span class='warning'>You do not have the means to do this!</span>")
+			return
+	var/mob/living/target = O
+	if(!istype(target))
+		return
+	for(var/mob/living/carbon/slime/M in range(1,target))
+		if(M.Victim == target)
+			to_chat(usr, "[target.name] will not fit into the [src] because they have a slime latched onto their head.")
+			return
+
+	if(target == user)
+		to_chat(user,"<span class='notice'>You begin to climb into the shelter.</span>")
+		if(do_after(target,src,10))
+			enter_shelter(target)
+	else
+		user.visible_message("<span class='danger'>[user] begins to drag [target] into the shelter!</span>")
+		if(do_after_many(user,list(target,src),20)) //Twice the normal time
+			enter_shelter(target)
